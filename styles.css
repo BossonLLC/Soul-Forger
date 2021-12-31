@@ -74,7 +74,17 @@ a:hover {
   color: #0000ff;
   text-decoration: underline;
 }
-.post, .SupportMe {
+.post, .CardGallery {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 60px 0;
+}
+.post, .Lore {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 60px 0;
+}
+.post, .HowToPlay {
   max-width: 800px;
   margin: 0 auto;
   padding: 60px 0;
@@ -84,15 +94,13 @@ a:hover {
   height: 200px;
   vertical-align: middle;
 }
-.post, .Portfolio {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 60px 0;
-}
-.post-author img, .SupportMe-author img {
+.post-author img, .CardGallery-author img {
   border-radius: 50%;
 }
-.post-author img, .Portfolio-author img {
+.post-author img, .Lore-author img {
+  border-radius: 50%;
+}
+.post-author img, .HowToPlay-author img {
   border-radius: 50%;
 }
 .post-author span {
@@ -111,12 +119,6 @@ h1, h2, h3, h4 {
 }
 p {
   line-height:1.5;
-}
-/*.SupportMe {
-  text-align: center;*/
-}
-.Portfolio {
-  text-align: center;
 }
 .post-container:nth-child(even) {
   background-color: #f2f2f2;
