@@ -103,6 +103,9 @@ a:hover {
 .post-author img, .HowToPlay-author img {
   border-radius: 50%;
 }
+.post-author img, .Updates-author img {
+  border-radius: 50%;
+}
 .post-author span {
   margin-left: 16px;
 }
