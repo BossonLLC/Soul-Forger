@@ -1,0 +1,166 @@
+@import url(http://fonts.googleapis.com/css?family=Montserrat:400,700);
+body {
+  background-color: black;
+  color: #FFFFFF;
+  margin: 0;
+
+  font-family: 'Montserrat', sans-serif;
+}
+
+p {color: #FFFFFF; }
+
+.w3-content{position:relative;margin-top:0em;}
+
+#header {
+  background-color: #DC143C;
+  height: 50px;
+  line-height: 50px;
+  color: #FFFFFF;
+  }
+  #header a {
+    color: white;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #FFFFFF;
+  }
+  #header a:hover {
+    color: #222;
+  }
+#header-title {
+  display: block;
+  float: left;
+  font-size: 20px;
+  font-weight: bold;
+  color: #FFFFFF;
+}
+#header-nav {
+  display: block;
+  float: right;
+  margin-top: 0;
+}
+#header-nav li {
+  display: inline;
+  padding-right: 20px;
+}
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+#footer {
+  background-color: #2f2f2f;
+  padding: 50px 0;
+}
+.column {
+  min-width: 300px;
+  display: inline-block;
+  vertical-align: top;
+}
+#footer h4 {
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+#footer p {
+  color: white;
+}
+/*link active*/
+a{
+  color: #00851a;
+  text-decoration: none;
+}
+/*link hover*/
+a:hover {
+  color: #0000ff;
+  text-decoration: underline;
+}
+.post, .SupportMe {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 60px 0;
+}
+.post-author img {
+  width: 200px;
+  height: 200px;
+  vertical-align: middle;
+}
+.post, .Portfolio {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 60px 0;
+}
+.post-author img, .SupportMe-author img {
+  border-radius: 50%;
+}
+.post-author img, .Portfolio-author img {
+  border-radius: 50%;
+}
+.post-author span {
+  margin-left: 16px;
+}
+.post-date {
+  color: #D2D2D2;
+
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+h1, h2, h3, h4 {
+  color: #FFFFFF;
+}
+p {
+  line-height:1.5;
+}
+/*.SupportMe {
+  text-align: center;*/
+}
+.Portfolio {
+  text-align: center;
+}
+.post-container:nth-child(even) {
+  background-color: #f2f2f2;
+}
+/* Dropdown Button */
+.dropbtn {
+  font-family: 'Montserrat', sans-serif;
+  letter-spacing: 0.1em;
+  background-color: #DC143C;
+  color: white;
+  padding: 14px;
+  font-size: 16px;
+  border: none;
+}
+
+/* The container <div> - needed to position the dropdown content */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #A9A9A9;
+  min-width: 100px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+/* Links inside the dropdown */
+.dropdown-content a {
+  color: white;
+  padding: 12px 12px;
+  text-decoration: none;
+  display: block;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {background-color: #DC143C;}
+
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdown-content {display: block;}
+
+/* Change the background color of the dropdown button when the dropdown content is shown */
+.dropdown:hover .dropbtn {background-color: #0000CD;}
