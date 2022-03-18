@@ -171,7 +171,7 @@ p {
 .dropdown:hover .dropbtn {background-color: #AFAFAF;}
 
 
-body > img {
+<!-- body > img {
     width: 50px;
     height: 50px;
     display: block;
@@ -181,5 +181,14 @@ body > img {
 }
 #fullsize.hidden {
     display: none;
-}
+} -->
 
+.thumbnail:hover {
+    position:relative;
+    top:0px;
+    left:0px;
+    width:150%;
+    height:auto;
+    display:block;
+    z-index:999;
+}
