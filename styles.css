@@ -1,10 +1,10 @@
-@import url(http://fonts.googleapis.com/css?family=Montserrat:400,700); 
+@import url(http://fonts.googleapis.com/css?family=Montserrat:400,700);
 body {
   background-color: black;
   color: black;
   margin: 0;
 
-  font-family: 'Lobster', Fantasy;
+  font-family: 'lobster', ;
 }
 
 p {color: #FFFFFF; }
@@ -182,3 +182,4 @@ body > img {
 #fullsize.hidden {
     display: none;
 }
+
