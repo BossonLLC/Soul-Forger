@@ -170,6 +170,14 @@ p {
 /* Change the background color of the dropdown button when the dropdown content is shown */
 .dropdown:hover .dropbtn {background-color: #AFAFAF;}
 
+    img {
+    transition:transform 1s ease;
+}
+
+iframe:hover {
+    -webkit-transform:scale(1.5); /* or some other value */
+    transform:scale(1.5);
+}
 
 /* <!-- body > img {
     width: 50px;
