@@ -182,7 +182,7 @@ p {
 #fullsize.hidden {
     display: none;
 } -->
-
+<!--
 .thumbnail:hover {
     position:relative;
     top:0px;
@@ -191,4 +191,4 @@ p {
     height:auto;
     display:block;
     z-index:999;
-}
+} -->
