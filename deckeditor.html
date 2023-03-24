@@ -1,0 +1,117 @@
+using System;
+
+using System.Collections.Generic;
+
+using System.Linq;
+
+using System.Text;
+
+using System.Threading.Tasks;
+
+using iTextSharp.text;
+
+using iTextSharp.text.pdf;
+
+using System.IO;
+
+namespace ImageToPDF
+
+{
+
+public class Program
+
+{
+
+static void Main(string[] args)
+
+{
+
+// Create a list of image file paths
+
+List imageList = new List();
+
+imageList.Add("image1.jpg");
+
+imageList.Add("image2.jpg");
+
+imageList.Add("image3.jpg");
+
+// Ask the user how many images they want to select
+
+Console.WriteLine("How many images do you want to select?");
+
+int numImages = Convert.ToInt32(Console.ReadLine());
+
+// Create a list to store the selected images
+
+List selectedImages = new List();
+
+// Loop through the image list and ask the user to choose images
+
+for (int i = 0; i < numImages; i++)
+
+{
+
+Console.WriteLine("Choose image " + (i + 1) + " from the list:");
+
+foreach (string img in imageList)
+
+{
+
+Console.WriteLine(Path.GetFileNameWithoutExtension(img));
+
+}
+
+string selectedImage = Console.ReadLine();
+
+if (imageList.Contains(selectedImage))
+
+{
+
+selectedImages.Add(selectedImage);
+
+}
+
+else
+
+{
+
+Console.WriteLine("Invalid selection. Please try again.");
+
+i--;
+
+}
+
+}
+
+// Generate the PDF document
+
+Document document = new Document();
+
+PdfWriter writer = PdfWriter.GetInstance(document, new FileStream("images.pdf", FileMode.Create));
+
+document.Open();
+
+foreach (string img in selectedImages)
+
+{
+
+Image image = Image.GetInstance(img);
+
+document.Add(image);
+
+}
+
+document.Close();
+
+writer.Close();
+
+Console.WriteLine("Images have been successfully converted to PDF");
+
+Console.ReadLine();
+
+}
+
+}
+
+}
