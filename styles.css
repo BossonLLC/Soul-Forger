@@ -175,7 +175,8 @@ p {
 }
 
 iframe {
-  max-width: 100px;
+  max-width: 240px;
+  max-height: 336px;
 }
 
 
