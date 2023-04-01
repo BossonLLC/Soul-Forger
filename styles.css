@@ -174,10 +174,8 @@ p {
     transition:transform 1s ease;
 }
 
-iframe {
-  max-width: 240px;
-  max-height: 336px;
-}
+<iframe src="iframe.png" width="240" height="336">
+
 
 
 /* iframe:hover {
