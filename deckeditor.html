@@ -24,6 +24,57 @@
     <class="w3-content">
       <img class="mySlides" src="banner/website banner.png" height="100%" alt="custom_html_banner1" style="width:100%">
   </head>
+	  <body>
+    <div id="card-images">
+      <!-- Replace this with your own card images -->
+      <img class="card-image" src="card1.jpg" data-card-name="Card 1">
+      <img class="card-image" src="card2.jpg" data-card-name="Card 2">
+      <img class="card-image" src="card3.jpg" data-card-name="Card 3">
+      <img class="card-image" src="card4.jpg" data-card-name="Card 4">
+      <img class="card-image" src="card5.jpg" data-card-name="Card 5">
+    </div>
+    <div class="card-list">
+      <h2>Card List</h2>
+      <ul id="selected-cards"></ul>
+      <button id="download-button">Download PDF</button>
+    </div>
+    <script>
+      // Get references to the card images and card list elements
+      const cardImages = document.querySelectorAll('.card-image');
+      const selectedCardsList = document.getElementById('selected-cards');
+      const downloadButton = document.getElementById('download-button');
+      
+      // Add click event listeners to the card images
+      cardImages.forEach(cardImage => {
+        cardImage.addEventListener('click', () => {
+          // Get the name of the clicked card
+          const cardName = cardImage.getAttribute('data-card-name');
+          
+          // Check if the card is already in the list
+          const cardListItem = selectedCardsList.querySelector(`li[data-card-name="${cardName}"]`);
+          if (cardListItem) {
+            // If it is, increment the quantity input
+            const quantityInput = cardListItem.querySelector('.card-list-item-quantity');
+            quantityInput.value = parseInt(quantityInput.value) + 1;
+          } else {
+            // If it's not, add it to the list
+            const newCardListItem = document.createElement('li');
+            newCardListItem.setAttribute('data-card-name', cardName);
+            
+            const newCardListItemImage = document.createElement('img');
+            newCardListItemImage.setAttribute('src', cardImage.getAttribute('src'));
+            newCardListItemImage.setAttribute('class', 'card-list-item-image');
+            
+            const newCardListItemName = document.createElement('span');
+            newCardListItemName.textContent = cardName;
+            
+            const newCardListItemQuantity = document.createElement('input');
+            newCardListItemQuantity.setAttribute('type', 'number');
+            newCardListItemQuantity.setAttribute('min', '1');
+            newCardListItemQuantity.setAttribute('max', '99');
+            newCardListItemQuantity.setAttribute('value', '1
+						 </body>
+						 
   <body>
     <div id="header">
       <div class="container">
