@@ -206,4 +206,32 @@ p {
 } --> */
 
 
-
+  /* CSS for the card images */
+      .card-image {
+        width: 100px;
+        height: 150px;
+        margin: 10px;
+        border: 1px solid black;
+      }
+      
+      /* CSS for the card list */
+      .card-list {
+        position: fixed;
+        top: 100px;
+        right: 10px;
+        width: 200px;
+        height: calc(100% - 200px);
+        overflow-y: auto;
+        border: 1px solid black;
+      }
+      
+      /* CSS for the card list items */
+      .card-list-item {
+        margin: 10px;
+        cursor: pointer;
+      }
+      
+      /* CSS for the card list item quantity input */
+      .card-list-item-quantity {
+        width: 30px;
+      }
