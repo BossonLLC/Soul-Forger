@@ -6,7 +6,7 @@ async function initCardGallery() {
     try {
         // *** IMPORTANT: Update this path! ***
         // Ensure this points to your JSON file (e.g., './data/cards.json')
-        const response = await fetch('path/to/your-card-data.json'); 
+        const response = await fetch('SFD.json');
         const cardData = await response.json();
 
         // 2. Define the List.js options
