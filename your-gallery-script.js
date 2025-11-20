@@ -9,10 +9,26 @@ async function initCardGallery() {
         const options = {
             // ValueNames are the properties in your JSON object you want to display/search
             valueNames: [
-                'name', 
-                'faction', 
-                'power', 
-                'endurance', 
+   "Card Name",
+   "Ronum",
+   "Cost",
+   "Cost Location",
+   "Type",
+   "Action Type",
+   "Equipment Type",
+   "Sub Type",
+   "Attack",
+   "Off-guard Attack",
+   "Damage Limit",
+   "Hands",
+   "Action Speed",
+   "Fire",
+   "Water",
+   "Earth",
+   "Air",
+   "Light",
+   "Dark",
+   "Genaric",
                 { data: ['id'] } // Data for unique ID
             ],
             // Template for a single card item
