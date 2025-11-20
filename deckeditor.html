@@ -56,14 +56,7 @@
         <ul/>
       </div>
     </div>
-	    <div id="card-images">
-      <!-- Replace this with your own card images -->
-      <img class="card-image" src="card1.jpg" data-card-name="Card 1">
-      <img class="card-image" src="card2.jpg" data-card-name="Card 2">
-      <img class="card-image" src="card3.jpg" data-card-name="Card 3">
-      <img class="card-image" src="card4.jpg" data-card-name="Card 4">
-      <img class="card-image" src="card5.jpg" data-card-name="Card 5">
-    </div>
+
     <div class="card-list">
       <h2>Card List</h2>
       <ul id="selected-cards"></ul>
@@ -105,17 +98,25 @@
             newCardListItemQuantity.setAttribute('max', '99');
             newCardListItemQuantity.setAttribute('value', '1 
 
+												 
+<div class="card-list">
+    <h2>Deck List</h2>
+    <ul id="selected-cards"></ul>
+    <button id="download-button">Download PDF</button>
+</div>
+
 <div id="cards-gallery">
-    
     <h3>Search Cards</h3>
     <input class="search" placeholder="Search by name or text" />
     
     <h3>Filter by Faction</h3>
-    <button class="filter" data-filter=".faction-Sky">Show Sky</button>
-    <button class="filter" data-filter=".faction-Ground">Show Ground</button>
-    <ul class="list">
-        </ul>
+    <button class="filter" data-filter="Sky">Show Sky</button>
+    <button class="filter" data-filter="Ground">Show Ground</button>
+    
+    <ul class="list"> 
+    </ul>
 </div>
+
 												 
 <script src="path/to/list.js"></script> 
 
@@ -142,5 +143,6 @@
   </body>
 </html>
     
+
 
 
