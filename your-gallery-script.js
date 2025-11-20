@@ -181,3 +181,58 @@ function generateDeckPDF() {
 
 // Attach the function to the download button
 document.getElementById('download-button').addEventListener('click', generateDeckPDF);
+
+
+// --- Function to generate the PDF ---
+
+function generateDeckPDF() {
+    // We need to use the jspdf library which is loaded from the CDN
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    const deckName = "My Soul-Forger Deck"; // You can make this user-editable later
+    doc.text(deckName, 10, 10); // Title at position (x=10, y=10)
+    
+    let yPosition = 20; // Starting position for the card list
+
+    // Get the list of cards in the deck
+    const selectedCardsList = document.getElementById('selected-cards');
+    const cardListItems = selectedCardsList.querySelectorAll('li');
+
+    // Check if the deck is empty
+    if (cardListItems.length === 0) {
+        alert("Your deck is empty! Add some cards first.");
+        return;
+    }
+
+    doc.setFontSize(12);
+
+    cardListItems.forEach(item => {
+        const cardName = item.getAttribute('data-card-name');
+        const quantityInput = item.querySelector('.card-list-item-quantity');
+        const quantity = quantityInput ? quantityInput.value : '1';
+
+        // Format the text: Quantity x Card Name
+        const deckLine = `${quantity} x ${cardName}`;
+        
+        // Add the line to the PDF
+        doc.text(deckLine, 10, yPosition);
+        
+        yPosition += 8; // Move down for the next line (adjust this value for spacing)
+
+        // If we reach the bottom of the page, add a new page
+        if (yPosition > 280) { // Standard A4 page height is about 297, use 280 for margin
+            doc.addPage();
+            yPosition = 10; // Reset Y position on the new page
+        }
+    });
+
+    // Save the PDF with a file name
+    doc.save(`${deckName}.pdf`);
+}
+
+
+
+// --- Attach the PDF function to the button click ---
+
+document.getElementById('download-button').addEventListener('click', generateDeckPDF);
