@@ -56,66 +56,17 @@
         <ul/>
       </div>
     </div>
+			
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> 
+<script src="path/to/list.js"></script> 
+<script src="path/to/your-gallery-script.js"></script>
 
+			
     <div class="card-list">
       <h2>Card List</h2>
       <ul id="selected-cards"></ul>
       <button id="download-button">Download PDF</button>
     </div>
-    <script>
-      // Get references to the card images and card list elements
-      const cardImages = document.querySelectorAll('.card-image');
-      const selectedCardsList = document.getElementById('selected-cards');
-      const downloadButton = document.getElementById('download-button');
-      
-      // Add click event listeners to the card images
-      cardImages.forEach(cardImage => {
-        cardImage.addEventListener('click', () => {
-          // Get the name of the clicked card
-          const cardName = cardImage.getAttribute('data-card-name');
-          
-          // Check if the card is already in the list
-          const cardListItem = selectedCardsList.querySelector(`li[data-card-name="${cardName}"]`);
-          if (cardListItem) {
-            // If it is, increment the quantity input
-            const quantityInput = cardListItem.querySelector('.card-list-item-quantity');
-            quantityInput.value = parseInt(quantityInput.value) + 1;
-          } else {
-            // If it's not, add it to the list
-            const newCardListItem = document.createElement('li');
-            newCardListItem.setAttribute('data-card-name', cardName);
-            
-            const newCardListItemImage = document.createElement('img');
-            newCardListItemImage.setAttribute('src', cardImage.getAttribute('src'));
-            newCardListItemImage.setAttribute('class', 'card-list-item-image');
-            
-            const newCardListItemName = document.createElement('span');
-            newCardListItemName.textContent = cardName;
-            
-            const newCardListItemQuantity = document.createElement('input');
-            newCardListItemQuantity.setAttribute('type', 'number');
-            newCardListItemQuantity.setAttribute('min', '1');
-            newCardListItemQuantity.setAttribute('max', '99');
-            newCardListItemQuantity.setAttribute('value', '1 
-
-												 
-<div class="card-list">
-    <h2>Deck List</h2>
-    <ul id="selected-cards"></ul>
-    <button id="download-button">Download PDF</button>
-</div>
-
-<div id="cards-gallery">
-    <h3>Search Cards</h3>
-    <input class="search" placeholder="Search by name or text" />
-    
-    <h3>Filter by Faction</h3>
-    <button class="filter" data-filter="Sky">Show Sky</button>
-    <button class="filter" data-filter="Ground">Show Ground</button>
-    
-    <ul class="list"> 
-    </ul>
-</div>
 
 												 
 <script src="path/to/list.js"></script> 
@@ -143,6 +94,7 @@
   </body>
 </html>
     
+
 
 
 
