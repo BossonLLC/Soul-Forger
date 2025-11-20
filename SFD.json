@@ -23,7 +23,7 @@
    "Effect": "Destroy all creatures on the field. Then summon a creature from your hand without paying its cost. Then discard the rest of your hand and deal 5 damage to target opponent",
    "Key Words": "-",
    "Set": "-",
-   "Image": "",
+   "Image": "(sftest/021_Front.png)",
    "Number": "",
    "Rarity": ""
  },
@@ -51,7 +51,7 @@
    "Effect": "Hidden",
    "Key Words": "Hidden",
    "Set": "",
-   "Image": "",
+   "Image": "(sftest/047_Front.png)",
    "Number": "",
    "Rarity": ""
  }
