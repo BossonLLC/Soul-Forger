@@ -13,7 +13,6 @@ async function initCardGallery() {
             valueNames: [
                 "Card Name", "Ronum", "Cost", "Type", "Action Type", "Sub Type",
                 "Attack", "Off-guard Attack", "Effect",
-                // This value name is used to inject the image path into the template
                 "Image"
             ],
             
@@ -41,43 +40,30 @@ async function initCardGallery() {
 
         // Initialize List.js
         var cardList = new List('cards-gallery', options, cardData); 
-        console.log('List.js initialized with ' + cardList.items.length + ' cards.');
+        console.log('List.js initialized with ' + cardList.items.length + ' cards.'); 
 
         // ----------------------------------------------------
         // ** START: Event Listeners & Dynamic Logic (Scoped to prevent ReferenceErrors) **
         // ----------------------------------------------------
 
         // --- 2. DYNAMIC CONTENT RENDERING (Image Source Fix) ---
-        // This runs after List.js populates the list (on 'updated')
-        cardList.on('updated', function() {
+        // FIX: Using the correct 'updated' event name as defined in your list.js source.
+        cardList.on('updated', function() { 
             console.log('*** STARTING IMAGE FIX LOGIC ***'); 
             
             cardList.items.forEach(item => {
                 const imgElement = item.elm.querySelector('.card-image');
-                
-                // Get the hidden span with the image path
                 const pathElement = item.elm.querySelector('.Image'); 
-                
-                // Extract the content
                 const imagePath = pathElement ? pathElement.textContent : 'SPAN NOT FOUND'; 
                 
-                // CRITICAL LOGGING: Check the raw value List.js provided
                 console.log(`[DEBUG] Card: ${item.values()['Card Name']} | Raw Content Read: "${imagePath}"`); 
                 
-                // Set the src only if a path was found and the src attribute is currently missing
                 if (imagePath && imagePath !== 'SPAN NOT FOUND' && !imgElement.getAttribute('src')) { 
-                    
-                    // Clean the path (removes parentheses and leading/trailing whitespace)
-                    // e.g., "(sftest/021_Front.png)" -> "sftest/021_Front.png"
                     const cleanPath = imagePath.trim().replace(/[()]/g, '');
                     
-                    // CRITICAL LOGGING: Check the final path to be set
                     console.log(`[DEBUG] Final Path to Set: "${cleanPath}"`); 
                     
-                    // Set the image source
                     imgElement.setAttribute('src', cleanPath);
-                    
-                    // Hide the temporary path element
                     pathElement.style.display = 'none';
                 }
             });
@@ -86,7 +72,7 @@ async function initCardGallery() {
         // --- 3. FILTERING LOGIC ---
         const typeFilterSelect = document.getElementById('type-filter');
 
-        if (typeFilterSelect) { // Safety check
+        if (typeFilterSelect) { 
             typeFilterSelect.addEventListener('change', function() {
                 const selectedType = this.value;
                 
@@ -102,7 +88,7 @@ async function initCardGallery() {
         
         // --- 4. DOWNLOAD BUTTON LISTENER ---
         const downloadButton = document.getElementById('download-button');
-        if (downloadButton) { // Safety check
+        if (downloadButton) { 
             downloadButton.addEventListener('click', generateDeckPDF);
         }
 
@@ -110,7 +96,7 @@ async function initCardGallery() {
         const selectedCardsList = document.getElementById('selected-cards');
         const cardsGallery = document.getElementById('cards-gallery');
 
-        if (cardsGallery) { // Safety check to prevent the script from crashing if element is missing
+        if (cardsGallery) { 
             cardsGallery.addEventListener('click', (event) => {
                 const addButton = event.target.closest('.add-to-deck-btn');
 
@@ -124,11 +110,9 @@ async function initCardGallery() {
                     const cardListItem = selectedCardsList.querySelector(`li[data-card-name="${cardName}"]`);
                     
                     if (cardListItem) {
-                        // Increment quantity
                         const quantityInput = cardListItem.querySelector('.card-list-item-quantity');
                         quantityInput.value = parseInt(quantityInput.value) + 1;
                     } else {
-                        // Add new card to list
                         const newCardListItem = document.createElement('li');
                         newCardListItem.setAttribute('data-card-name', cardName);
                         
@@ -161,7 +145,6 @@ async function initCardGallery() {
         // ----------------------------------------------------
 
     } catch (error) {
-        // This catches errors in JSON fetching or List.js initialization
         console.error('Error in Card Gallery setup:', error);
     }
 }
@@ -169,10 +152,9 @@ async function initCardGallery() {
 // Run the main initialization function only after the entire page is loaded
 window.onload = initCardGallery;
 
-// --- 6. PDF GENERATION LOGIC (Can remain outside as it is not called until a click) ---
+// --- 6. PDF GENERATION LOGIC ---
 
 function generateDeckPDF() {
-    // This is safe outside initCardGallery because it's only called by an event listener
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     
