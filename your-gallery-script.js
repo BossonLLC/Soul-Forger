@@ -23,12 +23,13 @@ const options = {
         <li class="card-item">
             <h4 class="Card Name">{Card Name}</h4> 
             
-            <img class="card-image" 
-                data-card-name="{Card Name}" 
-                data-card-id="{Ronum}" 
-                alt="">
-            
-            <span class="raw-image-path">{Image}</span>
+
+<img class="card-image" 
+    data-card-name="{Card Name}" 
+    data-card-id="{Ronum}" 
+    alt="">
+
+<span class="Image">{Image}</span>
             
             <div class="card-details">
                 <p>Cost: <span class="Cost">{Cost}</span> | Type: <span class="Type">{Type}</span></p>
@@ -52,26 +53,21 @@ document.getElementById('download-button').addEventListener('click', generateDec
 cardList.on('updated', function() {
     cardList.items.forEach(item => {
         const imgElement = item.elm.querySelector('.card-image');
-        const pathElement = item.elm.querySelector('.raw-image-path');
         
-        // This will show us the exact content of the path element, including any hidden spaces or newlines.
+        // FIX 2: Change the selector to look for the correct class name 'Image'
+        const pathElement = item.elm.querySelector('.Image'); 
+        
+        // Use textContent to get the value, which should now be (sftest/...)
         const imagePath = pathElement ? pathElement.textContent : 'NOT FOUND'; 
         
+        // We can remove the console.logs now, but leaving them for one last check is fine.
         console.log(`[DEBUG] Card: ${item.values()['Card Name']} | Raw Path Content: "${imagePath}"`); 
         
-        // We will now use a much safer method to clean the path:
+        // ... rest of the cleanup logic ...
         if (imagePath && imagePath !== 'NOT FOUND' && !imgElement.getAttribute('src')) { 
-            // 2. Trim whitespace and then remove the outer parentheses
             const cleanPath = imagePath.trim().replace(/[()]/g, '');
-            
-            // 3. Log the final path before setting src
-            console.log(`[DEBUG] Final Clean Path: ${cleanPath}`); 
-            
-            // 4. Set the actual image source
             imgElement.setAttribute('src', cleanPath);
-            
-            // Optional: Hide the temporary path element after use
-            pathElement.style.display = 'none';
+            pathElement.style.display = 'none'; // Keep this to hide the path
         }
     });
 });
