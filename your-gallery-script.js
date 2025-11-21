@@ -49,7 +49,7 @@ async function initCardGallery() {
 
         // --- 2. DYNAMIC CONTENT RENDERING (Image Source Fix) ---
         // This runs after List.js populates the list (on 'updated')
-        cardList.on('updated', function() {
+        cardList.on('update', function() {
             console.log('*** STARTING IMAGE FIX LOGIC ***'); 
             
             cardList.items.forEach(item => {
