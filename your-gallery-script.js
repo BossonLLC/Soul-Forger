@@ -10,45 +10,36 @@ async function initCardGallery() {
         const cardData = await response.json();
 
         // 2. Define the List.js options
-        const options = {
-            // These MUST match the keys in your JSON data exactly.
-valueNames: [
-    // Simple strings for all text fields you want List.js to populate
-    "Card Name", 
-    "Ronum", 
-    "Cost", 
-    "Type", 
-    "Action Type", 
-    "Sub Type",
-    "Attack", 
-    "Off-guard Attack", 
-    "Effect",
-    // Special object to map the 'Image' key to the data-image-path attribute
-    { name: 'Image', attr: 'data-image-path' } 
-],
+const options = {
+    // ...
+    valueNames: [
+        "Card Name", "Ronum", "Cost", "Type", "Action Type", "Sub Type",
+        "Attack", "Off-guard Attack", "Effect",
+        // FIX 1: CHANGE 'Image' back to a simple string in valueNames
+        "Image" 
+    ],
+    
+    item: `
+        <li class="card-item">
+            <h4 class="Card Name">{Card Name}</h4> 
             
-// Change this section (around line 30 in your last provided script)
-
-item: `
-    <li class="card-item">
-        <h4 class="Card Name">{Card Name}</h4> 
-        
-        <img class="card-image" 
-            data-card-name="{Card Name}" 
-            data-card-id="{Ronum}" 
-            alt=""
-            data-image-path> 
+            <img class="card-image" 
+                data-card-name="{Card Name}" 
+                data-card-id="{Ronum}" 
+                alt="">
             
-        <div class="card-details">
-            <p>Cost: <span class="Cost">{Cost}</span> | Type: <span class="Type">{Type}</span></p>
-            <p>A/OG Attack: <span class="Attack">{Attack}</span> / <span class="Off-guard Attack">{Off-guard Attack}</span></p>
-            <p>Effect: <span class="Effect">{Effect}</span></p>
-        </div>
-        
-        <button class="add-to-deck-btn">Add to Deck</button>
-    </li>
-`
-        };
+            <span class="raw-image-path">{Image}</span>
+            
+            <div class="card-details">
+                <p>Cost: <span class="Cost">{Cost}</span> | Type: <span class="Type">{Type}</span></p>
+                <p>A/OG Attack: <span class="Attack">{Attack}</span> / <span class="Off-guard Attack">{Off-guard Attack}</span></p>
+                <p>Effect: <span class="Effect">{Effect}</span></p>
+            </div>
+            
+            <button class="add-to-deck-btn">Add to Deck</button>
+        </li>
+    `
+};
 
         const cardList = new List('cards-gallery', options, cardData);
         console.log('List.js initialized with', cardList.items.length, 'cards.');
@@ -61,25 +52,25 @@ document.getElementById('download-button').addEventListener('click', generateDec
 cardList.on('updated', function() {
     cardList.items.forEach(item => {
         const imgElement = item.elm.querySelector('.card-image');
+        // FIX 3: Get the raw path from the new <span> element
+        const pathElement = item.elm.querySelector('.raw-image-path');
         
-        // 1. Get the path from the data-image-path attribute set by List.js
-        const imagePath = imgElement.getAttribute('data-image-path');
+        // Use textContent to get the value, which should be (sftest/...)
+        const imagePath = pathElement ? pathElement.textContent.trim() : null; 
         
-        // FIX: Use a robust check to see if the path is present AND the src needs fixing
-        const currentSrc = imgElement.getAttribute('src');
-
+        // This condition should now correctly check the path value
         if (imagePath && !imgElement.getAttribute('src')) { 
-            // 2. Remove the outer parentheses from the path: (path/image.png) -> path/image.png
+            // 2. Remove the outer parentheses from the path
             const cleanPath = imagePath.replace(/[()]/g, '');
-
-console.log('Attempting to set SRC:', cleanPath, 'from data-path:', imagePath);
             
             // 3. Set the actual image source
             imgElement.setAttribute('src', cleanPath);
             
-            // (The data-card-name fix is now redundant, but harmless if left in)
-            // const cardName = item.values()['Card Name'];
-            // imgElement.setAttribute('data-card-name', cardName);
+            // OPTIONAL: Hide the temporary path element after use
+            pathElement.style.display = 'none';
+
+            // ... (rest of the logic, like setting data-card-name, is now redundant 
+            // but harmless if you removed the previous manual set logic)
         }
     });
 });
