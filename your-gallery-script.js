@@ -54,20 +54,30 @@ cardList.on('updated', function() {
     cardList.items.forEach(item => {
         const imgElement = item.elm.querySelector('.card-image');
         
-        // FIX 2: Change the selector to look for the correct class name 'Image'
+        // --- 1. GET THE HIDDEN SPAN CONTAINING THE RAW PATH ---
         const pathElement = item.elm.querySelector('.Image'); 
         
-        // Use textContent to get the value, which should now be (sftest/...)
-        const imagePath = pathElement ? pathElement.textContent : 'NOT FOUND'; 
+        // --- 2. EXTRACT THE RAW PATH CONTENT ---
+        // Use textContent to get the value, which should be the path string
+        const imagePath = pathElement ? pathElement.textContent : 'SPAN NOT FOUND'; 
         
-        // We can remove the console.logs now, but leaving them for one last check is fine.
-        console.log(`[DEBUG] Card: ${item.values()['Card Name']} | Raw Path Content: "${imagePath}"`); 
+        // --- 3. CRITICAL LOGGING: Check the raw value List.js provided ---
+        console.log(`[DEBUG] Card: ${item.values()['Card Name']} | Raw Content Read: "${imagePath}"`); 
         
-        // ... rest of the cleanup logic ...
-        if (imagePath && imagePath !== 'NOT FOUND' && !imgElement.getAttribute('src')) { 
+        // Only proceed if the path was successfully read and we haven't set the src yet
+        if (imagePath && imagePath !== 'SPAN NOT FOUND' && !imgElement.getAttribute('src')) { 
+            
+            // --- 4. CLEAN THE PATH ---
             const cleanPath = imagePath.trim().replace(/[()]/g, '');
+            
+            // --- 5. CRITICAL LOGGING: Check the final path to be set ---
+            console.log(`[DEBUG] Final Path to Set: "${cleanPath}"`); 
+            
+            // --- 6. SET THE SOURCE ATTRIBUTE ---
             imgElement.setAttribute('src', cleanPath);
-            pathElement.style.display = 'none'; // Keep this to hide the path
+            
+            // Hide the temporary path element
+            pathElement.style.display = 'none';
         }
     });
 });
