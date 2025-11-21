@@ -69,6 +69,8 @@ cardList.on('updated', function() {
         if (imagePath && (currentSrc === null || currentSrc.includes('('))) { 
             // 2. Remove the outer parentheses from the path: (path/image.png) -> path/image.png
             const cleanPath = imagePath.replace(/[()]/g, '');
+
+console.log('Attempting to set SRC:', cleanPath, 'from data-path:', imagePath);
             
             // 3. Set the actual image source
             imgElement.setAttribute('src', cleanPath);
