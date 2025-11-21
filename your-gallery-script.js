@@ -100,21 +100,22 @@ typeFilterSelect.addEventListener('change', function() {
 
         // --- 4. DECK BUILDER LOGIC (Event Delegation) ---
 
-        const selectedCardsList = document.getElementById('selected-cards');
-        const cardsGallery = document.getElementById('cards-gallery');
+const selectedCardsList = document.getElementById('selected-cards');
+const cardsGallery = document.getElementById('cards-gallery');
 
-        cardsGallery.addEventListener('click', (event) => {
-            const addButton = event.target.closest('.add-to-deck-btn');
+cardsGallery.addEventListener('click', (event) => {
+    const addButton = event.target.closest('.add-to-deck-btn');
 
-            if (addButton) {
-                const cardItem = addButton.closest('.card-item');
-                if (!cardItem) return;
+    if (addButton) {
+        const cardItem = addButton.closest('.card-item');
+        if (!cardItem) return;
 
-                // Get card name from the data-card-name attribute we set above
+        // FIX: Define cardName here by reading the attribute set in the template
+        const cardName = cardItem.querySelector('.card-image').getAttribute('data-card-name');
 
-                const cardImageSrc = cardItem.querySelector('.card-image').getAttribute('src');
+        const cardImageSrc = cardItem.querySelector('.card-image').getAttribute('src');
 
-                const cardListItem = selectedCardsList.querySelector(`li[data-card-name="${cardName}"]`);
+        const cardListItem = selectedCardsList.querySelector(`li[data-card-name="${cardName}"]`);
                 
                 if (cardListItem) {
                     // Increment quantity
