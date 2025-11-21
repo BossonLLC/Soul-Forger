@@ -1,10 +1,10 @@
 // your-gallery-script.js
 
-// --- 1. INITIALIZE LIST.JS AND THE DECK BUILDER ---
+// --- 1. INITIALIZE LIST.JS AND MAIN GALLERY SETUP ---
 
 async function initCardGallery() {
     try {
-        // *** IMPORTANT: Update this path! ***
+        // Fetch card data from JSON file
         const response = await fetch('SFD.json');
         const cardData = await response.json();
 
@@ -13,7 +13,7 @@ async function initCardGallery() {
             valueNames: [
                 "Card Name", "Ronum", "Cost", "Type", "Action Type", "Sub Type",
                 "Attack", "Off-guard Attack", "Effect",
-                // This is the key that List.js uses to find the path data
+                // This value name is used to inject the image path into the template
                 "Image"
             ],
             
@@ -44,11 +44,11 @@ async function initCardGallery() {
         console.log('List.js initialized with ' + cardList.items.length + ' cards.');
 
         // ----------------------------------------------------
-        // ** START: Event Listeners (Must be inside initCardGallery due to scope) **
+        // ** START: Event Listeners & Dynamic Logic (Scoped to prevent ReferenceErrors) **
         // ----------------------------------------------------
 
-        // --- 2. DYNAMIC CONTENT RENDERING (Image Fix) ---
-        // The 'updated' event fires when List.js first loads and after filtering/searching.
+        // --- 2. DYNAMIC CONTENT RENDERING (Image Source Fix) ---
+        // This runs after List.js populates the list (on 'updated')
         cardList.on('updated', function() {
             console.log('*** STARTING IMAGE FIX LOGIC ***'); 
             
@@ -64,10 +64,11 @@ async function initCardGallery() {
                 // CRITICAL LOGGING: Check the raw value List.js provided
                 console.log(`[DEBUG] Card: ${item.values()['Card Name']} | Raw Content Read: "${imagePath}"`); 
                 
-                // Set the src only if a path was found and the image hasn't loaded yet
+                // Set the src only if a path was found and the src attribute is currently missing
                 if (imagePath && imagePath !== 'SPAN NOT FOUND' && !imgElement.getAttribute('src')) { 
                     
                     // Clean the path (removes parentheses and leading/trailing whitespace)
+                    // e.g., "(sftest/021_Front.png)" -> "sftest/021_Front.png"
                     const cleanPath = imagePath.trim().replace(/[()]/g, '');
                     
                     // CRITICAL LOGGING: Check the final path to be set
@@ -85,92 +86,93 @@ async function initCardGallery() {
         // --- 3. FILTERING LOGIC ---
         const typeFilterSelect = document.getElementById('type-filter');
 
-        typeFilterSelect.addEventListener('change', function() {
-            const selectedType = this.value;
-            
-            if (selectedType === 'all') {
-                // Show all items (clear the filter)
-                cardList.filter();
-            } else {
-                // Filter by the selected Type
-                cardList.filter(function(item) {
-                    return item.values().Type === selectedType; 
-                });
-            }
-        });
+        if (typeFilterSelect) { // Safety check
+            typeFilterSelect.addEventListener('change', function() {
+                const selectedType = this.value;
+                
+                if (selectedType === 'all') {
+                    cardList.filter();
+                } else {
+                    cardList.filter(function(item) {
+                        return item.values().Type === selectedType; 
+                    });
+                }
+            });
+        }
         
         // --- 4. DOWNLOAD BUTTON LISTENER ---
-        document.getElementById('download-button').addEventListener('click', generateDeckPDF);
+        const downloadButton = document.getElementById('download-button');
+        if (downloadButton) { // Safety check
+            downloadButton.addEventListener('click', generateDeckPDF);
+        }
+
+        // --- 5. DECK BUILDER LOGIC (Event Delegation) --- 
+        const selectedCardsList = document.getElementById('selected-cards');
+        const cardsGallery = document.getElementById('cards-gallery');
+
+        if (cardsGallery) { // Safety check to prevent the script from crashing if element is missing
+            cardsGallery.addEventListener('click', (event) => {
+                const addButton = event.target.closest('.add-to-deck-btn');
+
+                if (addButton) {
+                    const cardItem = addButton.closest('.card-item');
+                    if (!cardItem) return;
+
+                    const cardName = cardItem.querySelector('.card-image').getAttribute('data-card-name');
+                    const cardImageSrc = cardItem.querySelector('.card-image').getAttribute('src');
+
+                    const cardListItem = selectedCardsList.querySelector(`li[data-card-name="${cardName}"]`);
+                    
+                    if (cardListItem) {
+                        // Increment quantity
+                        const quantityInput = cardListItem.querySelector('.card-list-item-quantity');
+                        quantityInput.value = parseInt(quantityInput.value) + 1;
+                    } else {
+                        // Add new card to list
+                        const newCardListItem = document.createElement('li');
+                        newCardListItem.setAttribute('data-card-name', cardName);
+                        
+                        const newCardListItemImage = document.createElement('img');
+                        newCardListItemImage.setAttribute('src', cardImageSrc);
+                        newCardListItemImage.setAttribute('class', 'card-list-item-image');
+                        
+                        const newCardListItemName = document.createElement('span');
+                        newCardListItemName.textContent = cardName;
+                        
+                        const newCardListItemQuantity = document.createElement('input');
+                        newCardListItemQuantity.setAttribute('type', 'number');
+                        newCardListItemQuantity.setAttribute('class', 'card-list-item-quantity');
+                        newCardListItemQuantity.setAttribute('min', '1');
+                        newCardListItemQuantity.setAttribute('max', '99');
+                        newCardListItemQuantity.setAttribute('value', '1');
+
+                        newCardListItem.appendChild(newCardListItemImage);
+                        newCardListItem.appendChild(newCardListItemName);
+                        newCardListItem.appendChild(newCardListItemQuantity);
+                        
+                        selectedCardsList.appendChild(newCardListItem);
+                    }
+                }
+            });
+        }
 
         // ----------------------------------------------------
         // ** END: Event Listeners **
         // ----------------------------------------------------
 
-        // The deck builder logic (event delegation on cardsGallery) remains outside 
-        // because it doesn't need to be inside initCardGallery.
-
     } catch (error) {
+        // This catches errors in JSON fetching or List.js initialization
         console.error('Error in Card Gallery setup:', error);
     }
 }
 
-// Run the main initialization function
+// Run the main initialization function only after the entire page is loaded
 window.onload = initCardGallery;
 
-// --- 5. DECK BUILDER LOGIC (Event Delegation) ---
-
-const selectedCardsList = document.getElementById('selected-cards');
-const cardsGallery = document.getElementById('cards-gallery');
-
-// This logic is fine outside initCardGallery
-cardsGallery.addEventListener('click', (event) => {
-    const addButton = event.target.closest('.add-to-deck-btn');
-
-    if (addButton) {
-        const cardItem = addButton.closest('.card-item');
-        if (!cardItem) return;
-
-        // Reads attributes set in the template
-        const cardName = cardItem.querySelector('.card-image').getAttribute('data-card-name');
-        const cardImageSrc = cardItem.querySelector('.card-image').getAttribute('src');
-
-        const cardListItem = selectedCardsList.querySelector(`li[data-card-name="${cardName}"]`);
-        
-        if (cardListItem) {
-            // Increment quantity
-            const quantityInput = cardListItem.querySelector('.card-list-item-quantity');
-            quantityInput.value = parseInt(quantityInput.value) + 1;
-        } else {
-            // Add new card to list
-            const newCardListItem = document.createElement('li');
-            newCardListItem.setAttribute('data-card-name', cardName);
-            
-            const newCardListItemImage = document.createElement('img');
-            newCardListItemImage.setAttribute('src', cardImageSrc);
-            newCardListItemImage.setAttribute('class', 'card-list-item-image');
-            
-            const newCardListItemName = document.createElement('span');
-            newCardListItemName.textContent = cardName;
-            
-            const newCardListItemQuantity = document.createElement('input');
-            newCardListItemQuantity.setAttribute('type', 'number');
-            newCardListItemQuantity.setAttribute('class', 'card-list-item-quantity');
-            newCardListItemQuantity.setAttribute('min', '1');
-            newCardListItemQuantity.setAttribute('max', '99');
-            newCardListItemQuantity.setAttribute('value', '1');
-
-            newCardListItem.appendChild(newCardListItemImage);
-            newCardListItem.appendChild(newCardListItemName);
-            newCardListItem.appendChild(newCardListItemQuantity);
-            
-            selectedCardsList.appendChild(newCardListItem);
-        }
-    }
-});
-
-// --- 6. PDF GENERATION LOGIC ---
+// --- 6. PDF GENERATION LOGIC (Can remain outside as it is not called until a click) ---
 
 function generateDeckPDF() {
+    // This is safe outside initCardGallery because it's only called by an event listener
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     
