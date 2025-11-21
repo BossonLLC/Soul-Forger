@@ -69,19 +69,23 @@ async function initCardGallery() {
         });
 
 
-        // --- 3. FILTERING LOGIC ---
-        
-        document.querySelectorAll('.filter').forEach(button => {
-            button.addEventListener('click', function() {
-                const filterValue = this.getAttribute('data-filter');
-                
-                cardList.filter(function(item) {
-                    // Assuming 'Type' in your JSON is what determines Faction/Group
-                    // If your filters need to look at another field (e.g., 'Fire', 'Dark', etc.), change '.Type' here.
-                    return item.values().Type === filterValue; 
-                });
-            });
+// --- 3. FILTERING LOGIC (New Dropdown Logic) ---
+const typeFilterSelect = document.getElementById('type-filter');
+
+typeFilterSelect.addEventListener('change', function() {
+    const selectedType = this.value;
+    
+    if (selectedType === 'all') {
+        // Show all items (clear the filter)
+        cardList.filter();
+    } else {
+        // Filter by the selected Type
+        cardList.filter(function(item) {
+            // Note: This still filters based on the 'Type' field in your JSON
+            return item.values().Type === selectedType; 
         });
+    }
+});
 
 
         // --- 4. DECK BUILDER LOGIC (Event Delegation) ---
