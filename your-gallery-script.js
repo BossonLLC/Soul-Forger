@@ -54,30 +54,31 @@ item: `
         // FIX 4: Put the event listener here so it runs after initialization
 document.getElementById('download-button').addEventListener('click', generateDeckPDF);
 
-        // --- 2. DYNAMIC CONTENT RENDERING (Image Fix) ---
+// --- 2. DYNAMIC CONTENT RENDERING (Image Fix) ---
 
-        // This runs whenever List.js updates (on load, after search, or after filter)
-        cardList.on('updated', function() {
-            cardList.items.forEach(item => {
-                const imgElement = item.elm.querySelector('.card-image');
-                
-                // 1. Get the path from the data-image-path attribute set by List.js
-                const imagePath = imgElement.getAttribute('data-image-path');
-                
-       // This condition runs if imagePath is present AND the src is either empty or contains the parentheses.
-if (imagePath && (imgElement.getAttribute('src') === null || imgElement.getAttribute('src').includes('('))) {
-                    // 2. Remove the outer parentheses from the path: (sftest/021_Front.png) -> sftest/021_Front.png
-                    const cleanPath = imagePath.replace(/[()]/g, '');
-                    
-                    // 3. Set the actual image source
-                    imgElement.setAttribute('src', cleanPath);
-                    
-                    // 4. Also set the card name for the deck builder logic
-                    const cardName = item.values()['Card Name'];
-                    imgElement.setAttribute('data-card-name', cardName); 
-                }
-            });
-        });
+cardList.on('updated', function() {
+    cardList.items.forEach(item => {
+        const imgElement = item.elm.querySelector('.card-image');
+        
+        // 1. Get the path from the data-image-path attribute set by List.js
+        const imagePath = imgElement.getAttribute('data-image-path');
+        
+        // FIX: Use a robust check to see if the path is present AND the src needs fixing
+        const currentSrc = imgElement.getAttribute('src');
+
+        if (imagePath && (currentSrc === null || currentSrc.includes('('))) { 
+            // 2. Remove the outer parentheses from the path: (path/image.png) -> path/image.png
+            const cleanPath = imagePath.replace(/[()]/g, '');
+            
+            // 3. Set the actual image source
+            imgElement.setAttribute('src', cleanPath);
+            
+            // (The data-card-name fix is now redundant, but harmless if left in)
+            // const cardName = item.values()['Card Name'];
+            // imgElement.setAttribute('data-card-name', cardName);
+        }
+    });
+});
 
 
 // --- 3. FILTERING LOGIC (New Dropdown Logic) ---
