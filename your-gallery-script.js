@@ -27,6 +27,8 @@ valueNames: [
     { name: 'Image', attr: 'data-image-path' } 
 ],
             
+// Change this section (around line 30 in your last provided script)
+
 item: `
     <li class="card-item">
         <h4 class="Card Name">{Card Name}</h4> 
@@ -35,7 +37,7 @@ item: `
             data-card-name="{Card Name}" 
             data-card-id="{Ronum}" 
             alt=""
-            data-image-path="{Image}"> 
+            data-image-path> 
             
         <div class="card-details">
             <p>Cost: <span class="Cost">{Cost}</span> | Type: <span class="Type">{Type}</span></p>
