@@ -68,7 +68,7 @@ cardList.on('updated', function() {
         // FIX: Use a robust check to see if the path is present AND the src needs fixing
         const currentSrc = imgElement.getAttribute('src');
 
-        if (imagePath && (currentSrc === null || currentSrc.includes('('))) { 
+        if (imagePath && !imgElement.getAttribute('src')) { 
             // 2. Remove the outer parentheses from the path: (path/image.png) -> path/image.png
             const cleanPath = imagePath.replace(/[()]/g, '');
 
