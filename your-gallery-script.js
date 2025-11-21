@@ -12,12 +12,20 @@ async function initCardGallery() {
         // 2. Define the List.js options
         const options = {
             // These MUST match the keys in your JSON data exactly.
-            valueNames: [
-                "Card Name", "Ronum", "Cost", "Type", "Action Type", "Sub Type",
-                "Attack", "Off-guard Attack", "Effect",
-                // NEW: Map the 'Image' field from JSON to a data attribute (data-image-path)
-                { name: 'Image', attr: 'data-image-path' } 
-            ],
+valueNames: [
+    // Simple strings for all text fields you want List.js to populate
+    "Card Name", 
+    "Ronum", 
+    "Cost", 
+    "Type", 
+    "Action Type", 
+    "Sub Type",
+    "Attack", 
+    "Off-guard Attack", 
+    "Effect",
+    // Special object to map the 'Image' key to the data-image-path attribute
+    { name: 'Image', attr: 'data-image-path' } 
+],
             
             item: `
                 <li class="card-item">
