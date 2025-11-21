@@ -66,8 +66,11 @@
     <input class="search" placeholder="Search by name or text" />
     
 <h3>Filter by Type</h3>
-<button class="filter" data-filter="Creature">Show Creatures</button>
-<button class="filter" data-filter="Action">Show Actions</button>
+<select id="type-filter">
+    <option value="all">Show All Types</option>
+    <option value="Creature">Creatures</option>
+    <option value="Action">Actions</option>
+</select>
     
     <ul class="list"> 
     </ul>
@@ -102,6 +105,7 @@
   </body>
 </html>
     
+
 
 
 
