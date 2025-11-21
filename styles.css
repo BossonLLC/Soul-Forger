@@ -260,3 +260,22 @@ p {
     margin: 10px;
     border: none;
 }
+
+/* Hide all card detail text, keeping only the image visible */
+.card-details, .CardName, .Cost, .Type, .Attack, .Off-guard {
+    display: none !important;
+}
+
+/* Ensure the list is displayed horizontally */
+.list {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0;
+    list-style: none; /* Remove bullet points */
+}
+
+/* Style for each card item */
+.card-item {
+    margin: 10px;
+    border: none; /* Remove any default border if present */
+}
