@@ -27,25 +27,25 @@ valueNames: [
     { name: 'Image', attr: 'data-image-path' } 
 ],
             
-            item: `
-                <li class="card-item">
-                    <h4 class="Card Name"></h4>
-                    
-                    <img class="card-image" 
-                         data-card-name="" 
-                         data-card-id="" 
-                         alt=""
-                         data-image-path> 
-                         
-                    <div class="card-details">
-                        <p>Cost: <span class="Cost"></span> | Type: <span class="Type"></span></p>
-                        <p>A/OG Attack: <span class="Attack"></span> / <span class="Off-guard Attack"></span></p>
-                        <p>Effect: <span class="Effect"></span></p>
-                    </div>
-                    
-                    <button class="add-to-deck-btn">Add to Deck</button>
-                </li>
-            `
+item: `
+    <li class="card-item">
+        <h4 class="Card Name">{Card Name}</h4> 
+        
+        <img class="card-image" 
+            data-card-name="{Card Name}" 
+            data-card-id="{Ronum}" 
+            alt=""
+            data-image-path="{Image}"> 
+            
+        <div class="card-details">
+            <p>Cost: <span class="Cost">{Cost}</span> | Type: <span class="Type">{Type}</span></p>
+            <p>A/OG Attack: <span class="Attack">{Attack}</span> / <span class="Off-guard Attack">{Off-guard Attack}</span></p>
+            <p>Effect: <span class="Effect">{Effect}</span></p>
+        </div>
+        
+        <button class="add-to-deck-btn">Add to Deck</button>
+    </li>
+`
         };
 
         const cardList = new List('cards-gallery', options, cardData);
