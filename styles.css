@@ -279,3 +279,18 @@ p {
     margin: 10px;
     border: none; /* Remove any default border if present */
 }
+
+/* Fix 1: Hides the text name header */
+#cards-gallery .Card.Name { 
+    display: none !important; 
+}
+
+/* Fix 2: Hides the card details container */
+#cards-gallery .card-details {
+    display: none !important;
+}
+
+/* You may need to also hide the 'Add to Deck' button if you only want images */
+#cards-gallery .add-to-deck-btn {
+    display: none !important;
+}
