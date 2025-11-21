@@ -285,8 +285,11 @@ p {
     display: none !important; 
 }
 
-/* Fix 2: Hides the card details container */
 #cards-gallery .card-details {
-    display: none !important;
+    visibility: hidden !important; 
 }
 
+/* And change this for the button/name as well */
+#cards-gallery .add-to-deck-btn {
+    visibility: hidden !important; 
+}
