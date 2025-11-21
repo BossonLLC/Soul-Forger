@@ -51,6 +51,8 @@ item: `
         const cardList = new List('cards-gallery', options, cardData);
         console.log('List.js initialized with', cardList.items.length, 'cards.');
 
+        // FIX 4: Put the event listener here so it runs after initialization
+document.getElementById('download-button').addEventListener('click', generateDeckPDF);
 
         // --- 2. DYNAMIC CONTENT RENDERING (Image Fix) ---
 
@@ -195,5 +197,3 @@ function generateDeckPDF() {
     doc.save(`${deckName}.pdf`);
 }
 
-// Attach the PDF function to the download button
-document.getElementById('download-button').addEventListener('click', generateDeckPDF);
