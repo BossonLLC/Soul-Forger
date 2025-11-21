@@ -42,8 +42,8 @@ const options = {
     `
 };
 
-        const cardList = new List('cards-gallery', options, cardData);
-        console.log('List.js initialized with', cardList.items.length, 'cards.');
+var cardList = new List('cards-gallery', options, cardData); // Line 46 (or very near it)
+console.log('List.js initialized with ' + cardList.items.length + ' cards.');
 
         // FIX 4: Put the event listener here so it runs after initialization
 document.getElementById('download-button').addEventListener('click', generateDeckPDF);
@@ -53,6 +53,8 @@ document.getElementById('download-button').addEventListener('click', generateDec
 cardList.on('updated', function() {
     cardList.items.forEach(item => {
         const imgElement = item.elm.querySelector('.card-image');
+
+console.log('*** STARTING IMAGE FIX LOGIC ***');
         
         // --- 1. GET THE HIDDEN SPAN CONTAINING THE RAW PATH ---
         const pathElement = item.elm.querySelector('.Image'); 
