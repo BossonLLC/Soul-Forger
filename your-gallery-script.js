@@ -109,7 +109,7 @@ typeFilterSelect.addEventListener('change', function() {
                 if (!cardItem) return;
 
                 // Get card name from the data-card-name attribute we set above
-                const cardName = cardItem.querySelector('.card-image').getAttribute('data-card-name');
+
                 const cardImageSrc = cardItem.querySelector('.card-image').getAttribute('src');
 
                 const cardListItem = selectedCardsList.querySelector(`li[data-card-name="${cardName}"]`);
