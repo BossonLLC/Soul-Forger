@@ -52,25 +52,26 @@ document.getElementById('download-button').addEventListener('click', generateDec
 cardList.on('updated', function() {
     cardList.items.forEach(item => {
         const imgElement = item.elm.querySelector('.card-image');
-        // FIX 3: Get the raw path from the new <span> element
         const pathElement = item.elm.querySelector('.raw-image-path');
         
-        // Use textContent to get the value, which should be (sftest/...)
-        const imagePath = pathElement ? pathElement.textContent.trim() : null; 
+        // This will show us the exact content of the path element, including any hidden spaces or newlines.
+        const imagePath = pathElement ? pathElement.textContent : 'NOT FOUND'; 
         
-        // This condition should now correctly check the path value
-        if (imagePath && !imgElement.getAttribute('src')) { 
-            // 2. Remove the outer parentheses from the path
-            const cleanPath = imagePath.replace(/[()]/g, '');
+        console.log(`[DEBUG] Card: ${item.values()['Card Name']} | Raw Path Content: "${imagePath}"`); 
+        
+        // We will now use a much safer method to clean the path:
+        if (imagePath && imagePath !== 'NOT FOUND' && !imgElement.getAttribute('src')) { 
+            // 2. Trim whitespace and then remove the outer parentheses
+            const cleanPath = imagePath.trim().replace(/[()]/g, '');
             
-            // 3. Set the actual image source
+            // 3. Log the final path before setting src
+            console.log(`[DEBUG] Final Clean Path: ${cleanPath}`); 
+            
+            // 4. Set the actual image source
             imgElement.setAttribute('src', cleanPath);
             
-            // OPTIONAL: Hide the temporary path element after use
+            // Optional: Hide the temporary path element after use
             pathElement.style.display = 'none';
-
-            // ... (rest of the logic, like setting data-card-name, is now redundant 
-            // but harmless if you removed the previous manual set logic)
         }
     });
 });
