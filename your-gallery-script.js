@@ -64,7 +64,8 @@ document.getElementById('download-button').addEventListener('click', generateDec
                 // 1. Get the path from the data-image-path attribute set by List.js
                 const imagePath = imgElement.getAttribute('data-image-path');
                 
-                if (imagePath && !imgElement.getAttribute('src')) { // Only run if src hasn't been set
+       // This condition runs if imagePath is present AND the src is either empty or contains the parentheses.
+if (imagePath && (imgElement.getAttribute('src') === null || imgElement.getAttribute('src').includes('('))) {
                     // 2. Remove the outer parentheses from the path: (sftest/021_Front.png) -> sftest/021_Front.png
                     const cleanPath = imagePath.replace(/[()]/g, '');
                     
