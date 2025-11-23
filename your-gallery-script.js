@@ -2,15 +2,13 @@
 
 // --- 1. INITIALIZE LIST.JS AND MAIN GALLERY SETUP ---
 
-// ... (The top of your script remains the same)
-
 async function initCardGallery() {
     try {
-        // Fetch card data from JSON file
+        // 1a. Fetch card data from JSON file
         const response = await fetch('SFD.json');
         const cardData = await response.json();
 
-        // 2. Define the List.js options (This section MUST remain!)
+        // 2. Define the List.js options
         const options = {
             valueNames: [
                 "Card Name", "Ronum", "Cost", "Type", "Action Type", "Sub Type",
@@ -40,123 +38,114 @@ async function initCardGallery() {
             `
         };
 
-        // Initialize List.js
+        // 3. Initialize List.js
         var cardList = new List('cards-gallery', options, cardData); 
         console.log('List.js initialized with ' + cardList.items.length + ' cards.'); 
 
         // ----------------------------------------------------
-        // ** ALL LOGIC HAS BEEN COMMENTED OUT BELOW THIS LINE **
+        // ** Event Listeners & Dynamic Logic (Wrapped in try...catch for debugging) **
         // ----------------------------------------------------
 
-    } catch (error) {
-        console.error('Error in Card Gallery setup:', error);
-    }
-}
-
-// ... (window.onload and generateDeckPDF remain the same)
-        // ----------------------------------------------------
-        // ** START: Event Listeners & Dynamic Logic (Scoped to prevent ReferenceErrors) **
-        // ----------------------------------------------------
-
-        // --- 2. DYNAMIC CONTENT RENDERING (Image Source Fix) ---
-        // FIX: Using the correct 'updated' event name as defined in your list.js source.
-        cardList.on('updated', function() { 
-            console.log('*** STARTING IMAGE FIX LOGIC ***'); 
-            
-            cardList.items.forEach(item => {
-                const imgElement = item.elm.querySelector('.card-image');
-                const pathElement = item.elm.querySelector('.Image'); 
-                const imagePath = pathElement ? pathElement.textContent : 'SPAN NOT FOUND'; 
+        try {
+            // --- 4. DYNAMIC CONTENT RENDERING (Image Source Fix) ---
+            // Using the correct 'updated' event name for your list.js version.
+            cardList.on('updated', function() { 
+                console.log('*** STARTING IMAGE FIX LOGIC ***'); 
                 
-                console.log(`[DEBUG] Card: ${item.values()['Card Name']} | Raw Content Read: "${imagePath}"`); 
-                
-                if (imagePath && imagePath !== 'SPAN NOT FOUND' && !imgElement.getAttribute('src')) { 
-                    const cleanPath = imagePath.trim().replace(/[()]/g, '');
+                cardList.items.forEach(item => {
+                    const imgElement = item.elm.querySelector('.card-image');
+                    const pathElement = item.elm.querySelector('.Image'); 
+                    const imagePath = pathElement ? pathElement.textContent : 'SPAN NOT FOUND'; 
                     
-                    console.log(`[DEBUG] Final Path to Set: "${cleanPath}"`); 
+                    console.log(`[DEBUG] Card: ${item.values()['Card Name']} | Raw Content Read: "${imagePath}"`); 
                     
-                    imgElement.setAttribute('src', cleanPath);
-                    pathElement.style.display = 'none';
-                }
-            });
-        });
-
-        // --- 3. FILTERING LOGIC ---
-        const typeFilterSelect = document.getElementById('type-filter');
-
-        if (typeFilterSelect) { 
-            typeFilterSelect.addEventListener('change', function() {
-                const selectedType = this.value;
-                
-                if (selectedType === 'all') {
-                    cardList.filter();
-                } else {
-                    cardList.filter(function(item) {
-                        return item.values().Type === selectedType; 
-                    });
-                }
-            });
-        }
-        
-        // --- 4. DOWNLOAD BUTTON LISTENER ---
-        const downloadButton = document.getElementById('download-button');
-        if (downloadButton) { 
-            downloadButton.addEventListener('click', generateDeckPDF);
-        }
-
-        // --- 5. DECK BUILDER LOGIC (Event Delegation) --- 
-        const selectedCardsList = document.getElementById('selected-cards');
-        const cardsGallery = document.getElementById('cards-gallery');
-
-        if (cardsGallery) { 
-            cardsGallery.addEventListener('click', (event) => {
-                const addButton = event.target.closest('.add-to-deck-btn');
-
-                if (addButton) {
-                    const cardItem = addButton.closest('.card-item');
-                    if (!cardItem) return;
-
-                    const cardName = cardItem.querySelector('.card-image').getAttribute('data-card-name');
-                    const cardImageSrc = cardItem.querySelector('.card-image').getAttribute('src');
-
-                    const cardListItem = selectedCardsList.querySelector(`li[data-card-name="${cardName}"]`);
-                    
-                    if (cardListItem) {
-                        const quantityInput = cardListItem.querySelector('.card-list-item-quantity');
-                        quantityInput.value = parseInt(quantityInput.value) + 1;
-                    } else {
-                        const newCardListItem = document.createElement('li');
-                        newCardListItem.setAttribute('data-card-name', cardName);
+                    if (imagePath && imagePath !== 'SPAN NOT FOUND' && !imgElement.getAttribute('src')) { 
+                        const cleanPath = imagePath.trim().replace(/[()]/g, '');
                         
-                        const newCardListItemImage = document.createElement('img');
-                        newCardListItemImage.setAttribute('src', cardImageSrc);
-                        newCardListItemImage.setAttribute('class', 'card-list-item-image');
+                        console.log(`[DEBUG] Final Path to Set: "${cleanPath}"`); 
                         
-                        const newCardListItemName = document.createElement('span');
-                        newCardListItemName.textContent = cardName;
-                        
-                        const newCardListItemQuantity = document.createElement('input');
-                        newCardListItemQuantity.setAttribute('type', 'number');
-                        newCardListItemQuantity.setAttribute('class', 'card-list-item-quantity');
-                        newCardListItemQuantity.setAttribute('min', '1');
-                        newCardListItemQuantity.setAttribute('max', '99');
-                        newCardListItemQuantity.setAttribute('value', '1');
-
-                        newCardListItem.appendChild(newCardListItemImage);
-                        newCardListItem.appendChild(newCardListItemName);
-                        newCardListItem.appendChild(newCardListItemQuantity);
-                        
-                        selectedCardsList.appendChild(newCardListItem);
+                        imgElement.setAttribute('src', cleanPath);
+                        pathElement.style.display = 'none';
                     }
-                }
+                });
             });
+
+            // --- 5. FILTERING LOGIC ---
+            const typeFilterSelect = document.getElementById('type-filter');
+
+            if (typeFilterSelect) { 
+                typeFilterSelect.addEventListener('change', function() {
+                    const selectedType = this.value;
+                    
+                    if (selectedType === 'all') {
+                        cardList.filter();
+                    } else {
+                        cardList.filter(function(item) {
+                            return item.values().Type === selectedType; 
+                        });
+                    }
+                });
+            }
+            
+            // --- 6. DOWNLOAD BUTTON LISTENER ---
+            const downloadButton = document.getElementById('download-button');
+            if (downloadButton) { 
+                downloadButton.addEventListener('click', generateDeckPDF);
+            }
+
+            // --- 7. DECK BUILDER LOGIC (Event Delegation) --- 
+            const selectedCardsList = document.getElementById('selected-cards');
+            const cardsGallery = document.getElementById('cards-gallery');
+
+            if (cardsGallery) { 
+                cardsGallery.addEventListener('click', (event) => {
+                    const addButton = event.target.closest('.add-to-deck-btn');
+
+                    if (addButton) {
+                        const cardItem = addButton.closest('.card-item');
+                        if (!cardItem) return;
+
+                        const cardName = cardItem.querySelector('.card-image').getAttribute('data-card-name');
+                        const cardImageSrc = cardItem.querySelector('.card-image').getAttribute('src');
+
+                        const cardListItem = selectedCardsList.querySelector(`li[data-card-name="${cardName}"]`);
+                        
+                        if (cardListItem) {
+                            const quantityInput = cardListItem.querySelector('.card-list-item-quantity');
+                            quantityInput.value = parseInt(quantityInput.value) + 1;
+                        } else {
+                            const newCardListItem = document.createElement('li');
+                            newCardListItem.setAttribute('data-card-name', cardName);
+                            
+                            const newCardListItemImage = document.createElement('img');
+                            newCardListItemImage.setAttribute('src', cardImageSrc);
+                            newCardListItemImage.setAttribute('class', 'card-list-item-image');
+                            
+                            const newCardListItemName = document.createElement('span');
+                            newCardListItemName.textContent = cardName;
+                            
+                            const newCardListItemQuantity = document.createElement('input');
+                            newCardListItemQuantity.setAttribute('type', 'number');
+                            newCardListItemQuantity.setAttribute('class', 'card-list-item-quantity');
+                            newCardListItemQuantity.setAttribute('min', '1');
+                            newCardListItemQuantity.setAttribute('max', '99');
+                            newCardListItemQuantity.setAttribute('value', '1');
+
+                            newCardListItem.appendChild(newCardListItemImage);
+                            newCardListItem.appendChild(newCardListItemName);
+                            newCardListItem.appendChild(newCardListItemQuantity);
+                            
+                            selectedCardsList.appendChild(newCardListItem);
+                        }
+                    }
+                });
+            }
+        } catch (e) {
+            console.error("CRITICAL ERROR: List.js Event or Element Hookup Failed:", e);
         }
 
-        // ----------------------------------------------------
-        // ** END: Event Listeners **
-        // ----------------------------------------------------
-
     } catch (error) {
+        // This catches errors in JSON fetching or main setup
         console.error('Error in Card Gallery setup:', error);
     }
 }
@@ -164,11 +153,11 @@ async function initCardGallery() {
 // Run the main initialization function only after the entire page is loaded
 window.onload = initCardGallery;
 
-// --- 6. PDF GENERATION LOGIC ---
-
+// --- 8. PDF GENERATION LOGIC ---
 function generateDeckPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
+    // ... (rest of PDF logic is the same) ...
     
     const deckName = "My Soul-Forger Deck"; 
     doc.text(deckName, 10, 10); 
