@@ -66,14 +66,25 @@ async function initCardGallery() {
             `
         };
 
+    // your-gallery-script.js (Around line 40)
+
         // 2. Initialize List.js
         var cardList = new List('cards-gallery', options, cardData); 
-        console.log('List.js initialized with ' + cardList.items.length + ' cards.'); 
+        console.log('List.js initialized with ' + cardList.items.length + ' cards.'); // <-- Line 43
+
+        // ----------------------------------------------------
+        // ** CRITICAL VALIDATION CHECK **
+        // ----------------------------------------------------
+        if (!cardList || cardList.items.length === 0) {
+            console.error("List.js object failed to initialize or contains no items. Check HTML ID ('cards-gallery') and list item structure.");
+            // Stop execution here if the list isn't ready
+            return;
+        }
 
         // ----------------------------------------------------
         // ** FIX: FORCE IMAGE UPDATE LOGIC TO RUN IMMEDIATELY **
         // ----------------------------------------------------
-        setImageSources(cardList); // <-- CALL THE FUNCTION HERE!
+        setImageSources(cardList); // <-- This should now run ONLY if cardList is valid.
 
         // --- 3. DYNAMIC CONTENT RENDERING (Image Source Fix - Event Listener) ---
         // Keep the listener in case the list is searched/filtered later
