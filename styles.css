@@ -330,3 +330,29 @@ p {
     margin: 5px 0;
     font-size: 0.9em;
 }
+/* --- Magnified Image Feature Styles --- */
+
+#card-magnifier {
+    /* Hide by default */
+    display: none; 
+    
+    /* Position fixed so it stays relative to the viewport, not the page scroll */
+    position: fixed; 
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center the element */
+    
+    /* Ensure it hovers above everything else */
+    z-index: 1000; 
+    
+    /* Subtle border/shadow */
+    border: 5px solid #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+#magnified-image {
+    /* Set the size for the magnified card (Adjust the 400px value as needed) */
+    width: 300px; 
+    height: auto;
+    display: block;
+}
