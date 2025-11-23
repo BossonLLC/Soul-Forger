@@ -172,10 +172,54 @@ async function initCardGallery() {
     }
 }
 
+        // --- 7. CARD MAGNIFIER HOVER LOGIC ---
+        
+        const magnifier = document.getElementById('card-magnifier');
+        const magnifiedImage = document.getElementById('magnified-image');
+        const gallery = document.getElementById('cards-gallery');
+        let hoverTimeout;
+
+        if (gallery && magnifier && magnifiedImage) {
+            
+            // Function to handle showing the card
+            const showMagnifier = (src) => {
+                magnifiedImage.setAttribute('src', src);
+                magnifier.style.display = 'block';
+            };
+
+            // Function to handle hiding the card
+            const hideMagnifier = () => {
+                clearTimeout(hoverTimeout);
+                magnifier.style.display = 'none';
+                magnifiedImage.setAttribute('src', ''); // Clear the image source
+            };
+
+            gallery.addEventListener('mouseover', (event) => {
+                const imageElement = event.target.closest('.card-image');
+                
+                if (imageElement) {
+                    // Clear any existing timeout to restart the timer
+                    clearTimeout(hoverTimeout); 
+
+                    const cardSrc = imageElement.getAttribute('src');
+                    if (!cardSrc) return; // Exit if no source is set yet
+
+                    // Set the timer for 1200ms (1.2 seconds) before showing
+                    hoverTimeout = setTimeout(() => {
+                        showMagnifier(cardSrc);
+                    }, 1200); // Adjust this delay (1000ms is 1 second)
+                }
+            });
+
+            gallery.addEventListener('mouseout', (event) => {
+                // If the mouse leaves any part of the gallery, hide the magnifier
+                hideMagnifier();
+            });
+        }
 // Run the main initialization function only after the entire page is loaded
 window.onload = initCardGallery;
 
-// --- 7. PDF GENERATION LOGIC ---
+// --- 8. PDF GENERATION LOGIC ---
 // ... (generateDeckPDF function remains the same) ...
 function generateDeckPDF() {
     const { jsPDF } = window.jspdf;
