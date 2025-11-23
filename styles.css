@@ -293,3 +293,36 @@ p {
 #cards-gallery .add-to-deck-btn {
     visibility: hidden !important; 
 }
+
+/* Container for the List.js gallery */
+#cards-gallery ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap; /* Allows cards to wrap to the next line */
+    gap: 20px; /* Space between cards */
+}
+
+/* Individual Card Item */
+.card-item {
+    border: 1px solid #ccc;
+    padding: 10px;
+    width: 200px; /* Set a fixed width for the entire card container */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* The Card Image element */
+.card-item .card-image {
+    width: 100%; /* Make the image fill the container width */
+    height: auto; /* Maintain aspect ratio */
+    max-height: 250px; /* Set a max height if needed */
+    display: block; /* Removes any extra space below the image */
+    margin: 0 auto 10px auto; /* Center the image and add margin below */
+}
+
+/* Optional: Style the card details */
+.card-details p {
+    margin: 5px 0;
+    font-size: 0.9em;
+}
