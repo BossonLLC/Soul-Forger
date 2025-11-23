@@ -207,7 +207,7 @@ async function initCardGallery() {
                     // Set the timer for 1200ms (1.2 seconds) before showing
                     hoverTimeout = setTimeout(() => {
                         showMagnifier(cardSrc);
-                    }, 500); // Adjust this delay (1000ms is 1 second)
+                    }, 250); // Adjust this delay (1000ms is 1 second)
                 }
             });
 
