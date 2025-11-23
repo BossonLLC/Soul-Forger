@@ -96,23 +96,84 @@ async function initCardGallery() {
             console.warn("List.js 'updated' event registration failed, but forced update already ran.", e);
         }
 
-        // --- 4. FILTERING LOGIC ---
-        const typeFilterSelect = document.getElementById('type-filter');
 
-        if (typeFilterSelect) { 
-            typeFilterSelect.addEventListener('change', function() {
-                const selectedType = this.value;
-                
-                if (selectedType === 'all') {
-                    cardList.filter();
-                } else {
-                    cardList.filter(function(item) {
-                        return item.values().Type === selectedType; 
-                    });
-                }
+// --- 4. FILTERING LOGIC (Type Dropdown) ---
+const typeFilterSelect = document.getElementById('type-filter');
+
+if (typeFilterSelect) { 
+    typeFilterSelect.addEventListener('change', function() {
+        const selectedType = this.value;
+        
+        if (selectedType === 'all') {
+            cardList.filter();
+        } else {
+            cardList.filter(function(item) {
+                // Now supports Action, Creature, and Equipment
+                return item.values().Type === selectedType; 
             });
         }
+    });
+}
+
+// ------------------------------------------------------------------
+// --- 5. CUSTOM SEARCH LOGIC (Targeted Columns) ---
+// ------------------------------------------------------------------
+
+const cardNameSearchInput = document.querySelector('.card-name-search');
+const effectSearchInput = document.querySelector('.effect-search');
+
+// Function to handle custom search across the targeted columns
+const customSearchHandler = (event) => {
+    // 1. Get current values from all targeted search boxes
+    const nameQuery = cardNameSearchInput ? cardNameSearchInput.value : '';
+    const effectQuery = effectSearchInput ? effectSearchInput.value : '';
+    
+    // 2. Combine the queries into a single custom search function
+    //    List.js handles combined search if you provide a custom function.
+    cardList.search(nameQuery + ' ' + effectQuery, null, (query, columns) => {
+        // Query is the concatenated string (e.g., "Asteroid Kick 1 damage")
         
+        const normalizedNameQuery = nameQuery.toLowerCase().trim();
+        const normalizedEffectQuery = effectQuery.toLowerCase().trim();
+        
+        cardList.items.forEach(item => {
+            let matchesName = true;
+            let matchesEffect = true;
+
+            // Check Card Name
+            if (normalizedNameQuery.length > 0) {
+                const cardName = item.values()['Card Name'].toLowerCase();
+                matchesName = cardName.includes(normalizedNameQuery);
+            }
+
+            // Check Effect
+            if (normalizedEffectQuery.length > 0) {
+                const effectText = item.values()['Effect'].toLowerCase();
+                matchesEffect = effectText.includes(normalizedEffectQuery);
+            }
+            
+            // Item is 'found' only if it matches all active search criteria
+            item.found = matchesName && matchesEffect;
+        });
+
+        // The List.js search function requires the entire list to be returned,
+        // but since we modify `item.found` directly, List.js updates visibility.
+        return cardList.items.filter(i => i.found);
+    });
+    
+    // If all search boxes are empty, call list.search() with no arguments to reset.
+    if (!nameQuery && !effectQuery) {
+        cardList.search(); 
+    }
+};
+
+// Attach the same handler to both search boxes
+if (cardNameSearchInput) {
+    cardNameSearchInput.addEventListener('keyup', customSearchHandler);
+}
+if (effectSearchInput) {
+    effectSearchInput.addEventListener('keyup', customSearchHandler);
+}
         // --- 5. DOWNLOAD BUTTON LISTENER ---
         const downloadButton = document.getElementById('download-button');
         if (downloadButton) { 
