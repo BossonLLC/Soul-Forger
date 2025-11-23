@@ -59,17 +59,21 @@
 			
 			
 <div id="cards-gallery">
-    <h3>Search Cards</h3>
-    <input class="search" placeholder="Search by name or text" />
-    
-<h3>Filter by Type</h3>
-<select id="type-filter">
-    <option value="all">Show All Types</option>
-    <option value="Creature">Creatures</option>
-    <option value="Action">Actions</option>
-</select>
-    
-    <ul class="list"> 
+    <h3>Search by Card Name</h3>
+    <input class="search card-name-search" placeholder="Search by Card Name" data-list-attribute="Card Name" />
+
+    <h3>Search by Effect Text</h3>
+    <input class="search effect-search" placeholder="Search by Effect" data-list-attribute="Effect" />
+
+    <h3>Filter by Type</h3>
+    <select id="type-filter">
+        <option value="all">Show All Types</option>
+        <option value="Action">Action</option>
+        <option value="Creature">Creature</option>
+        <option value="Equipment">Equipment</option>
+    </select>
+
+    <ul class="list"> 
     </ul>
 </div>
 			
@@ -111,3 +115,4 @@
 			
   </body>
 </html>
+
