@@ -346,8 +346,8 @@ p {
     z-index: 1000; 
     
     /* Subtle border/shadow */
-    border: 5px solid #fff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    border: 5px solid #000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
 }
 
 #magnified-image {
