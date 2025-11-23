@@ -307,19 +307,23 @@ p {
 .card-item {
     border: 1px solid #ccc;
     padding: 10px;
-    width: 200px; /* Set a fixed width for the entire card container */
+    width: 200px; /* Base width of the card container */
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
     text-align: center;
 }
 
-/* The Card Image element */
+/* The Card Image element (CRITICAL FIX) */
 .card-item .card-image {
-    width: 100%; /* Make the image fill the container width */
-    height: auto; /* Maintain aspect ratio */
-    max-height: 250px; /* Set a max height if needed */
-    display: block; /* Removes any extra space below the image */
-    margin: 0 auto 10px auto; /* Center the image and add margin below */
-}
+    /* Set a fixed height for the image area, based on the card design */
+    height: 280px; /* A fixed height (adjust this number based on visual fit) */
+    width: 100%; /* Fill the width of the card container */
+    
+    /* FIX: Force the image to maintain its original aspect ratio */
+    object-fit: contain; /* Prevents stretching/distortion */
+    
+    display: block; 
+    margin: 0 auto 10px auto;
+ }
 
 /* Optional: Style the card details */
 .card-details p {
