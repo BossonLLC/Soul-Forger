@@ -352,7 +352,7 @@ p {
 
 #magnified-image {
     /* Set the size for the magnified card (Adjust the 400px value as needed) */
-    width: 300px; 
+    width: 500px; 
     height: auto;
     display: block;
 }
