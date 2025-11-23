@@ -2,13 +2,15 @@
 
 // --- 1. INITIALIZE LIST.JS AND MAIN GALLERY SETUP ---
 
+// ... (The top of your script remains the same)
+
 async function initCardGallery() {
     try {
         // Fetch card data from JSON file
         const response = await fetch('SFD.json');
         const cardData = await response.json();
 
-        // 2. Define the List.js options
+        // 2. Define the List.js options (This section MUST remain!)
         const options = {
             valueNames: [
                 "Card Name", "Ronum", "Cost", "Type", "Action Type", "Sub Type",
@@ -42,6 +44,16 @@ async function initCardGallery() {
         var cardList = new List('cards-gallery', options, cardData); 
         console.log('List.js initialized with ' + cardList.items.length + ' cards.'); 
 
+        // ----------------------------------------------------
+        // ** ALL LOGIC HAS BEEN COMMENTED OUT BELOW THIS LINE **
+        // ----------------------------------------------------
+
+    } catch (error) {
+        console.error('Error in Card Gallery setup:', error);
+    }
+}
+
+// ... (window.onload and generateDeckPDF remain the same)
         // ----------------------------------------------------
         // ** START: Event Listeners & Dynamic Logic (Scoped to prevent ReferenceErrors) **
         // ----------------------------------------------------
