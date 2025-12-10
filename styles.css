@@ -228,10 +228,10 @@ p {
     display: flex; 
     width: 100%; 
     
-
+  padding-top: 60px;
     
-    padding-left: 20px; 
-    padding-right: 20px; /* This padding should push the content inwards */
+    padding-left: 40px; 
+    padding-right: 40px; /* This padding should push the content inwards */
     
     min-height: 100vh; 
     box-sizing: border-box; 
