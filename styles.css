@@ -408,3 +408,8 @@ p {
     height: auto;
     display: block;
 }
+
+#cards-gallery {
+    /* ... existing rules ... */
+    background-color: rgba(255, 0, 0, 0.2) !important; /* TEMPORARY: Red overlay */
+}
