@@ -214,42 +214,39 @@ p {
         border: 1px solid black;
       }
 /* ------------------------------------------------------------------ */
-/* --- NEW LAYOUT RULES: FINAL FLEXBOX IMPLEMENTATION --- */
+/* --- NEW LAYOUT RULES: FINAL FLEXBOX IMPLEMENTATION (Revised) --- */
 /* ------------------------------------------------------------------ */
 
 /* 1. New Flexbox Wrapper for Main Content */
 .main-content-wrapper {
     display: flex; 
-    /* Use padding to create space from the sides of the screen */
+    width: 100%; /* Ensure it spans the full width available to its parent */
     padding: 0 20px; 
-    padding-top: 60px; /* Space below the fixed header (50px header + 10px margin) */
+    padding-top: 60px; 
     min-height: 100vh; 
+    box-sizing: border-box; /* Crucial to prevent padding from causing horizontal scroll */
 }
 
 /* 2. Gallery Container */
 #cards-gallery {
-    /* The gallery should take 100% of the remaining space, 
-       after reserving 220px for the deck list and gap. */
     flex-grow: 1; 
+    /* The gallery should take the entire width MINUS the fixed deck list width and gap. */
+    flex-basis: calc(100% - 240px); /* 100% - (200px deck list + 20px margin-left + 20px buffer) */
     
-    /* Set an explicit minimum size for the gallery (e.g., 75% of the total width) */
-    flex-basis: 75%; 
-    
-    /* Ensure no margins/paddings cause scrolling issues */
     box-sizing: border-box;
-    padding: 0; /* Remove padding here, use it on the wrapper */
+    padding-right: 20px; /* Add some internal padding to separate the cards from the edge of the list */
 }
 
 /* 3. Deck Builder Panel (Sticky Position Fix) */
 .card-list {
     position: sticky;
-    top: 50px; /* Stops right under the 50px header */
+    top: 50px; 
     
-    /* Explicitly set its size */
-    flex-basis: 200px; /* Set a starting width */
+    /* Explicitly fix its size */
+    flex-basis: 200px; /* Base width */
     flex-shrink: 0;    /* Prevent it from shrinking */
     
-    width: 200px; /* Keeping fixed width for safety */
+    width: 200px; /* Fixed width for safety/readability */
     z-index: 10;
     margin-left: 20px; /* Space between the gallery and the deck list */
     
