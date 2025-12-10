@@ -213,27 +213,45 @@ p {
         margin: 10px;
         border: 1px solid black;
       }
-/* New Flexbox Wrapper for Main Content */
-.main-content-wrapper {
-    display: flex; /* Activate flexbox */
-    padding: 0 10px; /* Optional: Add horizontal padding to the whole section */
-    /* Add top padding to push content down past the fixed header */
-    padding-top: 60px; /* 50px header height + 10px margin */
-    min-height: 100vh; /* Ensure the wrapper takes up at least the full viewport height */
-}      
 /* ------------------------------------------------------------------ */
-/* --- NEW LAYOUT RULES: FIXING STICKY POSITION AND OVERLAP (REVISED) --- */
+/* --- NEW LAYOUT RULES: FINAL FLEXBOX IMPLEMENTATION --- */
 /* ------------------------------------------------------------------ */
 
-/* 1. Deck Builder Panel (Sticky Position Fix) */
+/* 1. New Flexbox Wrapper for Main Content */
+.main-content-wrapper {
+    display: flex; 
+    /* Use padding to create space from the sides of the screen */
+    padding: 0 20px; 
+    padding-top: 60px; /* Space below the fixed header (50px header + 10px margin) */
+    min-height: 100vh; 
+}
+
+/* 2. Gallery Container */
+#cards-gallery {
+    /* The gallery should take 100% of the remaining space, 
+       after reserving 220px for the deck list and gap. */
+    flex-grow: 1; 
+    
+    /* Set an explicit minimum size for the gallery (e.g., 75% of the total width) */
+    flex-basis: 75%; 
+    
+    /* Ensure no margins/paddings cause scrolling issues */
+    box-sizing: border-box;
+    padding: 0; /* Remove padding here, use it on the wrapper */
+}
+
+/* 3. Deck Builder Panel (Sticky Position Fix) */
 .card-list {
     position: sticky;
     top: 50px; /* Stops right under the 50px header */
     
-    /* REMOVE float: right; */
+    /* Explicitly set its size */
+    flex-basis: 200px; /* Set a starting width */
+    flex-shrink: 0;    /* Prevent it from shrinking */
     
-    width: 200px; /* Fixed width for the deck list */
+    width: 200px; /* Keeping fixed width for safety */
     z-index: 10;
+    margin-left: 20px; /* Space between the gallery and the deck list */
     
     /* Styling */
     height: calc(100vh - 70px); 
@@ -241,25 +259,6 @@ p {
     border: 1px solid black;
     box-sizing: border-box; 
     padding: 10px;
-    
-    /* Flexbox Alignment */
-    flex-shrink: 0; /* Ensures it maintains its 200px width */
-    margin-right: 10px;
-}
-
-/* 2. Gallery Container (Overlap Fix - REVISED FOR ALIGNMENT) */
-#cards-gallery {
-    flex-grow: 1; 
-    
-    /* Set a maximum width or a flex-basis to control its size. 
-       Let's use a percentage of the screen width to keep it responsive,
-       while ensuring there's always a gap on the right. 
-    */
-    max-width: 75%; /* Allows the gallery to take up 75% of the wrapper space */
-    
-    padding: 20px;
-    box-sizing: border-box;
-    margin-left: 10px;
 }
       
       /* CSS for the card list items */
