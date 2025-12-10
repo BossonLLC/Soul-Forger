@@ -12,11 +12,17 @@ p {color: #FFFFFF; }
 .w3-content{position:relative;margin-top:0em;}
 
 #header {
-  background-color: #AFAFAF;
-  height: 50px;
-  line-height: 50px;
-  color: #838381;
-  }
+    background-color: #AFAFAF;
+    height: 50px;
+    line-height: 50px;
+    
+    /* CRITICAL: Must be fixed */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%; /* Spans the entire screen width */
+    z-index: 100; /* Stays above everything */
+}
   #header a {
     color: black;
     text-decoration: none;
@@ -214,41 +220,48 @@ p {
         border: 1px solid black;
       }
 /* ------------------------------------------------------------------ */
-/* --- NEW LAYOUT RULES: FINAL FLEXBOX IMPLEMENTATION (Revised) --- */
+/* --- NEW LAYOUT RULES: FINAL FLEXBOX IMPLEMENTATION (Guaranteed Fit) --- */
 /* ------------------------------------------------------------------ */
 
 /* 1. New Flexbox Wrapper for Main Content */
 .main-content-wrapper {
     display: flex; 
-    width: 100%; /* Ensure it spans the full width available to its parent */
-    padding: 0 20px; 
+    width: 100%; 
+    
+    /* CRITICAL: Push content down by 50px (header height) + 10px buffer */
     padding-top: 60px; 
+    
+    padding-left: 20px; 
+    padding-right: 20px; /* This padding should push the content inwards */
+    
     min-height: 100vh; 
-    box-sizing: border-box; /* Crucial to prevent padding from causing horizontal scroll */
+    box-sizing: border-box; 
 }
 
 /* 2. Gallery Container */
 #cards-gallery {
-    flex-grow: 1; 
-    /* The gallery should take the entire width MINUS the fixed deck list width and gap. */
-    flex-basis: calc(100% - 240px); /* 100% - (200px deck list + 20px margin-left + 20px buffer) */
+    /* Gallery takes all space MINUS the 220px required by the deck list and its margin */
+    flex-basis: calc(100% - 220px); 
+    flex-grow: 1; /* Allows it to take up any excess space within its flex-basis */
+    flex-shrink: 1; 
     
+    padding-right: 20px; /* Add some space between the cards and the search controls */
+    padding-left: 0; 
     box-sizing: border-box;
-    padding-right: 20px; /* Add some internal padding to separate the cards from the edge of the list */
 }
 
 /* 3. Deck Builder Panel (Sticky Position Fix) */
 .card-list {
     position: sticky;
-    top: 50px; 
+    top: 50px; /* Stops right under the 50px header */
     
     /* Explicitly fix its size */
-    flex-basis: 200px; /* Base width */
-    flex-shrink: 0;    /* Prevent it from shrinking */
-    
-    width: 200px; /* Fixed width for safety/readability */
+    flex-basis: 200px; 
+    flex-shrink: 0; 
+    width: 200px; 
     z-index: 10;
-    margin-left: 20px; /* Space between the gallery and the deck list */
+    
+    /* REMOVED margin-left: 20px; because flex-basis already reserves that space */
     
     /* Styling */
     height: calc(100vh - 70px); 
