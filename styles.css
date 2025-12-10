@@ -240,7 +240,7 @@ p {
 /* 2. Gallery Container */
 #cards-gallery {
     /* Gallery takes all space MINUS the 220px required by the deck list and its margin */
-    flex-basis: calc(100% - 360px); 
+    flex-basis: calc(100% - 440px); 
     flex-grow: 1; /* Allows it to take up any excess space within its flex-basis */
     flex-shrink: 1; 
     
