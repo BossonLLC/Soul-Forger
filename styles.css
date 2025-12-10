@@ -214,16 +214,42 @@ p {
         border: 1px solid black;
       }
       
-      /* CSS for the card list */
-      .card-list {
-        position: fixed;
-        top: 100px;
-        right: 10px;
-        width: 200px;
-        height: calc(100% - 200px);
-        overflow-y: auto;
-        border: 1px solid black;
-      }
+/* ------------------------------------------------------------------ */
+/* --- NEW LAYOUT RULES: FIXING STICKY POSITION AND OVERLAP --- */
+/* ------------------------------------------------------------------ */
+
+/* 1. Deck Builder Panel (Sticky Position Fix) */
+.card-list {
+    /* Set to sticky position, stops at 50px (the height of your header) */
+    position: sticky;
+    top: 50px; 
+    
+    /* Layout: Float right and set a fixed width */
+    float: right; 
+    width: 200px; /* Keeping your previous width */
+    z-index: 10; /* Ensure it's on top */
+    
+    /* Styling: Match your original fixed rules for appearance and scrolling */
+    right: 10px;
+    height: calc(100vh - 70px); /* Fill the viewport height below the 50px header + 20px padding */
+    overflow-y: auto; 
+    border: 1px solid black;
+    
+    /* Ensure content inside lists respects the boundary */
+    box-sizing: border-box; 
+    padding: 10px;
+}
+
+/* 2. Gallery Container (Overlap Fix) */
+#cards-gallery {
+    /* Float left to sit beside the floated .card-list */
+    float: left;
+    
+    /* Calculate the width: 100% of available space, minus the deck list (200px) and a gap (e.g., 20px) */
+    width: calc(100% - 230px); /* 100% - (200px deck list + 30px margin/padding) */
+    padding: 20px;
+    box-sizing: border-box;
+}
       
       /* CSS for the card list items */
       .card-list-item {
