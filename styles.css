@@ -246,7 +246,11 @@ p {
     
     padding-right: 20px; /* Add some space between the cards and the search controls */
     padding-left: 0; 
-    box-sizing: border-box;
+ box-sizing: border-box;
+
+    /* NEW CRITICAL FIX: Z-index and Positioning */
+    position: relative; /* Essential for z-index to work */
+    z-index: 5;        /* Places the entire gallery above most default elements */
 }
 
 /* 3. Deck Builder Panel (Sticky Position Fix) */
@@ -350,11 +354,14 @@ p {
 
 /* Individual Card Item */
 .card-item {
-    border: 1px solid #ccc;
-    padding: 10px;
-    width: 200px; /* Base width of the card container */
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-    text-align: center;
+    border: 1px solid #ccc;
+    padding: 10px;
+    width: 200px; /* Base width of the card container */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    /* NEW: Z-index for card items */
+    position: relative;
+    z-index: 6; /* Higher than the gallery container */
 }
 
 /* The Card Image element (CRITICAL FIX) */
