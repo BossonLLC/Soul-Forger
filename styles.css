@@ -216,7 +216,6 @@ p {
 /* New Flexbox Wrapper for Main Content */
 .main-content-wrapper {
     display: flex; /* Activate flexbox */
-    justify-content: space-between; /* Space out the gallery and the deck list */
     padding: 0 10px; /* Optional: Add horizontal padding to the whole section */
     /* Add top padding to push content down past the fixed header */
     padding-top: 60px; /* 50px header height + 10px margin */
@@ -248,12 +247,16 @@ p {
     margin-right: 10px;
 }
 
-/* 2. Gallery Container (Overlap Fix - simpler with Flexbox) */
+/* 2. Gallery Container (Overlap Fix - REVISED FOR ALIGNMENT) */
 #cards-gallery {
-    /* REMOVE float: left; */
-    /* REMOVE width: calc(100% - 230px); */
+    flex-grow: 1; 
     
-    flex-grow: 1; /* Allows the gallery to take up all remaining space */
+    /* Set a maximum width or a flex-basis to control its size. 
+       Let's use a percentage of the screen width to keep it responsive,
+       while ensuring there's always a gap on the right. 
+    */
+    max-width: 75%; /* Allows the gallery to take up 75% of the wrapper space */
+    
     padding: 20px;
     box-sizing: border-box;
     margin-left: 10px;
