@@ -40,7 +40,7 @@ async function initCardGallery() {
         const options = {
             valueNames: [
                 "Card Name", "Ronum", "Cost", "Type", "Action Type", "Sub Type",
-                "Attack", "Off-guard Attack", "Effect",
+                "Power", "Off-guard Power", "Effect",
                 "Image"
             ],
             
@@ -131,11 +131,11 @@ const controls = {
     'Effect': document.getElementById('effect-search'),
     'Ronum': document.getElementById('ronum-search'),
     'Sub Type': document.getElementById('subtype-search'),
-    'Attack': document.getElementById('on-guard-power-search'), // JSON key 'Attack'
+    'Power': document.getElementById('on-guard-power-search'), // JSON key 'Attack'
     'Off-guard Attack': document.getElementById('off-guard-power-search'), // JSON key 'Off-guard Attack'
     'Endurance': document.getElementById('endurance-search'),
     'Experience': document.getElementById('experience-search'),
-    'Hand': document.getElementById('hand-search'),
+    'Hands': document.getElementById('hand-search'),
     
     // Dropdowns (Filter) - MUST match HTML IDs and JSON attribute names
     'Type': document.getElementById('type-filter'),
