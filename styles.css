@@ -476,3 +476,79 @@ p {
     /* Ensure no weird padding/margins */
     padding: 0;
 }
+/* --- New Deck Builder Styling (Phase 1 Fixes) --- */
+
+/* 1. Center the "Add to Deck" Button */
+.card-item {
+    /* Ensure existing flex properties are kept, or add them if missing */
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; /* Centers items horizontally */
+    text-align: center; 
+}
+
+/* Ensure the button is styled to follow the centering */
+.add-to-deck-btn {
+    display: block; 
+    margin: 10px auto; /* Centers the button and adds vertical space */
+    /* You may need to remove 'visibility: hidden !important;' from line ~318
+       of your current CSS for this button to actually appear!
+       If you want the button visible under the cards, REMOVE this rule:
+       #cards-gallery .add-to-deck-btn { visibility: hidden !important; }
+    */
+}
+
+/* 2. Style the Deck List Container */
+.card-list {
+    background-color: white; /* Set the background to solid white */
+    padding: 15px; /* Add some internal spacing */
+    /* Retain existing position, width, height, and border rules */
+}
+
+/* Style for the new deck categories */
+.deck-category-header {
+    color: black; /* Headers inside the white box should be readable */
+    font-size: 1.1em;
+    margin-top: 15px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+}
+
+/* Style for the card list items (Name, Quantity, Remove Button) */
+.deck-category-list {
+    list-style: none;
+    padding: 0;
+}
+
+.deck-category-list li {
+    display: flex;
+    justify-content: space-between; /* Space out the name and controls */
+    align-items: center;
+    padding: 3px 0;
+    font-size: 0.9em;
+    color: black;
+}
+
+.card-list-item-name {
+    flex-grow: 1; /* Takes up all available space */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 5px;
+}
+
+.card-list-item-quantity {
+    width: 35px;
+    text-align: center;
+    border: 1px solid #ccc;
+    margin: 0 5px;
+}
+
+.remove-from-deck-btn {
+    background-color: red;
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 2px 5px;
+    line-height: 1;
+}
