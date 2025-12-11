@@ -124,24 +124,41 @@ initializeFilter(cardList, 'speed-filter');
 // --- 5. CUSTOM SEARCH LOGIC (TARGETED COLUMNS & DROPDOWN COMBINATION) ---
 // ------------------------------------------------------------------
 
-// 1. Get references to all 12 controls (Inputs + Selects)
-const controls = {
-    // Text Inputs (Search) - MUST match HTML IDs and JSON attribute names
-    'Card Name': document.getElementById('name-search'),
-    'Effect': document.getElementById('effect-search'),
-    'Ronum': document.getElementById('ronum-search'),
-    'Sub Type': document.getElementById('subtype-search'),
-    'Power': document.getElementById('on-guard-power-search'), // JSON key 'Attack'
-    'Off-guard Attack': document.getElementById('off-guard-power-search'), // JSON key 'Off-guard Attack'
-    'Endurance': document.getElementById('endurance-search'),
-    'Experience': document.getElementById('experience-search'),
-    'Hands': document.getElementById('hand-search'),
-    
-    // Dropdowns (Filter) - MUST match HTML IDs and JSON attribute names
-    'Type': document.getElementById('type-filter'),
-    'Faction': document.getElementById('faction-filter'),
-    'Action Speed': document.getElementById('speed-filter') 
-};
+// Master function that runs ALL search and filter logic
+const handleCombinedSearchAndFilter = (list) => {
+    // 1. Get references to all 12 controls (Inputs + Selects)
+    const controls = {
+        // Text Inputs (Search) - MUST match HTML IDs and JSON attribute names
+        'Card Name': document.getElementById('name-search'),
+        'Effect': document.getElementById('effect-search'),
+        'Ronum': document.getElementById('ronum-search'),
+        'Sub Type': document.getElementById('subtype-search'),
+        
+        // -------------------------------------------------------------------
+        // ** FIX 1: Using 'Power' (JSON key) for the On-Guard search box ID
+        'Power': document.getElementById('on-guard-power-search'), 
+        // -------------------------------------------------------------------
+
+        // -------------------------------------------------------------------
+        // ** FIX 2: Using 'Off-guard Power' (JSON key) for the Off-Guard search box ID
+        'Off-guard Power': document.getElementById('off-guard-power-search'), 
+        // -------------------------------------------------------------------
+        
+        'Endurance': document.getElementById('endurance-search'),
+        'Experience': document.getElementById('experience-search'),
+        
+        // -------------------------------------------------------------------
+        // ** FIX 3: Using 'Hands' (JSON key) for the Hand search box ID
+        'Hands': document.getElementById('hand-search'), 
+        // -------------------------------------------------------------------
+
+        // Dropdowns (Filter)
+        'Type': document.getElementById('type-filter'),
+        'Faction': document.getElementById('faction-filter'),
+        'Action Speed': document.getElementById('speed-filter') 
+    };
+
+    // ... (rest of the handleCombinedSearchAndFilter function remains the same)
 
 // Master function that runs ALL search and filter logic
 const handleCombinedSearchAndFilter = (list) => {
