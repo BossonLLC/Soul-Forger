@@ -9,22 +9,23 @@ function setImageSources(cardList) {
     
     cardList.items.forEach(item => {
         const imgElement = item.elm.querySelector('.card-image');
-        
-        // Use item.values().Image to access the raw data directly, which is more reliable
         const imagePath = item.values().Image || 'SPAN NOT FOUND';
         
-        // *** REMOVED THE IF CONDITION CHECK HERE ***
         if (imagePath && imagePath !== 'SPAN NOT FOUND') {
             
             // Clean the path (removes parentheses and leading/trailing whitespace)
             const cleanPath = String(imagePath).trim().replace(/[()]/g, '');
             
-            // console.log(`[DEBUG] Card: ${item.values()['Card Name']} | Final Path to Set: "${cleanPath}"`);
-            
-            // Set the image source regardless of its current state
+            // =========================================================
+            // *** CRITICAL DEBUGGING LINES ***
+            // =========================================================
+            console.log(`[DEBUG] Card: ${item.values()['Card Name']}`);
+            console.log(`[DEBUG] RAW Path: "${imagePath}"`);
+            console.log(`[DEBUG] CLEAN Path: "${cleanPath}"`);
+            // =========================================================
+
             imgElement.setAttribute('src', cleanPath);
             
-            // Optional: Hide the span element after getting the path
             const pathSpan = item.elm.querySelector('.Image');
             if (pathSpan) pathSpan.style.display = 'none';
         }
