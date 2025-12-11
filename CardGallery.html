@@ -59,19 +59,88 @@
 			
 <div class="main-content-wrapper">			
 <div id="cards-gallery">
-    <h3>Search by Card Name</h3>
-    <input class="search card-name-search" placeholder="Search by Card Name" data-list-attribute="Card Name" />
+<div class="filter-controls-wrapper">
 
-    <h3>Search by Effect Text</h3>
-    <input class="search effect-search" placeholder="Search by Effect" data-list-attribute="Effect" />
+    <div class="control-group">
+        <label for="name-search">Name:</label>
+        <input class="search" id="name-search" placeholder="Search by Name" data-list-attribute="Card Name" />
+    </div>
 
-    <h3>Filter by Type</h3>
-    <select id="type-filter">
-        <option value="all">Show All Types</option>
-        <option value="Action">Action</option>
-        <option value="Creature">Creature</option>
-        <option value="Equipment">Equipment</option>
-    </select>
+    <div class="control-group">
+        <label for="effect-search">Effect:</label>
+        <input class="search" id="effect-search" placeholder="Search by Effect" data-list-attribute="Effect" />
+    </div>
+
+    <div class="control-group">
+        <label for="ronum-search">Ronum:</label>
+        <input class="search" id="ronum-search" placeholder="Search by Ronum" data-list-attribute="Ronum" />
+    </div>
+
+    <div class="control-group">
+        <label for="subtype-search">Sub Type:</label>
+        <input class="search" id="subtype-search" placeholder="Search by Sub Type" data-list-attribute="Sub Type" />
+    </div>
+
+    <div class="control-group">
+        <label for="on-guard-power-search">On-guard Power:</label>
+        <input class="search" id="on-guard-power-search" placeholder="Power" data-list-attribute="Attack" />
+    </div>
+
+    <div class="control-group">
+        <label for="off-guard-power-search">Off-guard Power:</label>
+        <input class="search" id="off-guard-power-search" placeholder="Off-guard Power" data-list-attribute="Off-guard" />
+    </div>
+
+    <div class="control-group">
+        <label for="endurance-search">Endurance:</label>
+        <input class="search" id="endurance-search" placeholder="Endurance" data-list-attribute="Endurance" />
+    </div>
+
+    <div class="control-group">
+        <label for="experience-search">Experience:</label>
+        <input class="search" id="experience-search" placeholder="Experience" data-list-attribute="Experience" />
+    </div>
+
+    <div class="control-group">
+        <label for="hand-search">Hand:</label>
+        <input class="search" id="hand-search" placeholder="Hand" data-list-attribute="Hand" />
+    </div>
+    
+    <div class="control-group">
+        <label for="type-filter">Type:</label>
+        <select class="filter" id="type-filter" data-list-attribute="Type">
+            <option value="">All Types</option>
+            <option value="Creature">Creature</option>
+            <option value="Action">Action</option>
+            <option value="Equipment">Equipment</option>
+        </select>
+    </div>
+
+    <div class="control-group">
+        <label for="faction-filter">Faction:</label>
+        <select class="filter" id="faction-filter" data-list-attribute="Faction">
+            <option value="">All Factions</option>
+            <option value="Fire">Fire</option>
+            <option value="Water">Water</option>
+            <option value="Air">Air</option>
+            <option value="Earth">Earth</option>
+            <option value="Light">Light</option>
+            <option value="Dark">Dark</option>
+        </select>
+    </div>
+
+    <div class="control-group">
+        <label for="speed-filter">Action Speed:</label>
+        <select class="filter" id="speed-filter" data-list-attribute="Action Speed">
+            <option value="">All Speeds</option>
+            <option value="Normal">Normal</option>
+            <option value="Reaction">Reaction</option>
+            <option value="Instinct">Instinct</option>
+            <option value="Lingering">Lingering</option>
+        </select>
+    </div>
+
+</div>
 
     <ul class="list"> 
     </ul>
