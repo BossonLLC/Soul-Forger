@@ -220,58 +220,98 @@ async function initCardGallery() {
             downloadButton.addEventListener('click', generateDeckPDF);
         }
 
-        // --- 7. DECK BUILDER LOGIC (Event Delegation) --- 
-        const selectedCardsList = document.getElementById('selected-cards');
-        const cardsGallery = document.getElementById('cards-gallery');
+// --- 7. DECK BUILDER LOGIC (Event Delegation) ---
+const deckListContainer = document.getElementById('deck-list-container');
+const cardsGallery = document.getElementById('cards-gallery');
 
-        if (cardsGallery) { 
-            cardsGallery.addEventListener('click', (event) => {
-                const addButton = event.target.closest('.add-to-deck-btn');
-                
-                if (addButton) {
-                    const cardItem = addButton.closest('.card-item');
-                    if (!cardItem) return;
+// Helper function to get the correct list based on card type
+function getTargetList(cardType, cardCost) {
+    const isToken = String(cardCost).toLowerCase().includes('token');
 
-                    const cardName = cardItem.querySelector('.card-image').getAttribute('data-card-name');
-                    const cardImageSrc = cardItem.querySelector('.card-image').getAttribute('src');
-
-                    const cardListItem = selectedCardsList.querySelector(`li[data-card-name="${cardName}"]`);
-                    
-                    if (cardListItem) {
-                        const quantityInput = cardListItem.querySelector('.card-list-item-quantity');
-                        quantityInput.value = parseInt(quantityInput.value) + 1;
-                    } else {
-                        const newCardListItem = document.createElement('li');
-                        newCardListItem.setAttribute('data-card-name', cardName);
-                        
-                        const newCardListItemImage = document.createElement('img');
-                        newCardListItemImage.setAttribute('src', cardImageSrc);
-                        newCardListItemImage.setAttribute('class', 'card-list-item-image');
-                        
-                        const newCardListItemName = document.createElement('span');
-                        newCardListItemName.textContent = cardName;
-                        
-                        const newCardListItemQuantity = document.createElement('input');
-                        newCardListItemQuantity.setAttribute('type', 'number');
-                        newCardListItemQuantity.setAttribute('class', 'card-list-item-quantity');
-                        newCardListItemQuantity.setAttribute('min', '1');
-                        newCardListItemQuantity.setAttribute('max', '99');
-                        newCardListItemQuantity.setAttribute('value', '1');
-
-                        newCardListItem.appendChild(newCardListItemImage);
-                        newCardListItem.appendChild(newCardListItemName);
-                        newCardListItem.appendChild(newCardListItemQuantity);
-                        
-                        selectedCardsList.appendChild(newCardListItem);
-                    }
-                }
-            });
-        }
-
-    } catch (error) {
-        console.error('CRITICAL ERROR: Main Initialization Failed:', error);
+    if (isToken) {
+        return { id: 'token-deck-list', name: 'Tokens', itemClass: 'token-card' };
+    } else if (cardType === 'Equipment') {
+        return { id: 'forge-deck-list', name: 'Forge Deck', itemClass: 'forge-card' };
+    } else if (cardType === 'Creature' || cardType === 'Action') {
+        return { id: 'main-deck-list', name: 'Main Deck', itemClass: 'main-card' };
     }
+    // Fallback if type is unknown
+    return { id: 'main-deck-list', name: 'Main Deck', itemClass: 'main-card' }; 
 }
+
+
+if (cardsGallery) {
+    cardsGallery.addEventListener('click', (event) => {
+        const addButton = event.target.closest('.add-to-deck-btn');
+        
+        if (addButton) {
+            const cardItem = addButton.closest('.card-item');
+            if (!cardItem) return;
+
+            // Extract values needed for categorization and display
+            const cardName = cardItem.querySelector('h4').textContent.trim();
+            
+            // We need to use List.js data values to get Type and Cost correctly
+            // Since we can't easily access List.js item data from the HTML element,
+            // we'll temporarily read the data from the rendered spans in the card-details
+            const cardType = cardItem.querySelector('.Type').textContent.trim();
+            const cardCost = cardItem.querySelector('.Cost').textContent.trim();
+            
+            const { id: listId, itemClass } = getTargetList(cardType, cardCost);
+            const targetList = document.getElementById(listId);
+
+            if (!targetList) return;
+
+            let cardListItem = targetList.querySelector(`li[data-card-name="${cardName}"]`);
+            
+            if (cardListItem) {
+                // Card already exists, increase quantity
+                const quantityInput = cardListItem.querySelector('.card-list-item-quantity');
+                quantityInput.value = parseInt(quantityInput.value) + 1;
+            } else {
+                // Card is new, create the list item
+                const newCardListItem = document.createElement('li');
+                newCardListItem.setAttribute('data-card-name', cardName);
+                newCardListItem.setAttribute('class', itemClass);
+                
+                // Card Name (we want text only, no image)
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = cardName;
+                nameSpan.setAttribute('class', 'card-list-item-name');
+                
+                // Quantity Input
+                const quantityInput = document.createElement('input');
+                quantityInput.setAttribute('type', 'number');
+                quantityInput.setAttribute('class', 'card-list-item-quantity');
+                quantityInput.setAttribute('min', '1');
+                quantityInput.setAttribute('max', '99');
+                quantityInput.setAttribute('value', '1');
+                
+                // Remove Button
+                const removeButton = document.createElement('button');
+                removeButton.textContent = 'X';
+                removeButton.setAttribute('class', 'remove-from-deck-btn');
+                removeButton.addEventListener('click', () => {
+                    newCardListItem.remove();
+                    // Optional: Update deck counts here if you implement a count function
+                });
+
+                newCardListItem.appendChild(removeButton);
+                newCardListItem.appendChild(nameSpan);
+                newCardListItem.appendChild(quantityInput);
+                
+                targetList.appendChild(newCardListItem);
+            }
+            // Optional: Call a function here to update the deck counts (0/60, etc.)
+        }
+    });
+}
+// ---------------------------------------------
+// --- NEW REMOVE LOGIC FOR DECK LIST ITEMS ---
+// Since we add the event listener directly above, we don't need a delegation listener here
+// (The logic is inside the 'removeButton' listener)
+
+// --- MAGNIFIER, PDF GENERATION, and other functions follow ---
 
 // --- 8. CARD MAGNIFIER HOVER LOGIC ---
 
