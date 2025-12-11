@@ -95,25 +95,52 @@ async function initCardGallery() {
         } catch (e) {
             console.warn("List.js 'updated' event registration failed, but forced update already ran.", e);
         }
+// --- NEW DROPDOWN FILTER LOGIC ---
 
-
-// --- 4. FILTERING LOGIC (Type Dropdown) ---
-const typeFilterSelect = document.getElementById('type-filter');
-
-if (typeFilterSelect) { 
-    typeFilterSelect.addEventListener('change', function() {
-        const selectedType = this.value;
+// Function to attach a change listener to a dropdown filter
+function initializeFilter(list, filterId) {
+    const selectElement = document.getElementById(filterId);
+    if (selectElement) {
+        // Find the List.js attribute name from the data attribute
+        const attribute = selectElement.getAttribute('data-list-attribute');
         
-        if (selectedType === 'all') {
-            cardList.filter();
-        } else {
-            cardList.filter(function(item) {
-                // Now supports Action, Creature, and Equipment
-                return item.values().Type === selectedType; 
-            });
-        }
-    });
+        selectElement.addEventListener('change', function() {
+            const selectedValue = this.value; 
+            
+            // 1. Reset all filters and searches first (safe start)
+            list.filter();
+            list.search();
+
+            if (selectedValue === "" || selectedValue.includes("All")) {
+                // If "All" or empty is selected, List.js is already reset above.
+                return;
+            } else {
+                // 2. Apply the specific filter based on the selected value and attribute
+                list.filter(function(item) {
+                    // Check if the item's value for the target attribute matches the selected value
+                    return item.values()[attribute] === selectedValue;
+                });
+            }
+            
+            // IMPORTANT: Since filter and search operations don't stack directly in List.js,
+            // we must re-run all other active filters (dropdowns) to ensure they are reapplied
+            // on the current filtered set. We will handle this by simply calling the function
+            // but we need to ensure the other filters are applied correctly.
+            // For now, let's stick to simple individual filtering.
+            
+            // If you need combined filtering (e.g., Type AND Faction), the logic is much more complex
+            // and requires checking the state of ALL dropdowns/searches on EVERY change. 
+            // We will simplify for now to focus on getting the basic filter working.
+        });
+    }
 }
+
+// 4. Initialize the new dropdown filters
+// Note: The attribute in the HTML needs to match the key in your JSON (e.g., "Type", "Faction").
+initializeFilter(cardList, 'type-filter'); 
+initializeFilter(cardList, 'faction-filter');
+initializeFilter(cardList, 'speed-filter');
+
 
 // ------------------------------------------------------------------
 // --- 5. CUSTOM SEARCH LOGIC (Targeted Columns) ---
