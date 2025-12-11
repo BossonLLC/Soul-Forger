@@ -434,3 +434,20 @@ p {
     margin-bottom: 3px;
     font-weight: bold;
 }
+/* CSS to fix misalignment within the card details */
+.card-details p {
+    /* Ensures all inline elements within the <p> are aligned to the middle baseline */
+    vertical-align: middle;
+}
+
+/* Specifically target the spans inside the details to ensure they are inline-block */
+.card-details p span {
+    display: inline-block;
+    vertical-align: middle; /* Forces them to stay on the same line */
+}
+
+/* Optional: If the slash '/' itself is causing issues */
+.card-details p {
+    /* Sets a consistent line height for the entire paragraph */
+    line-height: 1.2;
+}
