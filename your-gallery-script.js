@@ -57,7 +57,7 @@ async function initCardGallery() {
                     
                     <div class="card-details">
                         <p>Cost: <span class="Cost">{Cost}</span> | Type: <span class="Type">{Type}</span></p>
-                        <p>A/OG Attack: <span class="Attack">{Attack}</span> / <span class="Off-guard Attack">{Off-guard Attack}</span></p>
+                        <p>A/OG Attack: <span class="Power">{Power}</span> / <span class="Off-guard Power">{Off-guard Power}</span></p>
                         <p>Effect: <span class="Effect">{Effect}</span></p>
                     </div>
                     
