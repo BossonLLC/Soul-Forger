@@ -462,3 +462,17 @@ p {
     margin: 0 !important;
     padding: 2px 0 !important;
 }
+/* Fixes the Off-Guard power alignment and presentation */
+.attack-line {
+    /* Set the parent line to a flexible container */
+    display: flex;
+    align-items: center; /* Center everything vertically */
+    gap: 5px; /* Add small space between elements */
+}
+
+/* Ensure the second value starts right after the first value */
+.attack-line .Off-guard-Power {
+    margin-left: -5px; /* Pull it slightly to the left to tighten space */
+    /* Ensure no weird padding/margins */
+    padding: 0;
+}
