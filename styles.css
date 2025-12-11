@@ -451,3 +451,14 @@ p {
     /* Sets a consistent line height for the entire paragraph */
     line-height: 1.2;
 }
+/* --- STRONG FIX FOR POWER/OFF-GUARD ALIGNMENT --- */
+
+.card-details p:nth-child(2) {
+    /* Forces the line to use flexbox layout */
+    display: flex !important;
+    /* Aligns all items perfectly to the center vertically */
+    align-items: center !important; 
+    /* Remove default margins that could cause shifting */
+    margin: 0 !important;
+    padding: 2px 0 !important;
+}
