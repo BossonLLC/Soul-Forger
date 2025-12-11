@@ -411,3 +411,26 @@ p {
     height: auto;
     display: block;
 }
+
+/* --- New CSS for Filter Layout --- */
+.filter-controls-wrapper {
+    display: flex; /* Use flexbox to align items horizontally */
+    flex-wrap: wrap; /* Allow controls to wrap to the next line if space runs out */
+    gap: 15px; /* Spacing between the control groups */
+    margin-bottom: 20px; /* Space between the controls and the card list */
+}
+
+/* Style for each individual control group (Label + Input/Select) */
+.control-group {
+    display: flex;
+    flex-direction: column; /* Stack label above input */
+    min-width: 150px; /* Give each control a minimum size */
+}
+
+/* Style for the labels */
+.control-group label {
+    color: #FFFFFF; /* Assuming your background is dark */
+    font-size: 0.9em;
+    margin-bottom: 3px;
+    font-weight: bold;
+}
