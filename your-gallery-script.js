@@ -3,25 +3,25 @@
 // --- 1. INITIALIZE LIST.JS AND MAIN GALLERY SETUP ---
 
 // Helper function to handle image source setting
+// your-gallery-script.js (around line 3)
 function setImageSources(cardList) {
     console.log('*** STARTING IMAGE FIX LOGIC (FORCED) ***');
     
     cardList.items.forEach(item => {
         const imgElement = item.elm.querySelector('.card-image');
-        const pathElement = item.elm.querySelector('.Image');
         
         // Use item.values().Image to access the raw data directly, which is more reliable
-        // than reading textContent from a newly created DOM element.
         const imagePath = item.values().Image || 'SPAN NOT FOUND';
         
-        // NOTE: We MUST check if the src is already set to prevent infinite loop or unnecessary re-setting
-        if (imagePath && imagePath !== 'SPAN NOT FOUND' && !imgElement.getAttribute('src')) {
+        // *** REMOVED THE IF CONDITION CHECK HERE ***
+        if (imagePath && imagePath !== 'SPAN NOT FOUND') {
             
             // Clean the path (removes parentheses and leading/trailing whitespace)
             const cleanPath = String(imagePath).trim().replace(/[()]/g, '');
             
-            console.log(`[DEBUG] Card: ${item.values()['Card Name']} | Final Path to Set: "${cleanPath}"`);
+            // console.log(`[DEBUG] Card: ${item.values()['Card Name']} | Final Path to Set: "${cleanPath}"`);
             
+            // Set the image source regardless of its current state
             imgElement.setAttribute('src', cleanPath);
             
             // Optional: Hide the span element after getting the path
