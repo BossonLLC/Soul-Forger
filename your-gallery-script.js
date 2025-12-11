@@ -38,20 +38,23 @@ async function initCardGallery() {
         const response = await fetch('SFD.json');
         const cardData = await response.json();
 
-        const options = {
-            valueNames: [
-                "Card Name", "Ronum", "Cost", "Type", "Action Type", "Sub Type",
-                "Power", "Off-guard Power", "Effect", // <-- Correct JSON fields
-                "Image", "Endurance", "Experience", "Hands", // <-- Adding missing fields for search/display
-                "Faction", "Action Speed" // <-- Adding filter fields
-            ],
-            
-// Replace the entire 'item' definition in options with this:
-            item: `<li class="card-item"><h4 class="Card Name">{Card Name}</h4><img class="card-image" data-card-name="{Card Name}" data-card-id="{Ronum}" alt=""><span class="Image">{Image}</span><div class="card-details"><p>Cost: <span class="Cost">{Cost}</span> | Type: <span class="Type">{Type}</span></p><p class="attack-line">A/OG Attack: <span class="Power">{Power}</span> <span class="Off-guard-Power off-guard-display-fix">| {Off-guard Power}</span></p><p>Effect: <span class="Effect">{Effect}</span></p></div><button class="add-to-deck-btn">Add to Deck</button></li>`
-// The line above should be the only content for the 'item' key.
+      // your-gallery-script.js (around line 47-50, inside initCardGallery)
 
+        const options = {
+            valueNames: [
+                "Card Name", "Ronum", "Cost", "Type", "Action Type", "Sub Type",
+                "Power", "Off-guard Power", "Effect", // <-- Correct JSON fields
+                "Image", "Endurance", "Experience", "Hands", // <-- Adding missing fields for search/display
+                "Faction", "Action Speed" // <-- Adding filter fields
+            ] // <--- **THIS LINE MUST END WITH A COMMA ,**
+            , // <--- **I'm adding it here for clarity, though it belongs on the line above**
+            
+// Replace the entire 'item' definition in options with this:
+            item: `<li class="card-item"><h4 class="Card Name">{Card Name}</h4><img class="card-image" data-card-name="{Card Name}" data-card-id="{Ronum}" alt=""><span class="Image">{Image}</span><div class="card-details"><p>Cost: <span class="Cost">{Cost}</span> | Type: <span class="Type">{Type}</span></p><p class="attack-line">A/OG Attack: <span class="Power">{Power}</span> <span class="Off-guard-Power off-guard-display-fix">| {Off-guard Power}</span></p><p>Effect: <span class="Effect">{Effect}</span></p></div><button class="add-to-deck-btn">Add to Deck</button></li>`
+        }; // <--- The options object must also be properly closed with }
+        
         // 2. Initialize List.js
-        var cardList = new List('cards-gallery', options, cardData); 
+        var cardList = new List('cards-gallery', options, cardData);
         console.log('List.js initialized with ' + cardList.items.length + ' cards.'); 
 
         // ----------------------------------------------------
