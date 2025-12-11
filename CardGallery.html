@@ -126,11 +126,20 @@
 </div>
 			
 			
-    <div class="card-list">
-      <h2>Card List</h2>
-      <ul id="selected-cards"></ul>
-      <button id="download-button">Download PDF</button>
-    </div>
+<div class="card-list">
+      <h2>Card List</h2>
+            <div id="deck-list-container">
+        <h3 class="deck-category-header">Main Deck (<span id="main-deck-count">0</span>/60)</h3>
+        <ul id="main-deck-list" class="deck-category-list"></ul>
+
+        <h3 class="deck-category-header">Forge Deck (<span id="forge-deck-count">0</span>/10)</h3>
+        <ul id="forge-deck-list" class="deck-category-list"></ul>
+        
+        <h3 class="deck-category-header">Tokens (<span id="token-deck-count">0</span>)</h3>
+        <ul id="token-deck-list" class="deck-category-list"></ul>
+      </div>
+            <button id="download-button">Download PDF</button>
+    </div>
 
 </div>			
 
