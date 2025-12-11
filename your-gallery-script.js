@@ -95,42 +95,15 @@ async function initCardGallery() {
         } catch (e) {
             console.warn("List.js 'updated' event registration failed, but forced update already ran.", e);
         }
-// --- NEW DROPDOWN FILTER LOGIC ---
-
-// Function to attach a change listener to a dropdown filter
+// --- NEW DROPDOWN FILTER LOGIC (SIMPLIFIED & CONNECTED) ---
+// Note: This function is now simplified and just calls the master handler, 
+// which is defined below. The old logic was causing conflicts.
 function initializeFilter(list, filterId) {
     const selectElement = document.getElementById(filterId);
     if (selectElement) {
-        // Find the List.js attribute name from the data attribute
-        const attribute = selectElement.getAttribute('data-list-attribute');
-        
         selectElement.addEventListener('change', function() {
-            const selectedValue = this.value; 
-            
-            // 1. Reset all filters and searches first (safe start)
-            list.filter();
-            list.search();
-
-            if (selectedValue === "" || selectedValue.includes("All")) {
-                // If "All" or empty is selected, List.js is already reset above.
-                return;
-            } else {
-                // 2. Apply the specific filter based on the selected value and attribute
-                list.filter(function(item) {
-                    // Check if the item's value for the target attribute matches the selected value
-                    return item.values()[attribute] === selectedValue;
-                });
-            }
-            
-            // IMPORTANT: Since filter and search operations don't stack directly in List.js,
-            // we must re-run all other active filters (dropdowns) to ensure they are reapplied
-            // on the current filtered set. We will handle this by simply calling the function
-            // but we need to ensure the other filters are applied correctly.
-            // For now, let's stick to simple individual filtering.
-            
-            // If you need combined filtering (e.g., Type AND Faction), the logic is much more complex
-            // and requires checking the state of ALL dropdowns/searches on EVERY change. 
-            // We will simplify for now to focus on getting the basic filter working.
+            // CRITICAL: Call the master function to check ALL controls
+            handleCombinedSearchAndFilter(list);
         });
     }
 }
@@ -139,68 +112,132 @@ function initializeFilter(list, filterId) {
 // Note: The attribute in the HTML needs to match the key in your JSON (e.g., "Type", "Faction").
 initializeFilter(cardList, 'type-filter'); 
 initializeFilter(cardList, 'faction-filter');
-initializeFilter(cardList, 'speed-filter');
+initializeFilter(cardList, 'speed-filter'); 
+
+// ------------------------------------------------------------------
+// --- 5. CUSTOM SEARCH LOGIC (Targeted Columns) --- 
+// *** This is the START of the new master function ***
+// ------------------------------------------------------------------
 
 
 // ------------------------------------------------------------------
-// --- 5. CUSTOM SEARCH LOGIC (Targeted Columns) ---
+// --- 5. CUSTOM SEARCH LOGIC (TARGETED COLUMNS & DROPDOWN COMBINATION) ---
 // ------------------------------------------------------------------
 
-const cardNameSearchInput = document.querySelector('.card-name-search');
-const effectSearchInput = document.querySelector('.effect-search');
-
-// Function to handle custom search across the targeted columns
-const customSearchHandler = (event) => {
-    // 1. Get current values from all targeted search boxes
-    const nameQuery = cardNameSearchInput ? cardNameSearchInput.value : '';
-    const effectQuery = effectSearchInput ? effectSearchInput.value : '';
+// 1. Get references to all 12 controls (Inputs + Selects)
+const controls = {
+    // Text Inputs (Search) - MUST match HTML IDs and JSON attribute names
+    'Card Name': document.getElementById('name-search'),
+    'Effect': document.getElementById('effect-search'),
+    'Ronum': document.getElementById('ronum-search'),
+    'Sub Type': document.getElementById('subtype-search'),
+    'Attack': document.getElementById('on-guard-power-search'), // JSON key 'Attack'
+    'Off-guard Attack': document.getElementById('off-guard-power-search'), // JSON key 'Off-guard Attack'
+    'Endurance': document.getElementById('endurance-search'),
+    'Experience': document.getElementById('experience-search'),
+    'Hand': document.getElementById('hand-search'),
     
-    // 2. Combine the queries into a single custom search function
-    //    List.js handles combined search if you provide a custom function.
-    cardList.search(nameQuery + ' ' + effectQuery, null, (query, columns) => {
-        // Query is the concatenated string (e.g., "Asteroid Kick 1 damage")
-        
-        const normalizedNameQuery = nameQuery.toLowerCase().trim();
-        const normalizedEffectQuery = effectQuery.toLowerCase().trim();
-        
-        cardList.items.forEach(item => {
-            let matchesName = true;
-            let matchesEffect = true;
-
-            // Check Card Name
-            if (normalizedNameQuery.length > 0) {
-                const cardName = item.values()['Card Name'].toLowerCase();
-                matchesName = cardName.includes(normalizedNameQuery);
-            }
-
-            // Check Effect
-            if (normalizedEffectQuery.length > 0) {
-                const effectText = item.values()['Effect'].toLowerCase();
-                matchesEffect = effectText.includes(normalizedEffectQuery);
-            }
-            
-            // Item is 'found' only if it matches all active search criteria
-            item.found = matchesName && matchesEffect;
-        });
-
-        // The List.js search function requires the entire list to be returned,
-        // but since we modify `item.found` directly, List.js updates visibility.
-        return cardList.items.filter(i => i.found);
-    });
-    
-    // If all search boxes are empty, call list.search() with no arguments to reset.
-    if (!nameQuery && !effectQuery) {
-        cardList.search(); 
-    }
+    // Dropdowns (Filter) - MUST match HTML IDs and JSON attribute names
+    'Type': document.getElementById('type-filter'),
+    'Faction': document.getElementById('faction-filter'),
+    'Action Speed': document.getElementById('speed-filter') 
 };
 
-// Attach the same handler to both search boxes
-if (cardNameSearchInput) {
-    cardNameSearchInput.addEventListener('keyup', customSearchHandler);
+// Master function that runs ALL search and filter logic
+const handleCombinedSearchAndFilter = (list) => {
+    // 1. Reset List.js filter/search state
+    list.search();
+    list.filter();
+
+    // 2. Collect all active criteria
+    const activeCriteria = [];
+    let isAnyControlActive = false;
+
+    for (const key in controls) {
+        const element = controls[key];
+        if (element) {
+            const value = element.value.toLowerCase().trim();
+            const type = element.tagName.toLowerCase(); // 'input' or 'select'
+
+            // Check if the control has a meaningful value
+            if (value && value !== "" && !value.includes("all")) {
+                isAnyControlActive = true;
+                activeCriteria.push({
+                    attribute: key,
+                    query: value,
+                    type: type
+                });
+            }
+        }
+    }
+
+    // 3. If nothing is active, stop here (the list is already reset above)
+    if (!isAnyControlActive) {
+        return;
+    }
+
+    // 4. Apply Custom Filtering
+    list.filter(function(item) {
+        let matchesAllCriteria = true;
+        const itemValues = item.values();
+
+        // Check against every active criteria
+        for (const criteria of activeCriteria) {
+            const itemValue = itemValues[criteria.attribute];
+            if (!itemValue) continue; // Skip if the card data is missing this field
+
+            const normalizedItemValue = String(itemValue).toLowerCase();
+
+            // Check if the current card matches the criteria
+            let matches = false;
+
+            if (criteria.type === 'input') {
+                // TEXT SEARCH (Targeted check for each text box)
+                matches = normalizedItemValue.includes(criteria.query);
+            } else if (criteria.type === 'select') {
+                // DROPDOWN FILTER (Inclusion check for Action Speed, Exact match for others)
+                if (criteria.attribute === 'Action Speed') {
+                    // FIX: Use .includes() for action speed to catch 'Normal, Lingering'
+                    matches = normalizedItemValue.includes(criteria.query);
+                } else {
+                    // Exact match for Type/Faction
+                    matches = normalizedItemValue === criteria.query;
+                }
+            }
+
+            // If this card fails to match one criteria, it fails all
+            if (!matches) {
+                matchesAllCriteria = false;
+                break; 
+            }
+        }
+        
+        return matchesAllCriteria;
+    });
+};
+
+
+// 5. Attach Event Listeners to ALL controls
+
+// Attach handler to all text inputs (Keyup for dynamic searching)
+for (const key in controls) {
+    const element = controls[key];
+    if (element && element.tagName.toLowerCase() === 'input') {
+        element.addEventListener('keyup', () => handleCombinedSearchAndFilter(cardList));
+    }
 }
-if (effectSearchInput) {
-    effectSearchInput.addEventListener('keyup', customSearchHandler);
+
+// Attach handler to all dropdowns (Change event)
+// The calls to initializeFilter above handle the dropdowns, but we will add these
+// listeners directly for consistency with the text inputs.
+for (const key in controls) {
+    const element = controls[key];
+    if (element && element.tagName.toLowerCase() === 'select') {
+        element.addEventListener('change', () => handleCombinedSearchAndFilter(cardList));
+    }
 }
+
+
         // --- 5. DOWNLOAD BUTTON LISTENER ---
         const downloadButton = document.getElementById('download-button');
         if (downloadButton) { 
