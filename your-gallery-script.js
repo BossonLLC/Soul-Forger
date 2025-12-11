@@ -318,3 +318,59 @@ if (gallery && magnifier && magnifiedImage) {
 
             const cardSrc = imageElement.getAttribute('src');
             if (!cardSrc) return; // Exit if no source is set yet
+
+            // Set the timer for 250ms before showing
+            hoverTimeout = setTimeout(() => {
+                showMagnifier(cardSrc);
+            }, 250);
+        }
+    });
+
+    gallery.addEventListener('mouseout', (event) => {
+        // If the mouse leaves any part of the gallery, hide the magnifier
+        hideMagnifier();
+    });
+}
+
+// Run the main initialization function only after the entire page is loaded
+window.onload = initCardGallery;
+
+// --- 9. PDF GENERATION LOGIC ---
+function generateDeckPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    const deckName = "My Soul-Forger Deck"; 
+    doc.text(deckName, 10, 10); 
+    
+    let yPosition = 20; 
+
+    const selectedCardsList = document.getElementById('selected-cards');
+    const cardListItems = selectedCardsList.querySelectorAll('li');
+
+    if (cardListItems.length === 0) {
+        alert("Your deck is empty! Add some cards first.");
+        return;
+    }
+
+    doc.setFontSize(12);
+
+    cardListItems.forEach(item => {
+        const cardName = item.getAttribute('data-card-name');
+        const quantityInput = item.querySelector('.card-list-item-quantity');
+        const quantity = quantityInput ? quantityInput.value : '1';
+
+        const deckLine = `${quantity} x ${cardName}`;
+        
+        doc.text(deckLine, 10, yPosition);
+        
+        yPosition += 8; 
+
+        if (yPosition > 280) { 
+            doc.addPage();
+            yPosition = 10; 
+        }
+    });
+
+    doc.save(`${deckName}.pdf`);
+}
