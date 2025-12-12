@@ -289,6 +289,10 @@ if (cardsGallery) {
                 newCardListItem.setAttribute('data-card-name', cardName);
                 newCardListItem.setAttribute('class', itemClass);
                 
+                // --- CRITICAL ADDITION: Store the image path directly ---
+    const cardImagePath = cardItem.querySelector('.card-image').getAttribute('src');
+    newCardListItem.setAttribute('data-image-path', cardImagePath); // <-- ADD THIS LINE
+    // --------------------------------------------------------
                 // Card Name (we want text only, no image)
                 const nameSpan = document.createElement('span');
                 nameSpan.textContent = cardName;
@@ -441,40 +445,24 @@ let allCardsToPrint = []; // **KEEP THIS DECLARATION HERE**
 
 console.log('--- PDF GENERATION DEBUG START ---');
 
-categoryLists.forEach(category => {
-    const listElement = document.getElementById(category.id);
+// your-gallery-script.js (around line 456, inside generateDeckPDF)
+
+cardListItems.forEach(item => {
+    const cardName = item.getAttribute('data-card-name');
+    const imagePath = item.getAttribute('data-image-path'); // <-- NEW: Get path directly
     
-    if (!listElement) {
-        console.warn(`List element not found for ID: ${category.id}. Skipping.`);
+    const quantityInput = item.querySelector('.card-list-item-quantity');
+    const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
+    
+    if (!imagePath) {
+        console.warn(`[IMAGE ERROR] Card item ${cardName} is missing the data-image-path attribute. Skipping.`);
         return;
     }
     
-    const cardListItems = listElement.querySelectorAll('li');
-    
-    console.log(`Checking List: ${category.id}. Found ${cardListItems.length} list items.`);
-    
-    cardListItems.forEach(item => {
-        const cardName = item.getAttribute('data-card-name');
-        const quantityInput = item.querySelector('.card-list-item-quantity');
-        const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
-        
-        // Find the original card data (to get the image path)
-        const galleryItem = document.querySelector(`.card-item .card-image[data-card-name="${cardName}"]`);
-
-        if (!galleryItem) {
-            console.warn(`Could not find gallery item image for card: ${cardName}. Skipping.`);
-            return;
-        }
-
-        const imagePath = galleryItem.getAttribute('src');
-        
-        if (imagePath) {
-            console.log(`Adding ${quantity} copies of: ${cardName} (Path: ${imagePath})`);
-            for (let i = 0; i < quantity; i++) {
-                allCardsToPrint.push({ name: cardName, path: imagePath });
-            }
-        }
-    });
+    console.log(`Adding ${quantity} copies of: ${cardName} (Path: ${imagePath})`);
+    for (let i = 0; i < quantity; i++) {
+        allCardsToPrint.push({ name: cardName, path: imagePath });
+    }
 });
 
 console.log('Total Cards Collected for Print:', allCardsToPrint.length);
