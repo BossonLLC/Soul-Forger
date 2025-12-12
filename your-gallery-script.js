@@ -14,7 +14,7 @@ function setImageSources(cardList) {
         if (imagePath && imagePath !== 'SPAN NOT FOUND') {
             
             // Clean the path (removes parentheses and leading/trailing whitespace)
-            const cleanPath = String(imagePath).trim().replace(/[()]/g, '');
+            const cleanPath = String(imagePath).trim();
             
             // =========================================================
             // *** CRITICAL DEBUGGING LINES ***
@@ -224,18 +224,31 @@ async function initCardGallery() {
 const deckListContainer = document.getElementById('deck-list-container');
 const cardsGallery = document.getElementById('cards-gallery');
 
-// Helper function to get the correct list based on card type
+// Helper function to get the correct list based on card type and cost
 function getTargetList(cardType, cardCost) {
-    const isToken = String(cardCost).toLowerCase().includes('token');
+    const costLower = String(cardCost).toLowerCase();
+    
+    // 1. Starting Gear Category: Match cards with "starting gear" in the Cost value
+    if (costLower.includes('starting gear')) {
+        return { id: 'starting-gear-list', name: 'Starting Gear', itemClass: 'starting-gear-card' };
+    }
 
-    if (isToken) {
+    // 2. Tokens Category: Match cards with "token" in the Cost value
+    if (costLower.includes('token')) {
         return { id: 'token-deck-list', name: 'Tokens', itemClass: 'token-card' };
-    } else if (cardType === 'Equipment') {
+    } 
+    
+    // 3. Forge Deck Category (Equipment)
+    else if (cardType === 'Equipment') {
         return { id: 'forge-deck-list', name: 'Forge Deck', itemClass: 'forge-card' };
-    } else if (cardType === 'Creature' || cardType === 'Action') {
+    } 
+    
+    // 4. Main Deck Category (Creature and Action)
+    else if (cardType === 'Creature' || cardType === 'Action') {
         return { id: 'main-deck-list', name: 'Main Deck', itemClass: 'main-card' };
     }
-    // Fallback if type is unknown
+    
+    // Fallback
     return { id: 'main-deck-list', name: 'Main Deck', itemClass: 'main-card' }; 
 }
 
@@ -306,6 +319,10 @@ if (cardsGallery) {
         }
     });
 }
+        } catch (error) {
+        console.error('CRITICAL ERROR: Main Initialization Failed:', error);
+    }
+} // <--- CRITICAL: This closes the entire async function initCardGallery()
 // ---------------------------------------------
 // --- NEW REMOVE LOGIC FOR DECK LIST ITEMS ---
 // Since we add the event listener directly above, we don't need a delegation listener here
