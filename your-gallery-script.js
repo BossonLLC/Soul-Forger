@@ -436,41 +436,55 @@ async function generateDeckPDF() { // <--- CRITICAL: MUST be async
 
     let allCardsToPrint = [];
 
-    // 1. COLLECT ALL CARDS AND QUANTITIES
-    categoryLists.forEach(category => {
-        const listElement = document.getElementById(category.id);
-        if (!listElement) return;
-        
-        const cardListItems = listElement.querySelectorAll('li');
-        
-        cardListItems.forEach(item => {
-            const cardName = item.getAttribute('data-card-name');
-            const quantityInput = item.querySelector('.card-list-item-quantity');
-            const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
-            
-            // Find the original card data (to get the image path)
-            // This is complex, so we'll grab the path from the gallery item's data-card-name
-            const galleryItem = document.querySelector(`.card-item .card-image[data-card-name="${cardName}"]`);
+// --- 1. COLLECT ALL CARDS AND QUANTITIES (WITH DEBUGGING) ---
+let allCardsToPrint = [];
 
-            if (!galleryItem) {
-                console.warn(`Could not find gallery item for card: ${cardName}. Skipping.`);
-                return;
-            }
+console.log('--- PDF GENERATION DEBUG START ---');
 
-            const imagePath = galleryItem.getAttribute('src');
-            
-            if (imagePath) {
-                for (let i = 0; i < quantity; i++) {
-                    allCardsToPrint.push({ name: cardName, path: imagePath });
-                }
-            }
-        });
-    });
+categoryLists.forEach(category => {
+    const listElement = document.getElementById(category.id);
     
-    if (allCardsToPrint.length === 0) {
-        alert("Your printable deck is empty! Add some cards first.");
+    if (!listElement) {
+        console.warn(`List element not found for ID: ${category.id}. Skipping.`);
         return;
     }
+    
+    const cardListItems = listElement.querySelectorAll('li');
+    
+    console.log(`Checking List: ${category.id}. Found ${cardListItems.length} list items.`);
+    
+    cardListItems.forEach(item => {
+        const cardName = item.getAttribute('data-card-name');
+        const quantityInput = item.querySelector('.card-list-item-quantity');
+        const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
+        
+        // Find the original card data (to get the image path)
+        const galleryItem = document.querySelector(`.card-item .card-image[data-card-name="${cardName}"]`);
+
+        if (!galleryItem) {
+            console.warn(`Could not find gallery item image for card: ${cardName}. Skipping.`);
+            return;
+        }
+
+        const imagePath = galleryItem.getAttribute('src');
+        
+        if (imagePath) {
+            console.log(`Adding ${quantity} copies of: ${cardName} (Path: ${imagePath})`);
+            for (let i = 0; i < quantity; i++) {
+                allCardsToPrint.push({ name: cardName, path: imagePath });
+            }
+        }
+    });
+});
+
+console.log('Total Cards Collected for Print:', allCardsToPrint.length);
+console.log('--- PDF GENERATION DEBUG END ---');
+
+// The original check below remains:
+if (allCardsToPrint.length === 0) {
+    alert("Your printable deck is empty! Add some cards first.");
+    return;
+}
 
     // 2. PROCESS AND ADD IMAGES TO PDF
     
