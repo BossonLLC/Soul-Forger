@@ -380,42 +380,81 @@ if (gallery && magnifier && magnifiedImage) {
 // Run the main initialization function only after the entire page is loaded
 window.onload = initCardGallery;
 
-// --- 9. PDF GENERATION LOGIC ---
+// --- 9. PDF GENERATION LOGIC (UPDATED TO HANDLE CATEGORIES) ---
 function generateDeckPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     
     const deckName = "My Soul-Forger Deck"; 
-    doc.text(deckName, 10, 10); 
     
     let yPosition = 20; 
+    let cardCount = 0; // Total card count
+    const margin = 10;
+    const lineHeight = 8;
+    
+    doc.setFontSize(14);
+    doc.text(deckName, margin, margin); 
+    doc.setFontSize(12);
 
-    const selectedCardsList = document.getElementById('selected-cards');
-    const cardListItems = selectedCardsList.querySelectorAll('li');
+    // CRITICAL: New way to select cards from all categories
+    const categoryLists = [
+        { id: 'starting-gear-list', header: 'Starting Gear' },
+        { id: 'main-deck-list', header: 'Main Deck' },
+        { id: 'forge-deck-list', header: 'Forge Deck' },
+        { id: 'token-deck-list', header: 'Tokens' }
+    ];
 
-    if (cardListItems.length === 0) {
+    let isDeckEmpty = true;
+
+    categoryLists.forEach(category => {
+        const listElement = document.getElementById(category.id);
+        if (!listElement) return; // Skip if element isn't found
+        
+        const cardListItems = listElement.querySelectorAll('li');
+        
+        if (cardListItems.length > 0) {
+            isDeckEmpty = false;
+            
+            // Add Category Header to PDF
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            doc.text(`${category.header}:`, margin, yPosition);
+            yPosition += lineHeight;
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+
+            cardListItems.forEach(item => {
+                const cardName = item.getAttribute('data-card-name');
+                const quantityInput = item.querySelector('.card-list-item-quantity');
+                const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
+                
+                const deckLine = `${quantity} x ${cardName}`;
+                
+                doc.text(deckLine, margin + 5, yPosition); // Indent card list
+                
+                yPosition += lineHeight; 
+                cardCount += quantity;
+
+                // Check for page break
+                if (yPosition > 280) { 
+                    doc.addPage();
+                    yPosition = 10; 
+                    doc.setFontSize(10);
+                }
+            });
+            // Add a small spacer after the category
+            yPosition += (lineHeight / 2);
+        }
+    });
+
+    if (isDeckEmpty) {
         alert("Your deck is empty! Add some cards first.");
         return;
     }
 
+    // Add total count at the end
     doc.setFontSize(12);
-
-    cardListItems.forEach(item => {
-        const cardName = item.getAttribute('data-card-name');
-        const quantityInput = item.querySelector('.card-list-item-quantity');
-        const quantity = quantityInput ? quantityInput.value : '1';
-
-        const deckLine = `${quantity} x ${cardName}`;
-        
-        doc.text(deckLine, 10, yPosition);
-        
-        yPosition += 8; 
-
-        if (yPosition > 280) { 
-            doc.addPage();
-            yPosition = 10; 
-        }
-    });
+    doc.text(`Total Cards: ${cardCount}`, margin, yPosition);
 
     doc.save(`${deckName}.pdf`);
 }
