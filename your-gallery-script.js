@@ -416,11 +416,11 @@ async function generateDeckPDF() { // <--- CRITICAL: MUST be async
     
     const deckName = "My Soul-Forger Deck"; 
     
-    // Define card layout dimensions (standard card ratio: 2.5:3.5)
-    const cardWidth = 50;  // 50mm width (for a printable size)
-    const cardHeight = 70; // 70mm height (to maintain ratio)
-    const padding = 5;     // Spacing between cards
-    const margin = 10;     // Page margins
+// Define card layout dimensions (standard TCG card size: 63.5mm x 88.9mm)
+    const cardWidth = 63.5;  // Standard TCG Width (2.5 inches)
+    const cardHeight = 88.9; // Standard TCG Height (3.5 inches)
+    const padding = 5;       // Spacing between cards (5mm)
+    const margin = 10;       // Page margins
     
     let x = margin;
     let y = margin;
@@ -434,6 +434,7 @@ async function generateDeckPDF() { // <--- CRITICAL: MUST be async
         { id: 'starting-gear-list', header: 'Starting Gear' },
         { id: 'main-deck-list', header: 'Main Deck' },
         { id: 'forge-deck-list', header: 'Forge Deck' },
+        { id: 'token-deck-list', header: 'Tokens' }
         // NOTE: Tokens are usually NOT included in printable decks. We will skip them for now
         // to focus on printable cards. You can add them back if needed.
     ];
