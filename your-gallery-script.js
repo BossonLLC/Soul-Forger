@@ -379,82 +379,159 @@ if (gallery && magnifier && magnifiedImage) {
 
 // Run the main initialization function only after the entire page is loaded
 window.onload = initCardGallery;
-
-// --- 9. PDF GENERATION LOGIC (UPDATED TO HANDLE CATEGORIES) ---
-function generateDeckPDF() {
+// --- CRITICAL ASYNC HELPER: Converts image URL to Base64 Data URI ---
+function imageUrlToBase64(url) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous'; // Important for CORS if using external images
+        img.onload = () => {
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                // Convert canvas image to Base64 JPEG data URI
+                const dataURL = canvas.toDataURL('image/jpeg', 1.0); // Use JPEG for smaller file size
+                resolve(dataURL);
+            } catch (e) {
+                reject(new Error(`Failed to process image canvas for URL: ${url}`));
+            }
+        };
+        img.onerror = (e) => {
+            console.error(`Image loading failed for URL: ${url}`, e);
+            reject(new Error(`Failed to load image from URL: ${url}`));
+        };
+        img.src = url;
+    });
+}
+// --- 9. PDF GENERATION LOGIC (IMAGE-BASED) ---
+async function generateDeckPDF() { // <--- CRITICAL: MUST be async
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     
     const deckName = "My Soul-Forger Deck"; 
     
-    let yPosition = 20; 
-    let cardCount = 0; // Total card count
-    const margin = 10;
-    const lineHeight = 8;
+    // Define card layout dimensions (standard card ratio: 2.5:3.5)
+    const cardWidth = 50;  // 50mm width (for a printable size)
+    const cardHeight = 70; // 70mm height (to maintain ratio)
+    const padding = 5;     // Spacing between cards
+    const margin = 10;     // Page margins
     
-    doc.setFontSize(14);
-    doc.text(deckName, margin, margin); 
-    doc.setFontSize(12);
+    let x = margin;
+    let y = margin;
+    let cardsPerRow = Math.floor((doc.internal.pageSize.getWidth() - (2 * margin)) / (cardWidth + padding));
+    let cardsInRow = 0;
+    
+    doc.text(`Deck: ${deckName}`, margin, 5); 
 
     // CRITICAL: New way to select cards from all categories
     const categoryLists = [
         { id: 'starting-gear-list', header: 'Starting Gear' },
         { id: 'main-deck-list', header: 'Main Deck' },
         { id: 'forge-deck-list', header: 'Forge Deck' },
-        { id: 'token-deck-list', header: 'Tokens' }
+        // NOTE: Tokens are usually NOT included in printable decks. We will skip them for now
+        // to focus on printable cards. You can add them back if needed.
     ];
 
-    let isDeckEmpty = true;
+    let allCardsToPrint = [];
 
+    // 1. COLLECT ALL CARDS AND QUANTITIES
     categoryLists.forEach(category => {
         const listElement = document.getElementById(category.id);
-        if (!listElement) return; // Skip if element isn't found
+        if (!listElement) return;
         
         const cardListItems = listElement.querySelectorAll('li');
         
-        if (cardListItems.length > 0) {
-            isDeckEmpty = false;
+        cardListItems.forEach(item => {
+            const cardName = item.getAttribute('data-card-name');
+            const quantityInput = item.querySelector('.card-list-item-quantity');
+            const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
             
-            // Add Category Header to PDF
-            doc.setFontSize(11);
-            doc.setFont('helvetica', 'bold');
-            doc.text(`${category.header}:`, margin, yPosition);
-            yPosition += lineHeight;
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(10);
+            // Find the original card data (to get the image path)
+            // This is complex, so we'll grab the path from the gallery item's data-card-name
+            const galleryItem = document.querySelector(`.card-item .card-image[data-card-name="${cardName}"]`);
 
-            cardListItems.forEach(item => {
-                const cardName = item.getAttribute('data-card-name');
-                const quantityInput = item.querySelector('.card-list-item-quantity');
-                const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
-                
-                const deckLine = `${quantity} x ${cardName}`;
-                
-                doc.text(deckLine, margin + 5, yPosition); // Indent card list
-                
-                yPosition += lineHeight; 
-                cardCount += quantity;
+            if (!galleryItem) {
+                console.warn(`Could not find gallery item for card: ${cardName}. Skipping.`);
+                return;
+            }
 
-                // Check for page break
-                if (yPosition > 280) { 
-                    doc.addPage();
-                    yPosition = 10; 
-                    doc.setFontSize(10);
+            const imagePath = galleryItem.getAttribute('src');
+            
+            if (imagePath) {
+                for (let i = 0; i < quantity; i++) {
+                    allCardsToPrint.push({ name: cardName, path: imagePath });
                 }
-            });
-            // Add a small spacer after the category
-            yPosition += (lineHeight / 2);
-        }
+            }
+        });
     });
-
-    if (isDeckEmpty) {
-        alert("Your deck is empty! Add some cards first.");
+    
+    if (allCardsToPrint.length === 0) {
+        alert("Your printable deck is empty! Add some cards first.");
         return;
     }
 
-    // Add total count at the end
-    doc.setFontSize(12);
-    doc.text(`Total Cards: ${cardCount}`, margin, yPosition);
+    // 2. PROCESS AND ADD IMAGES TO PDF
+    
+    // Add a small header/title on the first page
+    doc.setFontSize(14);
+    doc.text(`Total Cards to Print: ${allCardsToPrint.length}`, margin, y + 5);
+    y += 10;
+    
+    // Display a loading message
+    const loadingMessage = document.createElement('div');
+    loadingMessage.textContent = 'Generating PDF with images... Please wait.';
+    loadingMessage.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; padding: 20px; border: 2px solid #000; z-index: 9999;';
+    document.body.appendChild(loadingMessage);
 
-    doc.save(`${deckName}.pdf`);
+    for (let i = 0; i < allCardsToPrint.length; i++) {
+        const card = allCardsToPrint[i];
+
+        try {
+            // Convert the image path (e.g., "firecards/card.png") to Base64 data
+            const base64Image = await imageUrlToBase64(card.path);
+
+            // Check if we need a page break (for new row)
+            if (y + cardHeight + margin > doc.internal.pageSize.getHeight()) {
+                doc.addPage();
+                x = margin;
+                y = margin;
+                cardsInRow = 0;
+            }
+            
+            // Check if we need a new row
+            if (cardsInRow >= cardsPerRow) {
+                x = margin;
+                y += cardHeight + padding;
+                cardsInRow = 0;
+            }
+
+            // Check for page break again (for new row on new page)
+            if (y + cardHeight + margin > doc.internal.pageSize.getHeight()) {
+                doc.addPage();
+                x = margin;
+                y = margin;
+                cardsInRow = 0;
+            }
+
+            // Add the image to the PDF
+            doc.addImage(base64Image, 'JPEG', x, y, cardWidth, cardHeight);
+            
+            // Move to the next card position
+            x += cardWidth + padding;
+            cardsInRow++;
+
+        } catch (error) {
+            console.error(`Error processing card ${card.name}:`, error);
+            // Optionally add a placeholder text for the failed image
+            doc.text(`[Image Error: ${card.name}]`, x, y + cardHeight / 2);
+            x += cardWidth + padding;
+            cardsInRow++;
+        }
+    }
+    
+    // 3. CLEAN UP AND SAVE
+    document.body.removeChild(loadingMessage);
+    doc.save(`${deckName}_Printable.pdf`);
 }
