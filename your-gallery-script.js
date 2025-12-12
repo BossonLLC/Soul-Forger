@@ -13,16 +13,18 @@ function setImageSources(cardList) {
         
         if (imagePath && imagePath !== 'SPAN NOT FOUND') {
             
-            // Clean the path (removes parentheses and leading/trailing whitespace)
-            const cleanPath = String(imagePath).trim();
-            
-            // =========================================================
-            // *** CRITICAL DEBUGGING LINES ***
-            // =========================================================
-            console.log(`[DEBUG] Card: ${item.values()['Card Name']}`);
-            console.log(`[DEBUG] RAW Path: "${imagePath}"`);
-            console.log(`[DEBUG] CLEAN Path: "${cleanPath}"`);
-            // =========================================================
+            // Clean the path (CRITICAL: MUST remove literal parentheses)
+            // If the raw path is "(path/file.png)", this turns it into "path/file.png"
+            const cleanPath = String(imagePath).trim().replace(/[()]/g, ''); 
+            
+            // =========================================================
+            // *** CRITICAL DEBUGGING LINES ***
+            // You can keep these temporarily to verify the fix works!
+            // =========================================================
+            console.log(`[DEBUG] Card: ${item.values()['Card Name']}`);
+            console.log(`[DEBUG] RAW Path: "${imagePath}"`);
+            console.log(`[DEBUG] CLEAN Path: "${cleanPath}"`); // THIS SHOULD NOW SHOW 'firecards/blazemawwhelp.png'
+            // =========================================================
 
             imgElement.setAttribute('src', cleanPath);
             
