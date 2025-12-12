@@ -436,8 +436,8 @@ async function generateDeckPDF() { // <--- CRITICAL: MUST be async
 
     let allCardsToPrint = [];
 
-// --- 1. COLLECT ALL CARDS AND QUANTITIES (WITH DEBUGGING) ---
-let allCardsToPrint = [];
+// 1. COLLECT ALL CARDS AND QUANTITIES (WITH DEBUGGING) ---
+let allCardsToPrint = []; // **KEEP THIS DECLARATION HERE**
 
 console.log('--- PDF GENERATION DEBUG START ---');
 
@@ -479,7 +479,6 @@ categoryLists.forEach(category => {
 
 console.log('Total Cards Collected for Print:', allCardsToPrint.length);
 console.log('--- PDF GENERATION DEBUG END ---');
-
 // The original check below remains:
 if (allCardsToPrint.length === 0) {
     alert("Your printable deck is empty! Add some cards first.");
