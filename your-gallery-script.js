@@ -445,24 +445,37 @@ let allCardsToPrint = []; // **KEEP THIS DECLARATION HERE**
 
 console.log('--- PDF GENERATION DEBUG START ---');
 
-// your-gallery-script.js (around line 456, inside generateDeckPDF)
-
-cardListItems.forEach(item => {
-    const cardName = item.getAttribute('data-card-name');
-    const imagePath = item.getAttribute('data-image-path'); // <-- NEW: Get path directly
+categoryLists.forEach(category => {
+    const listElement = document.getElementById(category.id);
     
-    const quantityInput = item.querySelector('.card-list-item-quantity');
-    const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
-    
-    if (!imagePath) {
-        console.warn(`[IMAGE ERROR] Card item ${cardName} is missing the data-image-path attribute. Skipping.`);
-        return;
+    if (!listElement) {
+        console.warn(`List element not found for ID: ${category.id}. Skipping.`);
+        return; // Skip this category if the UL element is missing
     }
     
-    console.log(`Adding ${quantity} copies of: ${cardName} (Path: ${imagePath})`);
-    for (let i = 0; i < quantity; i++) {
-        allCardsToPrint.push({ name: cardName, path: imagePath });
-    }
+    // CRITICAL: This variable must be defined inside the category loop
+    const cardListItems = listElement.querySelectorAll('li'); 
+    
+    console.log(`Checking List: ${category.id}. Found ${cardListItems.length} list items.`);
+    
+    // Start of the inner loop to process each card item (which was mostly correct)
+    cardListItems.forEach(item => { 
+        const cardName = item.getAttribute('data-card-name');
+        const imagePath = item.getAttribute('data-image-path'); // Getting path directly (our successful fix)
+        
+        const quantityInput = item.querySelector('.card-list-item-quantity');
+        const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
+        
+        if (!imagePath) {
+            console.warn(`[IMAGE ERROR] Card item ${cardName} is missing the data-image-path attribute. Skipping.`);
+            return;
+        }
+        
+        console.log(`Adding ${quantity} copies of: ${cardName} (Path: ${imagePath})`);
+        for (let i = 0; i < quantity; i++) {
+            allCardsToPrint.push({ name: cardName, path: imagePath });
+        }
+    });
 });
 
 console.log('Total Cards Collected for Print:', allCardsToPrint.length);
