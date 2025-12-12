@@ -419,15 +419,14 @@ async function generateDeckPDF() { // <--- CRITICAL: MUST be async
 // Define card layout dimensions (standard TCG card size: 63.5mm x 88.9mm)
     const cardWidth = 63.5;  // Standard TCG Width (2.5 inches)
     const cardHeight = 88.9; // Standard TCG Height (3.5 inches)
-    const padding = 5;       // Spacing between cards (5mm)
-    const margin = 10;       // Page margins
+    const padding = 0;       // Spacing between cards (5mm)
+    const margin = 3;       // Page margins
     
     let x = margin;
     let y = margin;
     let cardsPerRow = Math.floor((doc.internal.pageSize.getWidth() - (2 * margin)) / (cardWidth + padding));
     let cardsInRow = 0;
     
-    doc.text(`Deck: ${deckName}`, margin, 5); 
 
     // CRITICAL: New way to select cards from all categories
     const categoryLists = [
