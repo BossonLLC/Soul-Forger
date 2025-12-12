@@ -434,7 +434,7 @@ async function generateDeckPDF() { // <--- CRITICAL: MUST be async
         // to focus on printable cards. You can add them back if needed.
     ];
 
-    let allCardsToPrint = [];
+
 
 // 1. COLLECT ALL CARDS AND QUANTITIES (WITH DEBUGGING) ---
 let allCardsToPrint = []; // **KEEP THIS DECLARATION HERE**
