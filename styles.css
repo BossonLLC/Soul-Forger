@@ -1,9 +1,10 @@
+
 @import url(//fonts.googleapis.com/css?family=Montserrat:400,700);
 body {
   background-color: black;
   color: black;
   margin: 0;
-padding-top: 50px;
+padding-top: 60px;
   font-family: 'lobster', ;
 }
 
@@ -176,14 +177,40 @@ p {
 /* Change the background color of the dropdown button when the dropdown content is shown */
 .dropdown:hover .dropbtn {background-color: #AFAFAF;}
 
-/* The following image and iframe rules were either redundant or malformed and have been removed. */
+    img {
+    transition:transform 1s ease;
+}
+
+<img src="iframe.png" height="336" width="240">
+
+}
+
 /* iframe:hover {
     -webkit-transform:scale(1.5); /* or some other value */
     transform:scale(1.5);
-} */
+}
 
-/* */
-/* */
+/* <!-- body > img {
+    width: 50px;
+    height: 50px;
+    display: block;
+}
+#fullsize {
+    position: absolute;
+}
+#fullsize.hidden {
+    display: none;
+} --> */
+/* <!--
+.thumbnail:hover {
+    position:relative;
+    top:0px;
+    left:0px;
+    width:150%;
+    height:auto;
+    display:block;
+    z-index:999;
+} --> */
 
 
   /* CSS for the card images */
@@ -201,6 +228,8 @@ p {
 .main-content-wrapper {
     display: flex; 
     width: 100%; 
+    
+  padding-top: 60px;
     
     padding-left: 40px; 
     padding-right: 40px; /* This padding should push the content inwards */
@@ -258,6 +287,16 @@ p {
       }
 
 
+/* New, safer rules for styles.css */
+#cards-gallery .card-details, 
+#cards-gallery .CardName, 
+#cards-gallery .Cost, 
+#cards-gallery .Type, 
+#cards-gallery .Attack, 
+#cards-gallery .Off-guard {
+    display: none !important;
+}
+
 /* Ensure the list is displayed horizontally */
 #cards-gallery .list {
     display: flex;
@@ -289,6 +328,20 @@ p {
 .card-item {
     margin: 10px;
     border: none; /* Remove any default border if present */
+}
+
+/* Fix 1: Hides the text name header */
+#cards-gallery .Card.Name { 
+    display: none !important; 
+}
+
+#cards-gallery .card-details {
+    visibility: hidden !important; 
+}
+
+/* And change this for the button/name as well */
+#cards-gallery .add-to-deck-btn {
+    visibility: hidden !important; 
 }
 
 /* Container for the List.js gallery */
@@ -439,6 +492,11 @@ p {
 .add-to-deck-btn {
     display: block; 
     margin: 10px auto; /* Centers the button and adds vertical space */
+    /* You may need to remove 'visibility: hidden !important;' from line ~318
+       of your current CSS for this button to actually appear!
+       If you want the button visible under the cards, REMOVE this rule:
+       #cards-gallery .add-to-deck-btn { visibility: hidden !important; }
+    */
 }
 
 /* 2. Style the Deck List Container */
