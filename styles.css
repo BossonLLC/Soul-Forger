@@ -552,3 +552,26 @@ p {
     padding: 2px 5px;
     line-height: 1;
 }
+
+/* --- Scroll-to-Top Button Styles --- */
+#scroll-to-top {
+    display: none; /* Hidden by default */
+    position: fixed; /* Fixed position */
+    bottom: 30px; /* 30px from the bottom */
+    right: 30px; /* 30px from the right */
+    z-index: 99; /* High z-index to stay on top */
+    border: none; 
+    outline: none; 
+    background-color: #AFAFAF; 
+    color: white; 
+    cursor: pointer; 
+    padding: 10px 15px; 
+    border-radius: 50%; 
+    font-size: 18px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+    transition: background-color 0.3s;
+}
+
+#scroll-to-top:hover {
+    background-color: #777;
+}
