@@ -52,8 +52,7 @@ async function initCardGallery() {
             , // <--- **I'm adding it here for clarity, though it belongs on the line above**
             
 // Replace the entire 'item' definition in options with this:
-            item: `<li class="card-item"><h4 class="Card Name">{Card Name}</h4><img class="card-image" data-card-name="{Card Name}" data-card-id="{Ronum}" alt=""><span class="Image">{Image}</span><div class="card-details"><p>Cost: <span class="Cost">{Cost}</span> | Type: <span class="Type">{Type}</span></p><p class="attack-line">A/OG Attack: <span class="Power">{Power}</span> <span class="Off-guard-Power off-guard-display-fix">| {Off-guard Power}</span></p><p>Effect: <span class="Effect">{Effect}</span></p></div><button class="add-to-deck-btn">Add to Deck</button></li>`
-        }; // <--- The options object must also be properly closed with }
+item: `<li class="card-item"><h4 class="Card Name">{Card Name}</h4><img class="card-image" loading="lazy" data-card-name="{Card Name}" data-card-id="{Ronum}" alt=""><span class="Image">{Image}</span><div class="card-details"><p>Cost: <span class="Cost">{Cost}</span> | Type: <span class="Type">{Type}</span></p><p class="attack-line">A/OG Attack: <span class="Power">{Power}</span> <span class="Off-guard-Power off-guard-display-fix">| {Off-guard Power}</span></p><p>Effect: <span class="Effect">{Effect}</span></p></div><button class="add-to-deck-btn">Add to Deck</button></li>`        }; // <--- The options object must also be properly closed with }
         
         // 2. Initialize List.js
         var cardList = new List('cards-gallery', options, cardData);
