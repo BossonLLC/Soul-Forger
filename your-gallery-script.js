@@ -325,9 +325,6 @@ if (cardsGallery) {
     });
 }
         
-        } catch (error) {
-        console.error('CRITICAL ERROR: Main Initialization Failed:', error);
-    }
 
     // --- 10. ROBUST SCROLL-TO-TOP LOGIC ---
     const scrollToTopBtn = document.getElementById('scroll-to-top');
@@ -354,7 +351,7 @@ if (cardsGallery) {
         console.warn("Scroll-to-Top button element was not found in the DOM.");
     }
     // ------------------------------------
-
+}
     } catch (error) {
         console.error('CRITICAL ERROR: Main Initialization Failed:', error);
     }
