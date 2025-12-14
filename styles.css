@@ -3,7 +3,7 @@ body {
   background-color: black;
   color: black;
   margin: 0;
-padding-top: 60px;
+padding-top: 50px;
   font-family: 'lobster', ;
 }
 
@@ -201,8 +201,6 @@ p {
 .main-content-wrapper {
     display: flex; 
     width: 100%; 
-    
-  padding-top: 60px;
     
     padding-left: 40px; 
     padding-right: 40px; /* This padding should push the content inwards */
