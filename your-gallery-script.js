@@ -327,6 +327,36 @@ if (cardsGallery) {
         } catch (error) {
         console.error('CRITICAL ERROR: Main Initialization Failed:', error);
     }
+
+    // --- 10. ROBUST SCROLL-TO-TOP LOGIC ---
+    const scrollToTopBtn = document.getElementById('scroll-to-top');
+
+    if (scrollToTopBtn) {
+        // Function to show/hide the button
+        window.onscroll = function() {
+            if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+                scrollToTopBtn.style.display = "block";
+            } else {
+                scrollToTopBtn.style.display = "none";
+            }
+        };
+
+        // Function to scroll to the top smoothly
+        scrollToTopBtn.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth' // Smooth scroll animation
+            });
+        });
+        console.log("Scroll-to-Top button listeners attached.");
+    } else {
+        console.warn("Scroll-to-Top button element was not found in the DOM.");
+    }
+    // ------------------------------------
+
+    } catch (error) {
+        console.error('CRITICAL ERROR: Main Initialization Failed:', error);
+    }
 } // <--- CRITICAL: This closes the entire async function initCardGallery()
 // ---------------------------------------------
 // --- NEW REMOVE LOGIC FOR DECK LIST ITEMS ---
@@ -549,24 +579,3 @@ if (allCardsToPrint.length === 0) {
     doc.save(`${deckName}_Printable.pdf`);
 }
 
-// --- 10. SCROLL-TO-TOP LOGIC ---
-const scrollToTopBtn = document.getElementById('scroll-to-top');
-
-// Function to show/hide the button
-window.onscroll = function() {
-    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
-        scrollToTopBtn.style.display = "block";
-    } else {
-        scrollToTopBtn.style.display = "none";
-    }
-};
-
-// Function to scroll to the top smoothly
-if (scrollToTopBtn) {
-    scrollToTopBtn.addEventListener('click', function() {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth' // Smooth scroll animation
-        });
-    });
-}
