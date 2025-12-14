@@ -333,13 +333,13 @@ if (cardsGallery) {
 
     if (scrollToTopBtn) {
         // Function to show/hide the button
-        window.onscroll = function() {
+        window.addEventListener('scroll', function() {
             if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
                 scrollToTopBtn.style.display = "block";
             } else {
                 scrollToTopBtn.style.display = "none";
             }
-        };
+        });
 
         // Function to scroll to the top smoothly
         scrollToTopBtn.addEventListener('click', function() {
