@@ -351,7 +351,7 @@ if (cardsGallery) {
         console.warn("Scroll-to-Top button element was not found in the DOM.");
     }
     // ------------------------------------
-}
+
     } catch (error) {
         console.error('CRITICAL ERROR: Main Initialization Failed:', error);
     }
