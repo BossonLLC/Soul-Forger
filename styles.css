@@ -4,7 +4,7 @@ body {
   color: black;
   margin: 0;
 padding-top: 60px;
-  font-family: 'lobster', ;
+  font-family: 'Montserrat', sans-serif;
 }
 
 p {color: #FFFFFF; }
@@ -180,7 +180,7 @@ p {
     transition:transform 1s ease;
 }
 
-<img src="iframe.png" height="336" width="240">
+/* <img src="iframe.png" height="336" width="240">
 
 }
 
