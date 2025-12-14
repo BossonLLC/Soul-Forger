@@ -324,8 +324,7 @@ if (cardsGallery) {
         }
     });
 }
-
-    }
+        
         } catch (error) {
         console.error('CRITICAL ERROR: Main Initialization Failed:', error);
     }
