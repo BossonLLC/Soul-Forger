@@ -548,3 +548,25 @@ if (allCardsToPrint.length === 0) {
     document.body.removeChild(loadingMessage);
     doc.save(`${deckName}_Printable.pdf`);
 }
+
+// --- 10. SCROLL-TO-TOP LOGIC ---
+const scrollToTopBtn = document.getElementById('scroll-to-top');
+
+// Function to show/hide the button
+window.onscroll = function() {
+    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+        scrollToTopBtn.style.display = "block";
+    } else {
+        scrollToTopBtn.style.display = "none";
+    }
+};
+
+// Function to scroll to the top smoothly
+if (scrollToTopBtn) {
+    scrollToTopBtn.addEventListener('click', function() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth' // Smooth scroll animation
+        });
+    });
+}
