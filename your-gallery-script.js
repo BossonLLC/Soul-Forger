@@ -489,9 +489,9 @@ if (allCardsToPrint.length === 0) {
     // 2. PROCESS AND ADD IMAGES TO PDF
     
     // Add a small header/title on the first page
-    doc.setFontSize(14);
-    doc.text(`Total Cards to Print: ${allCardsToPrint.length}`, margin, y + 5);
-    y += 10;
+    //doc.setFontSize(14);
+    //doc.text(`Total Cards to Print: ${allCardsToPrint.length}`, margin, y + 5);
+   // y += 10;
     
     // Display a loading message
     const loadingMessage = document.createElement('div');
