@@ -1,580 +1,577 @@
-// your-gallery-script.js
-
-// --- 1. INITIALIZE LIST.JS AND MAIN GALLERY SETUP ---
-
-// Helper function to handle image source setting
-// your-gallery-script.js (around line 3)
-function setImageSources(cardList) {
-    console.log('*** STARTING IMAGE FIX LOGIC (FORCED) ***');
-    
-    cardList.items.forEach(item => {
-        const imgElement = item.elm.querySelector('.card-image');
-        const imagePath = item.values().Image || 'SPAN NOT FOUND';
-        
-        if (imagePath && imagePath !== 'SPAN NOT FOUND') {
-            
-            // Clean the path (CRITICAL: MUST remove literal parentheses)
-            // If the raw path is "(path/file.png)", this turns it into "path/file.png"
-            const cleanPath = String(imagePath).trim().replace(/[()]/g, ''); 
-            
-            // =========================================================
-            // *** CRITICAL DEBUGGING LINES ***
-            // You can keep these temporarily to verify the fix works!
-            // =========================================================
-            console.log(`[DEBUG] Card: ${item.values()['Card Name']}`);
-            console.log(`[DEBUG] RAW Path: "${imagePath}"`);
-            console.log(`[DEBUG] CLEAN Path: "${cleanPath}"`); // THIS SHOULD NOW SHOW 'firecards/blazemawwhelp.png'
-            // =========================================================
-
-            imgElement.setAttribute('src', cleanPath);
-            
-            const pathSpan = item.elm.querySelector('.Image');
-            if (pathSpan) pathSpan.style.display = 'none';
-        }
-    });
+@import url(//fonts.googleapis.com/css?family=Montserrat:400,700);
+body {
+  background-color: black;
+  color: black;
+  margin: 0;
+padding-top: 60px;
+  font-family: 'lobster', ;
 }
 
+p {color: #FFFFFF; }
 
-async function initCardGallery() {
-    try {
-        const response = await fetch('SFD.json');
-        const cardData = await response.json();
+.w3-content{position:relative;margin-top:0em;}
 
-      // your-gallery-script.js (around line 47-50, inside initCardGallery)
+#header {
+    background-color: #AFAFAF;
+    height: 50px;
+    line-height: 50px;
+    
+    /* CRITICAL: Must be fixed */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%; /* Spans the entire screen width */
+    z-index: 100; /* Stays above everything */
+}
+  #header a {
+    color: black;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #FFFFFF;
+  }
+  #header a:hover {
+    color: #222;
+  }
+#header-title {
+  display: block;
+  float: left;
+  font-size: 20px;
+  font-weight: bold;
+  color: #FFFFFF;
+}
+#header-nav {
+  display: block;
+  float: right;
+  margin-top: 0;
+}
+#header-nav li {
+  display: inline;
+  padding-right: 20px;
+}
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+#footer {
+  background-color: #2f2f2f;
+  padding: 50px 0;
+}
+.column {
+  min-width: 300px;
+  display: inline-block;
+  vertical-align: top;
+}
+#footer h4 {
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+#footer p {
+  color: white;
+}
+/*link active*/
+a{
+  color: #00851a;
+  text-decoration: none;
+}
+/*link hover*/
+a:hover {
+  color: #0000ff;
+  text-decoration: underline;
+}
+.post, .CardGallery {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 60px 0;
+}
+.post, .Lore {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 60px 0;
+}
+.post, .HowToPlay {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 60px 0;
+}
+.post-author img {
+  width: 200px;
+  height: 200px;
+  vertical-align: middle;
+}
+.post-author img, .CardGallery-author img {
+  border-radius: 50%;
+}
+.post-author img, .Lore-author img {
+  border-radius: 50%;
+}
+.post-author img, .HowToPlay-author img {
+  border-radius: 50%;
+}
+.post-author img, .Updates-author img {
+  border-radius: 50%;
+}
+.post-author span {
+  margin-left: 16px;
+}
+.post-date {
+  color: #D2D2D2;
 
-        const options = {
-            valueNames: [
-                "Card Name", "Ronum", "Cost", "Type", "Action Type", "Sub Type",
-                "Power", "Off-guard Power", "Effect", // <-- Correct JSON fields
-                "Image", "Endurance", "Experience", "Hands", // <-- Adding missing fields for search/display
-                "Faction", "Action Speed" // <-- Adding filter fields
-            ] // <--- **THIS LINE MUST END WITH A COMMA ,**
-            , // <--- **I'm adding it here for clarity, though it belongs on the line above**
-            
-// Replace the entire 'item' definition in options with this:
-item: `<li class="card-item"><h4 class="Card Name">{Card Name}</h4><img class="card-image" loading="lazy" data-card-name="{Card Name}" data-card-id="{Ronum}" alt=""><span class="Image">{Image}</span><div class="card-details"><p>Cost: <span class="Cost">{Cost}</span> | Type: <span class="Type">{Type}</span></p><p class="attack-line">A/OG Attack: <span class="Power">{Power}</span> <span class="Off-guard-Power off-guard-display-fix">| {Off-guard Power}</span></p><p>Effect: <span class="Effect">{Effect}</span></p></div><button class="add-to-deck-btn">Add to Deck</button></li>`        }; // <--- The options object must also be properly closed with }
-        
-        // 2. Initialize List.js
-        var cardList = new List('cards-gallery', options, cardData);
-        console.log('List.js initialized with ' + cardList.items.length + ' cards.'); 
-
-        // ----------------------------------------------------
-        // ** CRITICAL VALIDATION CHECK **
-        // ----------------------------------------------------
-        if (!cardList || cardList.items.length === 0) {
-            console.error("List.js object failed to initialize or contains no items. Check HTML ID ('cards-gallery') and list item structure.");
-            // Stop execution here if the list isn't ready
-            return;
-        }
-
-        // ----------------------------------------------------
-        // ** FIX: FORCE IMAGE UPDATE LOGIC TO RUN IMMEDIATELY **
-        // ----------------------------------------------------
-        setImageSources(cardList); 
-
-        // --- 3. DYNAMIC CONTENT RENDERING (Image Source Fix - Event Listener) ---
-        // Keep the listener in case the list is searched/filtered later
-        try {
-            cardList.on('updated', function() { 
-                setImageSources(cardList); 
-            });
-        } catch (e) {
-            console.warn("List.js 'updated' event registration failed, but forced update already ran.", e);
-        }
-
-        // --- NEW DROPDOWN FILTER LOGIC (SIMPLIFIED & CONNECTED) ---
-        function initializeFilter(list, filterId) {
-            const selectElement = document.getElementById(filterId);
-            if (selectElement) {
-                selectElement.addEventListener('change', function() {
-                    // CRITICAL: Call the master function to check ALL controls
-                    handleCombinedSearchAndFilter(list);
-                });
-            }
-        }
-
-        // 4. Initialize the new dropdown filters
-        initializeFilter(cardList, 'type-filter'); 
-        initializeFilter(cardList, 'faction-filter');
-        initializeFilter(cardList, 'speed-filter'); 
-
-
-        // ------------------------------------------------------------------
-        // --- 5. CUSTOM SEARCH LOGIC (TARGETED COLUMNS & DROPDOWN COMBINATION) ---
-        // ------------------------------------------------------------------
-
-        // Master function that runs ALL search and filter logic
-        const handleCombinedSearchAndFilter = (list) => {
-            // 1. Get references to all 12 controls (Inputs + Selects)
-            const controls = {
-                // Text Inputs (Search) - MUST match JSON attribute names (keys) and HTML IDs (values)
-                'Card Name': document.getElementById('name-search'),
-                'Effect': document.getElementById('effect-search'),
-                'Ronum': document.getElementById('ronum-search'),
-                'Sub Type': document.getElementById('subtype-search'),
-                'Power': document.getElementById('on-guard-power-search'),
-                'Off-guard Power': document.getElementById('off-guard-power-search'),
-                'Endurance': document.getElementById('endurance-search'),
-                'Experience': document.getElementById('experience-search'),
-                'Hands': document.getElementById('hand-search'),
-                // Dropdowns (Filter)
-                'Type': document.getElementById('type-filter'),
-                'Faction': document.getElementById('faction-filter'),
-                'Action Speed': document.getElementById('speed-filter') 
-            };
-        
-            // 1. Reset List.js filter/search state
-            list.search();
-            list.filter();
-        
-            // 2. Collect all active criteria
-            const activeCriteria = [];
-            let isAnyControlActive = false;
-        
-            for (const key in controls) {
-                const element = controls[key];
-                if (element) {
-                    const value = element.value.toLowerCase().trim();
-                    const type = element.tagName.toLowerCase(); // 'input' or 'select'
-        
-                    // Check if the control has a meaningful value
-                    if (value && value !== "" && !value.includes("all")) {
-                        isAnyControlActive = true;
-                        activeCriteria.push({
-                            attribute: key,
-                            query: value,
-                            type: type
-                        });
-                    }
-                }
-            }
-        
-            // 3. If nothing is active, stop here (the list is already reset above)
-            if (!isAnyControlActive) {
-                return;
-            }
-        
-            // 4. Apply Custom Filtering
-            list.filter(function(item) {
-                let matchesAllCriteria = true;
-                const itemValues = item.values();
-        
-                // Check against every active criteria
-                for (const criteria of activeCriteria) {
-                    const itemValue = itemValues[criteria.attribute];
-                    if (!itemValue) continue; // Skip if the card data is missing this field
-        
-                    const normalizedItemValue = String(itemValue).toLowerCase();
-        
-                    // Check if the current card matches the criteria
-                    let matches = false;
-        
-                    if (criteria.type === 'input') {
-                        // TEXT SEARCH (Targeted check for each text box)
-                        matches = normalizedItemValue.includes(criteria.query);
-                    } else if (criteria.type === 'select') {
-                        // DROPDOWN FILTER (Inclusion check for Action Speed, Exact match for others)
-                        if (criteria.attribute === 'Action Speed') {
-                            // Use .includes() for action speed to catch 'Normal, Lingering'
-                            matches = normalizedItemValue.includes(criteria.query);
-                        } else {
-                            // Exact match for Type/Faction
-                            matches = normalizedItemValue === criteria.query;
-                        }
-                    }
-        
-                    // If this card fails to match one criteria, it fails all
-                    if (!matches) {
-                        matchesAllCriteria = false;
-                        break; 
-                    }
-                }
-                
-                return matchesAllCriteria;
-            });
-        };
-
-
-        // 5. Attach Event Listeners to ALL controls
-        // Note: The 'controls' object is now inside handleCombinedSearchAndFilter, so we
-        // must reference the IDs directly here.
-
-        const controlIds = [
-            'name-search', 'effect-search', 'ronum-search', 'subtype-search',
-            'on-guard-power-search', 'off-guard-power-search', 'endurance-search',
-            'experience-search', 'hand-search', 'type-filter', 'faction-filter',
-            'speed-filter'
-        ];
-
-        controlIds.forEach(id => {
-            const element = document.getElementById(id);
-            if (element) {
-                const eventType = element.tagName.toLowerCase() === 'input' ? 'keyup' : 'change';
-                element.addEventListener(eventType, () => handleCombinedSearchAndFilter(cardList));
-            }
-        });
-
-
-        // --- 6. DOWNLOAD BUTTON LISTENER ---
-        const downloadButton = document.getElementById('download-button');
-        if (downloadButton) { 
-            downloadButton.addEventListener('click', generateDeckPDF);
-        }
-
-// --- 7. DECK BUILDER LOGIC (Event Delegation) ---
-const deckListContainer = document.getElementById('deck-list-container');
-const cardsGallery = document.getElementById('cards-gallery');
-
-// Helper function to get the correct list based on card type and cost
-function getTargetList(cardType, cardCost) {
-    const costLower = String(cardCost).toLowerCase();
-    
-    // 1. Starting Gear Category: Match cards with "starting gear" in the Cost value
-    if (costLower.includes('starting gear')) {
-        return { id: 'starting-gear-list', name: 'Starting Gear', itemClass: 'starting-gear-card' };
-    }
-
-    // 2. Tokens Category: Match cards with "token" in the Cost value
-    if (costLower.includes('token')) {
-        return { id: 'token-deck-list', name: 'Tokens', itemClass: 'token-card' };
-    } 
-    
-    // 3. Forge Deck Category (Equipment)
-    else if (cardType === 'Equipment') {
-        return { id: 'forge-deck-list', name: 'Forge Deck', itemClass: 'forge-card' };
-    } 
-    
-    // 4. Main Deck Category (Creature and Action)
-    else if (cardType === 'Creature' || cardType === 'Action') {
-        return { id: 'main-deck-list', name: 'Main Deck', itemClass: 'main-card' };
-    }
-    
-    // Fallback
-    return { id: 'main-deck-list', name: 'Main Deck', itemClass: 'main-card' }; 
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+h1, h2, h3, h4 {
+  color: #FFFFFF;
+}
+p {
+  line-height:1.5;
+}
+.post-container:nth-child(even) {
+  background-color: #f2f2f2;
+}
+/* Dropdown Button */
+.dropbtn {
+  font-family: 'Montserrat', sans-serif;
+  letter-spacing: 0.1em;
+  background-color: #AFAFAF;
+  color: white;
+  padding: 14px;
+  font-size: 16px;
+  border: none;
 }
 
-
-if (cardsGallery) {
-    cardsGallery.addEventListener('click', (event) => {
-        const addButton = event.target.closest('.add-to-deck-btn');
-        
-        if (addButton) {
-            const cardItem = addButton.closest('.card-item');
-            if (!cardItem) return;
-
-            // Extract values needed for categorization and display
-            const cardName = cardItem.querySelector('h4').textContent.trim();
-            
-            // We need to use List.js data values to get Type and Cost correctly
-            // Since we can't easily access List.js item data from the HTML element,
-            // we'll temporarily read the data from the rendered spans in the card-details
-            const cardType = cardItem.querySelector('.Type').textContent.trim();
-            const cardCost = cardItem.querySelector('.Cost').textContent.trim();
-            
-            const { id: listId, itemClass } = getTargetList(cardType, cardCost);
-            const targetList = document.getElementById(listId);
-
-            if (!targetList) return;
-
-            let cardListItem = targetList.querySelector(`li[data-card-name="${cardName}"]`);
-            
-            if (cardListItem) {
-                // Card already exists, increase quantity
-                const quantityInput = cardListItem.querySelector('.card-list-item-quantity');
-                quantityInput.value = parseInt(quantityInput.value) + 1;
-            } else {
-                // Card is new, create the list item
-                const newCardListItem = document.createElement('li');
-                newCardListItem.setAttribute('data-card-name', cardName);
-                newCardListItem.setAttribute('class', itemClass);
-                
-                // --- CRITICAL ADDITION: Store the image path directly ---
-    const cardImagePath = cardItem.querySelector('.card-image').getAttribute('src');
-    newCardListItem.setAttribute('data-image-path', cardImagePath); // <-- ADD THIS LINE
-    // --------------------------------------------------------
-                // Card Name (we want text only, no image)
-                const nameSpan = document.createElement('span');
-                nameSpan.textContent = cardName;
-                nameSpan.setAttribute('class', 'card-list-item-name');
-                
-                // Quantity Input
-                const quantityInput = document.createElement('input');
-                quantityInput.setAttribute('type', 'number');
-                quantityInput.setAttribute('class', 'card-list-item-quantity');
-                quantityInput.setAttribute('min', '1');
-                quantityInput.setAttribute('max', '99');
-                quantityInput.setAttribute('value', '1');
-                
-                // Remove Button
-                const removeButton = document.createElement('button');
-                removeButton.textContent = 'X';
-                removeButton.setAttribute('class', 'remove-from-deck-btn');
-                removeButton.addEventListener('click', () => {
-                    newCardListItem.remove();
-                    // Optional: Update deck counts here if you implement a count function
-                });
-
-                newCardListItem.appendChild(removeButton);
-                newCardListItem.appendChild(nameSpan);
-                newCardListItem.appendChild(quantityInput);
-                
-                targetList.appendChild(newCardListItem);
-            }
-            // Optional: Call a function here to update the deck counts (0/60, etc.)
-        }
-    });
-}
-        } catch (error) {
-        console.error('CRITICAL ERROR: Main Initialization Failed:', error);
-    }
-
-    // --- 10. ROBUST SCROLL-TO-TOP LOGIC ---
-    const scrollToTopBtn = document.getElementById('scroll-to-top');
-
-    if (scrollToTopBtn) {
-        // Function to show/hide the button
-        window.addEventListener('scroll', function() {
-            if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
-                scrollToTopBtn.style.display = "block";
-            } else {
-                scrollToTopBtn.style.display = "none";
-            }
-        });
-
-        // Function to scroll to the top smoothly
-        scrollToTopBtn.addEventListener('click', function() {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth' // Smooth scroll animation
-            });
-        });
-        console.log("Scroll-to-Top button listeners attached.");
-    } else {
-        console.warn("Scroll-to-Top button element was not found in the DOM.");
-    }
-    // ------------------------------------
-
-    } catch (error) {
-        console.error('CRITICAL ERROR: Main Initialization Failed:', error);
-    }
-} // <--- CRITICAL: This closes the entire async function initCardGallery()
-// ---------------------------------------------
-// --- NEW REMOVE LOGIC FOR DECK LIST ITEMS ---
-// Since we add the event listener directly above, we don't need a delegation listener here
-// (The logic is inside the 'removeButton' listener)
-
-// --- MAGNIFIER, PDF GENERATION, and other functions follow ---
-
-// --- 8. CARD MAGNIFIER HOVER LOGIC ---
-
-const magnifier = document.getElementById('card-magnifier');
-const magnifiedImage = document.getElementById('magnified-image');
-const gallery = document.getElementById('cards-gallery');
-let hoverTimeout;
-
-if (gallery && magnifier && magnifiedImage) {
-    
-    // Function to handle showing the card
-    const showMagnifier = (src) => {
-        magnifiedImage.setAttribute('src', src);
-        magnifier.style.display = 'block';
-    };
-
-    // Function to handle hiding the card
-    const hideMagnifier = () => {
-        clearTimeout(hoverTimeout);
-        magnifier.style.display = 'none';
-        magnifiedImage.setAttribute('src', ''); // Clear the image source
-    };
-
-    gallery.addEventListener('mouseover', (event) => {
-        const imageElement = event.target.closest('.card-image');
-        
-        if (imageElement) {
-            // Clear any existing timeout to restart the timer
-            clearTimeout(hoverTimeout); 
-
-            const cardSrc = imageElement.getAttribute('src');
-            if (!cardSrc) return; // Exit if no source is set yet
-
-            // Set the timer for 250ms before showing
-            hoverTimeout = setTimeout(() => {
-                showMagnifier(cardSrc);
-            }, 250);
-        }
-    });
-
-    gallery.addEventListener('mouseout', (event) => {
-        // If the mouse leaves any part of the gallery, hide the magnifier
-        hideMagnifier();
-    });
+/* The container <div> - needed to position the dropdown content */
+.dropdown {
+  position: relative;
+  display: inline-block;
 }
 
-// Run the main initialization function only after the entire page is loaded
-window.onload = initCardGallery;
-// --- CRITICAL ASYNC HELPER: Converts image URL to Base64 Data URI ---
-function imageUrlToBase64(url) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = 'Anonymous'; // Important for CORS if using external images
-        img.onload = () => {
-            try {
-                const canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0);
-                // Convert canvas image to Base64 JPEG data URI
-                const dataURL = canvas.toDataURL('image/jpeg', 1.0); // Use JPEG for smaller file size
-                resolve(dataURL);
-            } catch (e) {
-                reject(new Error(`Failed to process image canvas for URL: ${url}`));
-            }
-        };
-        img.onerror = (e) => {
-            console.error(`Image loading failed for URL: ${url}`, e);
-            reject(new Error(`Failed to load image from URL: ${url}`));
-        };
-        img.src = url;
-    });
-}
-// --- 9. PDF GENERATION LOGIC (IMAGE-BASED) ---
-async function generateDeckPDF() { // <--- CRITICAL: MUST be async
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    
-    const deckName = "My Soul-Forger Deck"; 
-    
-// Define card layout dimensions (standard TCG card size: 63.5mm x 88.9mm)
-    const cardWidth = 63.5;  // Standard TCG Width (2.5 inches)
-    const cardHeight = 88.9; // Standard TCG Height (3.5 inches)
-    const padding = 0;       // Spacing between cards (5mm)
-    const margin = 3;       // Page margins
-    
-    let x = margin;
-    let y = margin;
-    let cardsPerRow = Math.floor((doc.internal.pageSize.getWidth() - (2 * margin)) / (cardWidth + padding));
-    let cardsInRow = 0;
-    
-
-    // CRITICAL: New way to select cards from all categories
-    const categoryLists = [
-        { id: 'starting-gear-list', header: 'Starting Gear' },
-        { id: 'main-deck-list', header: 'Main Deck' },
-        { id: 'forge-deck-list', header: 'Forge Deck' },
-        { id: 'token-deck-list', header: 'Tokens' }
-        // NOTE: Tokens are usually NOT included in printable decks. We will skip them for now
-        // to focus on printable cards. You can add them back if needed.
-    ];
-
-
-
-// 1. COLLECT ALL CARDS AND QUANTITIES (WITH DEBUGGING) ---
-let allCardsToPrint = []; // **KEEP THIS DECLARATION HERE**
-
-console.log('--- PDF GENERATION DEBUG START ---');
-
-categoryLists.forEach(category => {
-    const listElement = document.getElementById(category.id);
-    
-    if (!listElement) {
-        console.warn(`List element not found for ID: ${category.id}. Skipping.`);
-        return; // Skip this category if the UL element is missing
-    }
-    
-    // CRITICAL: This variable must be defined inside the category loop
-    const cardListItems = listElement.querySelectorAll('li'); 
-    
-    console.log(`Checking List: ${category.id}. Found ${cardListItems.length} list items.`);
-    
-    // Start of the inner loop to process each card item (which was mostly correct)
-    cardListItems.forEach(item => { 
-        const cardName = item.getAttribute('data-card-name');
-        const imagePath = item.getAttribute('data-image-path'); // Getting path directly (our successful fix)
-        
-        const quantityInput = item.querySelector('.card-list-item-quantity');
-        const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
-        
-        if (!imagePath) {
-            console.warn(`[IMAGE ERROR] Card item ${cardName} is missing the data-image-path attribute. Skipping.`);
-            return;
-        }
-        
-        console.log(`Adding ${quantity} copies of: ${cardName} (Path: ${imagePath})`);
-        for (let i = 0; i < quantity; i++) {
-            allCardsToPrint.push({ name: cardName, path: imagePath });
-        }
-    });
-});
-
-console.log('Total Cards Collected for Print:', allCardsToPrint.length);
-console.log('--- PDF GENERATION DEBUG END ---');
-// The original check below remains:
-if (allCardsToPrint.length === 0) {
-    alert("Your printable deck is empty! Add some cards first.");
-    return;
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #A9A9A9;
+  min-width: 100px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
 }
 
-    // 2. PROCESS AND ADD IMAGES TO PDF
-    
-    // Add a small header/title on the first page
-    //doc.setFontSize(14);
-    //doc.text(`Total Cards to Print: ${allCardsToPrint.length}`, margin, y + 5);
-   // y += 10;
-    
-    // Display a loading message
-    const loadingMessage = document.createElement('div');
-    loadingMessage.textContent = 'Generating PDF with images... Please wait.';
-    loadingMessage.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; padding: 20px; border: 2px solid #000; z-index: 9999;';
-    document.body.appendChild(loadingMessage);
+/* Links inside the dropdown */
+.dropdown-content a {
+  color: white;
+  padding: 12px 12px;
+  text-decoration: none;
+  display: block;
+}
 
-    for (let i = 0; i < allCardsToPrint.length; i++) {
-        const card = allCardsToPrint[i];
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {background-color: #AFAFAF;}
 
-        try {
-            // Convert the image path (e.g., "firecards/card.png") to Base64 data
-            const base64Image = await imageUrlToBase64(card.path);
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdown-content {display: block;}
 
-            // Check if we need a page break (for new row)
-            if (y + cardHeight + margin > doc.internal.pageSize.getHeight()) {
-                doc.addPage();
-                x = margin;
-                y = margin;
-                cardsInRow = 0;
-            }
-            
-            // Check if we need a new row
-            if (cardsInRow >= cardsPerRow) {
-                x = margin;
-                y += cardHeight + padding;
-                cardsInRow = 0;
-            }
+/* Change the background color of the dropdown button when the dropdown content is shown */
+.dropdown:hover .dropbtn {background-color: #AFAFAF;}
 
-            // Check for page break again (for new row on new page)
-            if (y + cardHeight + margin > doc.internal.pageSize.getHeight()) {
-                doc.addPage();
-                x = margin;
-                y = margin;
-                cardsInRow = 0;
-            }
+    img {
+    transition:transform 1s ease;
+}
 
-            // Add the image to the PDF
-            doc.addImage(base64Image, 'JPEG', x, y, cardWidth, cardHeight);
-            
-            // Move to the next card position
-            x += cardWidth + padding;
-            cardsInRow++;
+<img src="iframe.png" height="336" width="240">
 
-        } catch (error) {
-            console.error(`Error processing card ${card.name}:`, error);
-            // Optionally add a placeholder text for the failed image
-            doc.text(`[Image Error: ${card.name}]`, x, y + cardHeight / 2);
-            x += cardWidth + padding;
-            cardsInRow++;
-        }
-    }
-    
-    // 3. CLEAN UP AND SAVE
-    document.body.removeChild(loadingMessage);
-    doc.save(`${deckName}_Printable.pdf`);
+}
+
+/* iframe:hover {
+    -webkit-transform:scale(1.5); /* or some other value */
+    transform:scale(1.5);
+}
+
+/* <!-- body > img {
+    width: 50px;
+    height: 50px;
+    display: block;
+}
+#fullsize {
+    position: absolute;
+}
+#fullsize.hidden {
+    display: none;
+} --> */
+/* <!--
+.thumbnail:hover {
+    position:relative;
+    top:0px;
+    left:0px;
+    width:150%;
+    height:auto;
+    display:block;
+    z-index:999;
+} --> */
+
+
+  /* CSS for the card images */
+      .card-image {
+        width: 100px;
+        height: 150px;
+        margin: 10px;
+        border: 1px solid black;
+      }
+/* ------------------------------------------------------------------ */
+/* --- NEW LAYOUT RULES: FINAL FLEXBOX IMPLEMENTATION (Guaranteed Fit) --- */
+/* ------------------------------------------------------------------ */
+
+/* 1. New Flexbox Wrapper for Main Content */
+.main-content-wrapper {
+    display: flex; 
+    width: 100%; 
+    
+  padding-top: 60px;
+    
+    padding-left: 40px; 
+    padding-right: 40px; /* This padding should push the content inwards */
+    
+    min-height: 100vh; 
+    box-sizing: border-box; 
+}
+
+/* 2. Gallery Container */
+#cards-gallery {
+    /* Gallery takes all space MINUS the 220px required by the deck list and its margin */
+    flex-basis: calc(100% - 440px); 
+    flex-grow: 1; /* Allows it to take up any excess space within its flex-basis */
+    flex-shrink: 1; 
+    
+    padding-right: 20px; /* Add some space between the cards and the search controls */
+    padding-left: 0; 
+ box-sizing: border-box;
+
+    /* NEW CRITICAL FIX: Z-index and Positioning */
+    position: relative; /* Essential for z-index to work */
+    z-index: 5;        /* Places the entire gallery above most default elements */
+}
+
+/* 3. Deck Builder Panel (Sticky Position Fix) */
+.card-list {
+    position: sticky;
+    top: 50px; /* Stops right under the 50px header */
+    
+    /* Explicitly fix its size */
+    flex-basis: 200px; 
+    flex-shrink: 0; 
+    width: 200px; 
+    z-index: 10;
+    
+    /* REMOVED margin-left: 20px; because flex-basis already reserves that space */
+    
+    /* Styling */
+    height: calc(100vh - 70px); 
+    overflow-y: auto; 
+    border: 1px solid black;
+    box-sizing: border-box; 
+    padding: 10px;
+}
+      
+      /* CSS for the card list items */
+      .card-list-item {
+        margin: 10px;
+        cursor: pointer;
+      }
+      
+      /* CSS for the card list item quantity input */
+      .card-list-item-quantity {
+        width: 30px;
+      }
+
+
+/* New, safer rules for styles.css */
+#cards-gallery .card-details, 
+#cards-gallery .CardName, 
+#cards-gallery .Cost, 
+#cards-gallery .Type, 
+#cards-gallery .Attack, 
+#cards-gallery .Off-guard {
+    display: none !important;
+}
+
+/* Ensure the list is displayed horizontally */
+#cards-gallery .list {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0;
+    list-style: none;
+}
+
+/* Style for each card item */
+#cards-gallery .card-item {
+    margin: 10px;
+    border: none;
+}
+
+/* Hide all card detail text, keeping only the image visible */
+.card-details, .CardName, .Cost, .Type, .Attack, .Off-guard {
+    display: none !important;
+}
+
+/* Ensure the list is displayed horizontally */
+.list {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0;
+    list-style: none; /* Remove bullet points */
+}
+
+/* Style for each card item */
+.card-item {
+    margin: 10px;
+    border: none; /* Remove any default border if present */
+}
+
+/* Fix 1: Hides the text name header */
+#cards-gallery .Card.Name { 
+    display: none !important; 
+}
+
+#cards-gallery .card-details {
+    visibility: hidden !important; 
+}
+
+/* And change this for the button/name as well */
+#cards-gallery .add-to-deck-btn {
+    visibility: hidden !important; 
+}
+
+/* Container for the List.js gallery */
+#cards-gallery ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap; /* Allows cards to wrap to the next line */
+    gap: 20px; /* Space between cards */
+}
+
+/* Individual Card Item */
+.card-item {
+    border: 1px solid #ccc;
+    padding: 10px;
+    width: 200px; /* Base width of the card container */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    /* NEW: Z-index for card items */
+    position: relative;
+    z-index: 6; /* Higher than the gallery container */
+}
+
+/* The Card Image element (CRITICAL FIX) */
+.card-item .card-image {
+    /* Set a fixed height for the image area, based on the card design */
+    height: 280px; /* A fixed height (adjust this number based on visual fit) */
+    width: 100%; /* Fill the width of the card container */
+    
+    /* FIX: Force the image to maintain its original aspect ratio */
+    object-fit: contain; /* Prevents stretching/distortion */
+    
+    display: block; 
+    margin: 0 auto 10px auto;
+ }
+
+/* Optional: Style the card details */
+.card-details p {
+    margin: 5px 0;
+    font-size: 0.9em;
+}
+/* --- Magnified Image Feature Styles --- */
+
+#card-magnifier {
+    /* Hide by default */
+    display: none; 
+    
+    /* Position fixed so it stays relative to the viewport, not the page scroll */
+    position: fixed; 
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center the element */
+    
+    /* Ensure it hovers above everything else */
+    z-index: 1000; 
+    
+    /* Subtle border/shadow */
+    border: 5px solid #000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
+    
+    /* CRITICAL FIX: Ignore mouse events on the magnified image */
+    pointer-events: none; 
+}
+
+#magnified-image {
+    /* Set the size for the magnified card (Adjust the 400px value as needed) */
+    width: 500px; 
+    height: auto;
+    display: block;
+}
+
+/* --- New CSS for Filter Layout --- */
+.filter-controls-wrapper {
+    display: flex; /* Use flexbox to align items horizontally */
+    flex-wrap: wrap; /* Allow controls to wrap to the next line if space runs out */
+    gap: 15px; /* Spacing between the control groups */
+    margin-bottom: 20px; /* Space between the controls and the card list */
+}
+
+/* Style for each individual control group (Label + Input/Select) */
+.control-group {
+    display: flex;
+    flex-direction: column; /* Stack label above input */
+    min-width: 150px; /* Give each control a minimum size */
+}
+
+/* Style for the labels */
+.control-group label {
+    color: #FFFFFF; /* Assuming your background is dark */
+    font-size: 0.9em;
+    margin-bottom: 3px;
+    font-weight: bold;
+}
+/* CSS to fix misalignment within the card details */
+.card-details p {
+    /* Ensures all inline elements within the <p> are aligned to the middle baseline */
+    vertical-align: middle;
+}
+
+/* Specifically target the spans inside the details to ensure they are inline-block */
+.card-details p span {
+    display: inline-block;
+    vertical-align: middle; /* Forces them to stay on the same line */
+}
+
+/* Optional: If the slash '/' itself is causing issues */
+.card-details p {
+    /* Sets a consistent line height for the entire paragraph */
+    line-height: 1.2;
+}
+/* --- STRONG FIX FOR POWER/OFF-GUARD ALIGNMENT --- */
+
+.card-details p:nth-child(2) {
+    /* Forces the line to use flexbox layout */
+    display: flex !important;
+    /* Aligns all items perfectly to the center vertically */
+    align-items: center !important; 
+    /* Remove default margins that could cause shifting */
+    margin: 0 !important;
+    padding: 2px 0 !important;
+}
+/* Fixes the Off-Guard power alignment and presentation */
+.attack-line {
+    /* Set the parent line to a flexible container */
+    display: flex;
+    align-items: center; /* Center everything vertically */
+    gap: 5px; /* Add small space between elements */
+}
+
+/* Ensure the second value starts right after the first value */
+.attack-line .Off-guard-Power {
+    margin-left: -5px; /* Pull it slightly to the left to tighten space */
+    /* Ensure no weird padding/margins */
+    padding: 0;
+}
+/* --- New Deck Builder Styling (Phase 1 Fixes) --- */
+
+/* 1. Center the "Add to Deck" Button */
+.card-item {
+    /* Ensure existing flex properties are kept, or add them if missing */
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; /* Centers items horizontally */
+    text-align: center; 
+}
+
+/* Ensure the button is styled to follow the centering */
+.add-to-deck-btn {
+    display: block; 
+    margin: 10px auto; /* Centers the button and adds vertical space */
+    /* You may need to remove 'visibility: hidden !important;' from line ~318
+       of your current CSS for this button to actually appear!
+       If you want the button visible under the cards, REMOVE this rule:
+       #cards-gallery .add-to-deck-btn { visibility: hidden !important; }
+    */
+}
+
+/* 2. Style the Deck List Container */
+.card-list {
+    background-color: white; /* Set the background to solid white */
+    padding: 15px; /* Add some internal spacing */
+    /* Retain existing position, width, height, and border rules */
+}
+
+/* Style for the new deck categories */
+.deck-category-header {
+    color: black; /* Headers inside the white box should be readable */
+    font-size: 1.1em;
+    margin-top: 15px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+}
+
+/* Style for the card list items (Name, Quantity, Remove Button) */
+.deck-category-list {
+    list-style: none;
+    padding: 0;
+}
+
+.deck-category-list li {
+    display: flex;
+    justify-content: space-between; /* Space out the name and controls */
+    align-items: center;
+    padding: 3px 0;
+    font-size: 0.9em;
+    color: black;
+}
+
+.card-list-item-name {
+    flex-grow: 1; /* Takes up all available space */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 5px;
+}
+
+.card-list-item-quantity {
+    width: 35px;
+    text-align: center;
+    border: 1px solid #ccc;
+    margin: 0 5px;
+}
+
+.remove-from-deck-btn {
+    background-color: red;
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 2px 5px;
+    line-height: 1;
+}
+
+/* --- Scroll-to-Top Button Styles --- */
+#scroll-to-top {
+    display: none; /* Hidden by default */
+    position: fixed; /* Fixed position */
+    bottom: 30px; /* 30px from the bottom */
+    right: 30px; /* 30px from the right */
+    z-index: 99; /* High z-index to stay on top */
+    border: none; 
+    outline: none; 
+    background-color: #AFAFAF; 
+    color: white; 
+    cursor: pointer; 
+    padding: 10px 15px; 
+    border-radius: 50%; 
+    font-size: 18px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+    transition: background-color 0.3s;
+}
+
+#scroll-to-top:hover {
+    background-color: #777;
 }
