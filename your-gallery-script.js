@@ -302,7 +302,6 @@ function getTargetList(cardType, cardCost) {
     return { id: 'main-deck-list', name: 'Main Deck', itemClass: 'main-card' }; 
 }
 
-
 if (cardsGallery) {
     cardsGallery.addEventListener('click', (event) => {
         const addButton = event.target.closest('.add-to-deck-btn');
@@ -313,28 +312,56 @@ if (cardsGallery) {
 
             // Extract values needed for categorization and display
             const cardName = cardItem.querySelector('h4').textContent.trim();
-            
-            // We need to use List.js data values to get Type and Cost correctly
-            // Since we can't easily access List.js item data from the HTML element,
-            // we'll temporarily read the data from the rendered spans in the card-details
             const cardType = cardItem.querySelector('.Type').textContent.trim();
             const cardCost = cardItem.querySelector('.Cost').textContent.trim();
             
+            // Get the target list ID and item class
             const { id: listId, itemClass } = getTargetList(cardType, cardCost);
             const targetList = document.getElementById(listId);
 
             if (!targetList) return;
 
+            // --- 1. Determine the Card Limit based on the Category ---
+            let MAX_COPIES_PER_CARD = Infinity; 
+            
+            // Check the list ID to set the limit
+            if (listId === 'starting-gear-list') {
+                MAX_COPIES_PER_CARD = 1;
+            } else if (listId === 'main-deck-list' || listId === 'forge-deck-list') {
+                MAX_COPIES_PER_CARD = 4;
+            } 
+            // 'token-deck-list' defaults to Infinity, as set above.
+            
+            // --- 2. Check if the card already exists in the deck list ---
             let cardListItem = targetList.querySelector(`li[data-card-name="${cardName}"]`);
             
             if (cardListItem) {
                 // Card already exists, increase quantity
                 const quantityInput = cardListItem.querySelector('.card-list-item-quantity');
-                quantityInput.value = parseInt(quantityInput.value) + 1;
-  
-             updateDeckCounts();   
+                const currentQuantity = parseInt(quantityInput.value); 
+                
+                // === START: CUSTOM LIMIT CHECK ===
+                if (MAX_COPIES_PER_CARD !== Infinity && currentQuantity >= MAX_COPIES_PER_CARD) {
+                    // Alert the user and prevent further addition
+                    alert(`Cannot add more than ${MAX_COPIES_PER_CARD} copies of ${cardName} to the ${listId.replace('-list', '').replace('-', ' ').toUpperCase()}.`);
+                    return; // Stop execution here
+                }
+                // === END: CUSTOM LIMIT CHECK ===
+
+                // If the limit hasn't been reached (or it's a Token card), increase quantity
+                quantityInput.value = currentQuantity + 1;
+                updateDeckCounts(); 	
             } else {
-                // Card is new, create the list item
+                // Card is new, create the list item (starts at 1)
+                
+                // === CHECK LIMIT FOR NEW CARD ===
+                // This handles the case where the limit is 1 (Starting Gear)
+                if (MAX_COPIES_PER_CARD === 1) {
+                    // If the card is starting gear, we allow it to be added (quantity 1), but
+                    // if they already have one, the block above would have caught it.
+                    // This is mainly a redundant check, but good for clarity.
+                }
+
                 const newCardListItem = document.createElement('li');
                 newCardListItem.setAttribute('data-card-name', cardName);
                 newCardListItem.setAttribute('class', itemClass);
