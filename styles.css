@@ -530,11 +530,20 @@ p {
 }
 
 .card-list-item-name {
-    flex-grow: 1; /* Takes up all available space */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    /* Keep the flex settings for layout */
+    flex-grow: 1; 
+    
+    /* Remove the nowrap and ellipsis properties, and allow wrapping: */
+    white-space: normal; /* Allows text to wrap to the next line */
+    overflow: visible; /* Prevents hiding the wrapped text */
+    text-overflow: initial; /* Resets truncation */
+    word-wrap: break-word; /* Ensures long, continuous words break */
+    
+    /* Keep original margins */
     margin-right: 5px;
+    
+    /* You may also want to set a minimum width or remove the flex-grow 
+       if it doesn't wrap correctly due to other flex rules. */
 }
 
 .card-list-item-quantity {
