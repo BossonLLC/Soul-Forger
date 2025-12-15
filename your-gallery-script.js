@@ -343,7 +343,7 @@ if (cardsGallery) {
                 // === START: CUSTOM LIMIT CHECK ===
                 if (MAX_COPIES_PER_CARD !== Infinity && currentQuantity >= MAX_COPIES_PER_CARD) {
                     // Alert the user and prevent further addition
-                    alert(`Cannot add more than ${MAX_COPIES_PER_CARD} copies of ${cardName} to the ${listId.replace('-list', '').replace('-', ' ').toUpperCase()}.`);
+                   // alert(`Cannot add more than ${MAX_COPIES_PER_CARD} copies of ${cardName} to the ${listId.replace('-list', '').replace('-', ' ').toUpperCase()}.`);
                     return; // Stop execution here
                 }
                 // === END: CUSTOM LIMIT CHECK ===
