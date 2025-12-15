@@ -175,18 +175,17 @@ const handleCombinedSearchAndFilter = (list) => {
     // 1. Reset List.js filter/search state
     list.search();
     list.filter();
-
-    // 2. Collect all active criteria
+// 2. Collect all active criteria
     const activeCriteria = [];
     let isAnyControlActive = false;
 
     for (const key in controls) {
+        // ... (existing loop logic that populates activeCriteria) ...
         const element = controls[key];
         if (element) {
             const value = element.value.toLowerCase().trim();
-            const type = element.tagName.toLowerCase(); // 'input' or 'select'
+            const type = element.tagName.toLowerCase(); 
 
-            // Check if the control has a meaningful value
             if (value && value !== "" && !value.includes("all")) {
                 isAnyControlActive = true;
                 activeCriteria.push({
@@ -198,33 +197,86 @@ const handleCombinedSearchAndFilter = (list) => {
         }
     }
 
-    // 3. If nothing is active, stop here (the list is already reset above)
+    // --- CHECKBOX STATE INTEGRATION ---
+    const startingGearActive = document.getElementById('starting-gear-filter').checked;
+    const tokensActive = document.getElementById('tokens-filter').checked;
+
+    // If either checkbox is checked, the filtering is considered active
+    if (startingGearActive || tokensActive) {
+        isAnyControlActive = true;
+    }
+
+    // 3. If NO control (input, select, or checkbox) is active, stop here
     if (!isAnyControlActive) {
         return;
     }
-
+    // --- END CHECKBOX STATE INTEGRATION ---
+    
     // Array of attributes that should be treated as NUMERIC for strict checking
     const numericAttributes = ['Ronum', 'Power', 'Off-guard Power', 'Endurance', 'Experience', 'Hands'];
+    
+// 3. Check Checkbox State
+    const startingGearActive = document.getElementById('starting-gear-filter').checked;
+    const tokensActive = document.getElementById('tokens-filter').checked;
 
-// 4. Apply Custom Filtering
+    // Checkboxes count as an active control if checked
+    if (startingGearActive || tokensActive) {
+        isAnyControlActive = true;
+    }
+
+    // 4. If nothing is active, stop here (the list is already reset above)
+    if (!isAnyControlActive) {
+        return;
+    }
+    
+// 5. Apply Custom Filtering
 list.filter(function(item) {
     let matchesAllCriteria = true;
     const itemValues = item.values();
 
-    // Check against every active criteria
+    // =========================================================
+    // 1. CHECKBOX FILTER LOGIC (MUST RUN FIRST)
+    // =========================================================
+
+    const itemType = String(itemValues['Type']).toLowerCase().trim();
+    const itemCost = String(itemValues['Cost']).toLowerCase().trim();
+
+    if (startingGearActive) {
+        // If 'Show Starting Gear Only' is checked, only cards with Cost: 'Starting Gear' pass.
+        if (!itemCost.includes('starting gear')) {
+            return false; // Fail this card immediately
+        }
+    }
+
+    if (tokensActive) {
+        // If 'Show Tokens Only' is checked, only cards with Cost: 'Token' pass.
+        if (!itemCost.includes('token')) {
+            return false; // Fail this card immediately
+        }
+    }
+    
+    // CRITICAL: If both are checked, the filter must allow items that match EITHER criteria.
+    // The current logic handles this: a card must pass BOTH (if both are checked).
+    // E.g., if SG is checked, Tokens fail. If Tokens is checked, SG fails.
+    // Assuming you want the filters to be mutually exclusive for simplicity.
+
+    // =========================================================
+    // 2. ACTIVE CRITERIA LOOP (EXISTING LOGIC)
+    // =========================================================
+
+    // Check against every active criteria (inputs and selects)
     for (const criteria of activeCriteria) {
+        // ... (rest of your existing filter loop logic goes here) ...
+        // You should copy/paste your entire loop for activeCriteria here.
+        
         const itemValue = itemValues[criteria.attribute];
         
         // --- CRITICAL FIX FOR ZERO (0) STATS ---
-        // A card FAILS if the value is truly missing: null, undefined, or empty string.
-        // It MUST PASS if the value is 0 (number) or "0" (string).
         if (itemValue === null || itemValue === undefined || itemValue === '') {
             matchesAllCriteria = false;
             break;
         }
-        // ----------------------------------------
         
-        // IMPORTANT: Always normalize the item value for consistency
         const normalizedItemValue = String(itemValue).toLowerCase().trim();
         let matches = false;
 
@@ -232,39 +284,31 @@ list.filter(function(item) {
 
         if (criteria.type === 'input') {
             // This is a text/numeric search field
-
-            // 1. Check for N/A in NUMERIC FIELDS
             if (numericAttributes.includes(criteria.attribute)) {
                 
-                // If the card's value is N/A, it MUST fail the filter if the user is searching for a number.
                 if (normalizedItemValue === 'n/a') {
                     matchesAllCriteria = false;
                     break;
                 }
                 
-                // Use the standard text-based includes check. This handles '0' matching '0'.
                 matches = normalizedItemValue.includes(criteria.query);
                 
             } else {
-                // 2. Standard Text Search (e.g., Card Name, Effect)
+                // Standard Text Search (e.g., Card Name, Effect)
                 matches = normalizedItemValue.includes(criteria.query);
             }
 
         } else if (criteria.type === 'select') {
             // This is a dropdown filter (Type, Faction, Action Speed)
             
-            // 1. Check for N/A in DROPDOWNS (must fail)
             if (normalizedItemValue === 'n/a') {
                 matchesAllCriteria = false;
                 break;
             }
             
-            // 2. Standard Dropdown Match
             if (criteria.attribute === 'Action Speed') {
-                // Use .includes() for action speed to catch 'Normal, Lingering'
                 matches = normalizedItemValue.includes(criteria.query);
             } else {
-                // Exact match for Type/Faction
                 matches = normalizedItemValue === criteria.query;
             }
         }
@@ -691,4 +735,45 @@ if (allCardsToPrint.length === 0) {
     // 3. CLEAN UP AND SAVE
     document.body.removeChild(loadingMessage);
     doc.save(`${deckName}_Printable.pdf`);
+}
+// your-gallery-script.js (Add this function anywhere globally)
+
+function clearAllFilters(cardList) {
+    // 1. Reset all Text Inputs and Dropdowns
+    const controlsToClear = [
+        'name-search', 'effect-search', 'ronum-search', 'subtype-search',
+        'on-guard-power-search', 'off-guard-power-search', 'endurance-search',
+        'experience-search', 'hand-search', 
+        'type-filter', 'faction-filter', 'speed-filter'
+    ];
+
+    controlsToClear.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            // Reset input text fields to empty
+            if (element.tagName.toLowerCase() === 'input') {
+                element.value = '';
+            } 
+            // Reset select/dropdowns to the default "All" option
+            else if (element.tagName.toLowerCase() === 'select') {
+                // Assuming your default "All" option has the value 'all'
+                element.value = 'all'; 
+            }
+        }
+    });
+
+    // 2. Reset Checkboxes
+    document.getElementById('starting-gear-filter').checked = false;
+    document.getElementById('tokens-filter').checked = false;
+
+    // 3. Re-run the main filter function to show all cards
+    handleCombinedSearchAndFilter(cardList);
+}
+
+
+// --- ATTACH THE CLEAR BUTTON LISTENER ---
+// Add this inside your initCardGallery function, near where you attach other listeners (e.g., near line 250)
+const clearButton = document.getElementById('clear-filters-btn');
+if (clearButton) {
+    clearButton.addEventListener('click', () => clearAllFilters(cardList));
 }
