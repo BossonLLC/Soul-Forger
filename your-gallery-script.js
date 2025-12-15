@@ -34,7 +34,56 @@ function setImageSources(cardList) {
     });
 }
 
+              // --- DECK COUNTS HELPER FUNCTION ---
+function updateDeckCounts() {
+    const categories = [
+        // Changed limit from 0 to 3 for Starting Gear
+        { id: 'starting-gear-list', countId: 'starting-gear-count', limitMin: 0, limitMax: 3 }, 
+        // Set min/max limits for Main Deck
+        { id: 'main-deck-list', countId: 'main-deck-count', limitMin: 60, limitMax: 75 }, 
+        // Set exact limit for Forge Deck (min/max are both 15)
+        { id: 'forge-deck-list', countId: 'forge-deck-count', limitMin: 15, limitMax: 15 },
+        // Tokens have no required limit
+        { id: 'token-deck-list', countId: 'token-deck-count', limitMin: 0, limitMax: Infinity }
+    ];
 
+    categories.forEach(category => {
+        const list = document.getElementById(category.id);
+        const countSpan = document.getElementById(category.countId);
+
+        if (list && countSpan) {
+            let totalCards = 0;
+            // Iterate over every list item in the category
+            list.querySelectorAll('li').forEach(item => {
+                const quantityInput = item.querySelector('.card-list-item-quantity');
+                const quantity = quantityInput ? parseInt(quantityInput.value) : 0; // Use 0 if invalid
+                totalCards += quantity;
+            });
+
+            // 1. Determine the count text
+            let countText;
+            if (category.id === 'main-deck-list') {
+                countText = `${totalCards}/${category.limitMin}-${category.limitMax}`;
+            } else if (category.limitMax === Infinity) {
+                countText = `${totalCards}`; // For Tokens/unlimited categories
+            } else {
+                countText = `${totalCards}/${category.limitMax}`;
+            }
+            
+            countSpan.textContent = countText;
+
+            // 2. Apply visual feedback based on limits
+            if (totalCards < category.limitMin) {
+                countSpan.style.color = 'red'; // Too few cards
+            } else if (totalCards > category.limitMax) {
+                countSpan.style.color = 'red'; // Too many cards
+            } else {
+                // If it meets the limit (or is an unlimited category)
+                countSpan.style.color = 'green'; // Use green for valid counts
+            }
+        }
+    });
+}
 async function initCardGallery() {
     try {
         const response = await fetch('SFD.json');
@@ -282,56 +331,7 @@ if (cardsGallery) {
                 // Card already exists, increase quantity
                 const quantityInput = cardListItem.querySelector('.card-list-item-quantity');
                 quantityInput.value = parseInt(quantityInput.value) + 1;
-                // --- DECK COUNTS HELPER FUNCTION ---
-function updateDeckCounts() {
-    const categories = [
-        // Changed limit from 0 to 3 for Starting Gear
-        { id: 'starting-gear-list', countId: 'starting-gear-count', limitMin: 0, limitMax: 3 }, 
-        // Set min/max limits for Main Deck
-        { id: 'main-deck-list', countId: 'main-deck-count', limitMin: 60, limitMax: 75 }, 
-        // Set exact limit for Forge Deck (min/max are both 15)
-        { id: 'forge-deck-list', countId: 'forge-deck-count', limitMin: 15, limitMax: 15 },
-        // Tokens have no required limit
-        { id: 'token-deck-list', countId: 'token-deck-count', limitMin: 0, limitMax: Infinity }
-    ];
-
-    categories.forEach(category => {
-        const list = document.getElementById(category.id);
-        const countSpan = document.getElementById(category.countId);
-
-        if (list && countSpan) {
-            let totalCards = 0;
-            // Iterate over every list item in the category
-            list.querySelectorAll('li').forEach(item => {
-                const quantityInput = item.querySelector('.card-list-item-quantity');
-                const quantity = quantityInput ? parseInt(quantityInput.value) : 0; // Use 0 if invalid
-                totalCards += quantity;
-            });
-
-            // 1. Determine the count text
-            let countText;
-            if (category.id === 'main-deck-list') {
-                countText = `${totalCards}/${category.limitMin}-${category.limitMax}`;
-            } else if (category.limitMax === Infinity) {
-                countText = `${totalCards}`; // For Tokens/unlimited categories
-            } else {
-                countText = `${totalCards}/${category.limitMax}`;
-            }
-            
-            countSpan.textContent = countText;
-
-            // 2. Apply visual feedback based on limits
-            if (totalCards < category.limitMin) {
-                countSpan.style.color = 'red'; // Too few cards
-            } else if (totalCards > category.limitMax) {
-                countSpan.style.color = 'red'; // Too many cards
-            } else {
-                // If it meets the limit (or is an unlimited category)
-                countSpan.style.color = 'green'; // Use green for valid counts
-            }
-        }
-    });
-}
+  
              updateDeckCounts();   
             } else {
                 // Card is new, create the list item
