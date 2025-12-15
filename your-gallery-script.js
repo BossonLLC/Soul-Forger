@@ -152,102 +152,130 @@ item: `<li class="card-item"><h4 class="Card Name">{Card Name}</h4><img class="c
         // --- 5. CUSTOM SEARCH LOGIC (TARGETED COLUMNS & DROPDOWN COMBINATION) ---
         // ------------------------------------------------------------------
 
-        // Master function that runs ALL search and filter logic
-        const handleCombinedSearchAndFilter = (list) => {
-            // 1. Get references to all 12 controls (Inputs + Selects)
-            const controls = {
-                // Text Inputs (Search) - MUST match JSON attribute names (keys) and HTML IDs (values)
-                'Card Name': document.getElementById('name-search'),
-                'Effect': document.getElementById('effect-search'),
-                'Ronum': document.getElementById('ronum-search'),
-                'Sub Type': document.getElementById('subtype-search'),
-                'Power': document.getElementById('on-guard-power-search'),
-                'Off-guard Power': document.getElementById('off-guard-power-search'),
-                'Endurance': document.getElementById('endurance-search'),
-                'Experience': document.getElementById('experience-search'),
-                'Hands': document.getElementById('hand-search'),
-                // Dropdowns (Filter)
-                'Type': document.getElementById('type-filter'),
-                'Faction': document.getElementById('faction-filter'),
-                'Action Speed': document.getElementById('speed-filter') 
-            };
-        
-            // 1. Reset List.js filter/search state
-            list.search();
-            list.filter();
-        
-            // 2. Collect all active criteria
-            const activeCriteria = [];
-            let isAnyControlActive = false;
-        
-            for (const key in controls) {
-                const element = controls[key];
-                if (element) {
-                    const value = element.value.toLowerCase().trim();
-                    const type = element.tagName.toLowerCase(); // 'input' or 'select'
-        
-                    // Check if the control has a meaningful value
-                    if (value && value !== "" && !value.includes("all")) {
-                        isAnyControlActive = true;
-                        activeCriteria.push({
-                            attribute: key,
-                            query: value,
-                            type: type
-                        });
-                    }
-                }
-            }
-        
-            // 3. If nothing is active, stop here (the list is already reset above)
-            if (!isAnyControlActive) {
-                return;
-            }
-        
-            // 4. Apply Custom Filtering
-            list.filter(function(item) {
-                let matchesAllCriteria = true;
-                const itemValues = item.values();
-        
-                // Check against every active criteria
-                for (const criteria of activeCriteria) {
-                    const itemValue = itemValues[criteria.attribute];
-                    if (!itemValue) continue; // Skip if the card data is missing this field
-        
-                    const normalizedItemValue = String(itemValue).toLowerCase().trim();
-        // +++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                    // *** CRITICAL ADDITION: Ignore 'N/A' placeholder ***
-                    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                    if (normalizedItemValue === 'n/a' || normalizedItemValue === '') {
-                        continue; // If the card's value is N/A, it should not fail the filter (it's ignored).
-                    }
-                    // Check if the current card matches the criteria
-                    let matches = false;
-        
-                    if (criteria.type === 'input') {
-                        // TEXT SEARCH (Targeted check for each text box)
-                        matches = normalizedItemValue.includes(criteria.query);
-                    } else if (criteria.type === 'select') {
-                        // DROPDOWN FILTER (Inclusion check for Action Speed, Exact match for others)
-                        if (criteria.attribute === 'Action Speed') {
-                            // Use .includes() for action speed to catch 'Normal, Lingering'
-                            matches = normalizedItemValue.includes(criteria.query);
-                        } else {
-                            // Exact match for Type/Faction
-                            matches = normalizedItemValue === criteria.query;
-                        }
-                    }
-        
-                    // If this card fails to match one criteria, it fails all
-                    if (!matches) {
-                        matchesAllCriteria = false;
-                        break; 
-                    }
-                }
-                
-                return matchesAllCriteria;
-            });
-        };
+// your-gallery-script.js (around line 125)
 
+// Master function that runs ALL search and filter logic
+const handleCombinedSearchAndFilter = (list) => {
+    // 1. Get references to all 12 controls (Inputs + Selects)
+    const controls = {
+        // Text Inputs (Search) - MUST match JSON attribute names (keys) and HTML IDs (values)
+        'Card Name': document.getElementById('name-search'),
+        'Effect': document.getElementById('effect-search'),
+        'Ronum': document.getElementById('ronum-search'),
+        'Sub Type': document.getElementById('subtype-search'),
+        'Power': document.getElementById('on-guard-power-search'),
+        'Off-guard Power': document.getElementById('off-guard-power-search'),
+        'Endurance': document.getElementById('endurance-search'),
+        'Experience': document.getElementById('experience-search'),
+        'Hands': document.getElementById('hand-search'), // <-- FIX: 'Hands' attribute check is here
+        // Dropdowns (Filter)
+        'Type': document.getElementById('type-filter'),
+        'Faction': document.getElementById('faction-filter'),
+        'Action Speed': document.getElementById('speed-filter') 
+    };
+
+    // 1. Reset List.js filter/search state
+    list.search();
+    list.filter();
+
+    // 2. Collect all active criteria
+    const activeCriteria = [];
+    let isAnyControlActive = false;
+
+    for (const key in controls) {
+        const element = controls[key];
+        if (element) {
+            const value = element.value.toLowerCase().trim();
+            const type = element.tagName.toLowerCase(); // 'input' or 'select'
+
+            // Check if the control has a meaningful value
+            if (value && value !== "" && !value.includes("all")) {
+                isAnyControlActive = true;
+                activeCriteria.push({
+                    attribute: key,
+                    query: value,
+                    type: type
+                });
+            }
+        }
+    }
+
+    // 3. If nothing is active, stop here (the list is already reset above)
+    if (!isAnyControlActive) {
+        return;
+    }
+
+    // Array of attributes that should be treated as NUMERIC for strict checking
+    const numericAttributes = ['Ronum', 'Power', 'Off-guard Power', 'Endurance', 'Experience', 'Hands'];
+
+    // 4. Apply Custom Filtering
+    list.filter(function(item) {
+        let matchesAllCriteria = true;
+        const itemValues = item.values();
+
+        // Check against every active criteria
+        for (const criteria of activeCriteria) {
+            const itemValue = itemValues[criteria.attribute];
+            // If card data is missing this field entirely, it should fail if the filter is active.
+            if (!itemValue) {
+                matchesAllCriteria = false;
+                break;
+            }
+
+            const normalizedItemValue = String(itemValue).toLowerCase().trim();
+
+            let matches = false;
+
+            // --- CRITICAL N/A/Empty CHECK ---
+            if (normalizedItemValue === 'n/a' || normalizedItemValue === '') {
+                // If a card's value is N/A, it MUST fail any active filter.
+                // It can only pass if there is no filter active for this attribute.
+                matchesAllCriteria = false;
+                break; 
+            }
+            // ------------------------------------
+
+            if (criteria.type === 'input') {
+                // TEXT/NUMERIC SEARCH
+                
+                // If it's a numeric attribute (like Power, Hands) and the value is not 'N/A' (checked above)
+                if (numericAttributes.includes(criteria.attribute)) {
+                    const queryNum = parseFloat(criteria.query);
+                    const itemNum = parseFloat(itemValue);
+                    
+                    // Simple check for equality or inclusion (e.g., searching "1" should match "10")
+                    // Since we're using text input includes(), we rely on that.
+                    // IMPORTANT: List.js only supports filtering by value matching the full string, 
+                    // not > < logic, so we keep using includes() for simplicity here.
+                    matches = normalizedItemValue.includes(criteria.query);
+
+                } else {
+                    // Standard text search (Card Name, Effect, Sub Type)
+                    matches = normalizedItemValue.includes(criteria.query);
+                }
+
+            } else if (criteria.type === 'select') {
+                // DROPDOWN FILTER (Type, Faction, Action Speed)
+
+                if (criteria.attribute === 'Action Speed') {
+                    // Use .includes() for action speed to catch 'Normal, Lingering'
+                    matches = normalizedItemValue.includes(criteria.query);
+                } else {
+                    // Exact match for Type/Faction
+                    matches = normalizedItemValue === criteria.query;
+                }
+            }
+
+            // If this card fails to match one criteria, it fails all
+            if (!matches) {
+                matchesAllCriteria = false;
+                break;
+            }
+        }
+
+        return matchesAllCriteria;
+    });
+};
 
         // 5. Attach Event Listeners to ALL controls
         // Note: The 'controls' object is now inside handleCombinedSearchAndFilter, so we
