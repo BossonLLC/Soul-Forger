@@ -554,12 +554,16 @@ p {
 }
 
 .remove-from-deck-btn {
-    background-color: red;
+    background-color: #A8422C;
     color: white;
     border: none;
     cursor: pointer;
     padding: 2px 5px;
     line-height: 1;
+  /* ADD THIS LINE for spacing: */
+    margin-right: 8px; /* You can adjust 8px (e.g., to 5px or 10px) as needed */   
+    /* Ensure it has a fixed size if it's currently flexible */
+    flex-shrink: 0;
 }
 
 /* --- Scroll-to-Top Button Styles --- */
