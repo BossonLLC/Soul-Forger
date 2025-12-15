@@ -206,76 +206,78 @@ const handleCombinedSearchAndFilter = (list) => {
     // Array of attributes that should be treated as NUMERIC for strict checking
     const numericAttributes = ['Ronum', 'Power', 'Off-guard Power', 'Endurance', 'Experience', 'Hands'];
 
-    // 4. Apply Custom Filtering
-    list.filter(function(item) {
-        let matchesAllCriteria = true;
-        const itemValues = item.values();
+// 4. Apply Custom Filtering
+list.filter(function(item) {
+    let matchesAllCriteria = true;
+    const itemValues = item.values();
 
-        // Check against every active criteria
-        for (const criteria of activeCriteria) {
-            const itemValue = itemValues[criteria.attribute];
-            // If card data is missing this field entirely, it fails the filter.
-            if (!itemValue) {
-                matchesAllCriteria = false;
-                break;
-            }
+    // Check against every active criteria
+    for (const criteria of activeCriteria) {
+        const itemValue = itemValues[criteria.attribute];
+        
+        // --- CRITICAL FIX FOR ZERO (0) STATS ---
+        // A card FAILS if the value is truly missing: null, undefined, or empty string.
+        // It MUST PASS if the value is 0 (number) or "0" (string).
+        if (itemValue === null || itemValue === undefined || itemValue === '') {
+            matchesAllCriteria = false;
+            break;
+        }
+        // ----------------------------------------
+        
+        // IMPORTANT: Always normalize the item value for consistency
+        const normalizedItemValue = String(itemValue).toLowerCase().trim();
+        let matches = false;
 
-            // IMPORTANT: Always normalize the item value for consistency
-            const normalizedItemValue = String(itemValue).toLowerCase().trim();
-            let matches = false;
+        // --- FILTER LOGIC BRANCHING ---
 
-            // --- FILTER LOGIC BRANCHING ---
+        if (criteria.type === 'input') {
+            // This is a text/numeric search field
 
-            if (criteria.type === 'input') {
-                // This is a text/numeric search field
-
-                // 1. Check for N/A in NUMERIC FIELDS
-                if (numericAttributes.includes(criteria.attribute)) {
-                    
-                    // If the card's value is N/A, it MUST fail the filter if the user is searching for a number.
-                    // This is CRITICAL to filter out non-numeric entries when searching for a number.
-                    if (normalizedItemValue === 'n/a' || normalizedItemValue === '') {
-                        matchesAllCriteria = false;
-                        break;
-                    }
-                    
-                    // If it's not N/A, use the standard text-based includes check.
-                    // This allows '0' to be found by '0', and '10' by '1' or '10'.
-                    matches = normalizedItemValue.includes(criteria.query);
-                    
-                } else {
-                    // 2. Standard Text Search (e.g., Card Name, Effect)
-                    matches = normalizedItemValue.includes(criteria.query);
-                }
-
-            } else if (criteria.type === 'select') {
-                // This is a dropdown filter (Type, Faction, Action Speed)
+            // 1. Check for N/A in NUMERIC FIELDS
+            if (numericAttributes.includes(criteria.attribute)) {
                 
-                // 1. Check for N/A in DROPDOWNS (must fail)
-                if (normalizedItemValue === 'n/a' || normalizedItemValue === '') {
+                // If the card's value is N/A, it MUST fail the filter if the user is searching for a number.
+                if (normalizedItemValue === 'n/a') {
                     matchesAllCriteria = false;
                     break;
                 }
                 
-                // 2. Standard Dropdown Match
-                if (criteria.attribute === 'Action Speed') {
-                    // Use .includes() for action speed to catch 'Normal, Lingering'
-                    matches = normalizedItemValue.includes(criteria.query);
-                } else {
-                    // Exact match for Type/Faction
-                    matches = normalizedItemValue === criteria.query;
-                }
+                // Use the standard text-based includes check. This handles '0' matching '0'.
+                matches = normalizedItemValue.includes(criteria.query);
+                
+            } else {
+                // 2. Standard Text Search (e.g., Card Name, Effect)
+                matches = normalizedItemValue.includes(criteria.query);
             }
 
-            // If this card fails to match the current criteria, stop and fail all
-            if (!matches) {
+        } else if (criteria.type === 'select') {
+            // This is a dropdown filter (Type, Faction, Action Speed)
+            
+            // 1. Check for N/A in DROPDOWNS (must fail)
+            if (normalizedItemValue === 'n/a') {
                 matchesAllCriteria = false;
                 break;
             }
+            
+            // 2. Standard Dropdown Match
+            if (criteria.attribute === 'Action Speed') {
+                // Use .includes() for action speed to catch 'Normal, Lingering'
+                matches = normalizedItemValue.includes(criteria.query);
+            } else {
+                // Exact match for Type/Faction
+                matches = normalizedItemValue === criteria.query;
+            }
         }
 
-        return matchesAllCriteria;
-    });
+        // If this card fails to match the current criteria, stop and fail all
+        if (!matches) {
+            matchesAllCriteria = false;
+            break;
+        }
+    }
+
+    return matchesAllCriteria;
+});
 };
         // 5. Attach Event Listeners to ALL controls
         // Note: The 'controls' object is now inside handleCombinedSearchAndFilter, so we
