@@ -213,11 +213,11 @@ item: `<li class="card-item"><h4 class="Card Name">{Card Name}</h4><img class="c
                     const itemValue = itemValues[criteria.attribute];
                     if (!itemValue) continue; // Skip if the card data is missing this field
         
-                    const normalizedItemValue = String(itemValue).toLowerCase();
+                    const normalizedItemValue = String(itemValue).toLowerCase().trim();
         // +++++++++++++++++++++++++++++++++++++++++++++++++++++++
                     // *** CRITICAL ADDITION: Ignore 'N/A' placeholder ***
                     // +++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                    if (normalizedItemValue === 'n/a') {
+                    if (normalizedItemValue === 'n/a' || normalizedItemValue === '') {
                         continue; // If the card's value is N/A, it should not fail the filter (it's ignored).
                     }
                     // Check if the current card matches the criteria
