@@ -208,75 +208,80 @@ const handleCombinedSearchAndFilter = (list) => {
     // Array of attributes that should be treated as NUMERIC for strict checking
     const numericAttributes = ['Ronum', 'Power', 'Off-guard Power', 'Endurance', 'Experience', 'Hands'];
 
-    // 4. Apply Custom Filtering
-    list.filter(function(item) {
-        let matchesAllCriteria = true;
-        const itemValues = item.values();
+// Array of attributes that should be treated as NUMERIC for strict checking
+const numericAttributes = ['Ronum', 'Power', 'Off-guard Power', 'Endurance', 'Experience', 'Hands'];
 
-        // Check against every active criteria
-        for (const criteria of activeCriteria) {
-            const itemValue = itemValues[criteria.attribute];
-            // If card data is missing this field entirely, it should fail if the filter is active.
-            if (!itemValue) {
-                matchesAllCriteria = false;
-                break;
-            }
+// 4. Apply Custom Filtering
+list.filter(function(item) {
+    let matchesAllCriteria = true;
+    const itemValues = item.values();
 
-            const normalizedItemValue = String(itemValue).toLowerCase().trim();
+    // Check against every active criteria
+    for (const criteria of activeCriteria) {
+        const itemValue = itemValues[criteria.attribute];
+        // If card data is missing this field entirely, it fails the filter.
+        if (!itemValue) {
+            matchesAllCriteria = false;
+            break;
+        }
 
-            let matches = false;
+        // IMPORTANT: Always normalize the item value for consistency
+        const normalizedItemValue = String(itemValue).toLowerCase().trim();
+        let matches = false;
 
-            // --- CRITICAL N/A/Empty CHECK ---
-            if (normalizedItemValue === 'n/a' || normalizedItemValue === '') {
-                // If a card's value is N/A, it MUST fail any active filter.
-                // It can only pass if there is no filter active for this attribute.
-                matchesAllCriteria = false;
-                break; 
-            }
-            // ------------------------------------
+        // --- FILTER LOGIC BRANCHING ---
 
-            if (criteria.type === 'input') {
-                // TEXT/NUMERIC SEARCH
+        if (criteria.type === 'input') {
+            // This is a text/numeric search field
+
+            // 1. Check for N/A in NUMERIC FIELDS
+            if (numericAttributes.includes(criteria.attribute)) {
                 
-                // If it's a numeric attribute (like Power, Hands) and the value is not 'N/A' (checked above)
-                if (numericAttributes.includes(criteria.attribute)) {
-                    const queryNum = parseFloat(criteria.query);
-                    const itemNum = parseFloat(itemValue);
-                    
-                    // Simple check for equality or inclusion (e.g., searching "1" should match "10")
-                    // Since we're using text input includes(), we rely on that.
-                    // IMPORTANT: List.js only supports filtering by value matching the full string, 
-                    // not > < logic, so we keep using includes() for simplicity here.
-                    matches = normalizedItemValue.includes(criteria.query);
-
-                } else {
-                    // Standard text search (Card Name, Effect, Sub Type)
-                    matches = normalizedItemValue.includes(criteria.query);
+                // If the card's value is N/A, it MUST fail the filter if the user is searching for a number.
+                if (normalizedItemValue === 'n/a' || normalizedItemValue === '') {
+                    matchesAllCriteria = false;
+                    break;
                 }
-
-            } else if (criteria.type === 'select') {
-                // DROPDOWN FILTER (Type, Faction, Action Speed)
-
-                if (criteria.attribute === 'Action Speed') {
-                    // Use .includes() for action speed to catch 'Normal, Lingering'
-                    matches = normalizedItemValue.includes(criteria.query);
-                } else {
-                    // Exact match for Type/Faction
-                    matches = normalizedItemValue === criteria.query;
-                }
+                
+                // If it's not N/A, use the standard text-based includes check.
+                // This correctly handles:
+                // - Card value '0' matching query '0'
+                // - Card value '10' matching query '1' or '10'
+                matches = normalizedItemValue.includes(criteria.query);
+                
+            } else {
+                // 2. Standard Text Search (e.g., Card Name, Effect)
+                matches = normalizedItemValue.includes(criteria.query);
             }
 
-            // If this card fails to match one criteria, it fails all
-            if (!matches) {
+        } else if (criteria.type === 'select') {
+            // This is a dropdown filter (Type, Faction, Action Speed)
+            
+            // 1. Check for N/A in DROPDOWNS (must fail, as previously fixed)
+            if (normalizedItemValue === 'n/a' || normalizedItemValue === '') {
                 matchesAllCriteria = false;
                 break;
+            }
+            
+            // 2. Standard Dropdown Match
+            if (criteria.attribute === 'Action Speed') {
+                // Use .includes() for action speed to catch 'Normal, Lingering'
+                matches = normalizedItemValue.includes(criteria.query);
+            } else {
+                // Exact match for Type/Faction
+                matches = normalizedItemValue === criteria.query;
             }
         }
 
-        return matchesAllCriteria;
-    });
-};
+        // If this card fails to match the current criteria, stop and fail all
+        if (!matches) {
+            matchesAllCriteria = false;
+            break;
+        }
+    }
 
+    return matchesAllCriteria;
+});
         // 5. Attach Event Listeners to ALL controls
         // Note: The 'controls' object is now inside handleCombinedSearchAndFilter, so we
         // must reference the IDs directly here.
