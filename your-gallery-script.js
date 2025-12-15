@@ -151,9 +151,7 @@ item: `<li class="card-item"><h4 class="Card Name">{Card Name}</h4><img class="c
         // ------------------------------------------------------------------
         // --- 5. CUSTOM SEARCH LOGIC (TARGETED COLUMNS & DROPDOWN COMBINATION) ---
         // ------------------------------------------------------------------
-
-// your-gallery-script.js (around line 125)
-
+        
 // Master function that runs ALL search and filter logic
 const handleCombinedSearchAndFilter = (list) => {
     // 1. Get references to all 12 controls (Inputs + Selects)
@@ -167,7 +165,7 @@ const handleCombinedSearchAndFilter = (list) => {
         'Off-guard Power': document.getElementById('off-guard-power-search'),
         'Endurance': document.getElementById('endurance-search'),
         'Experience': document.getElementById('experience-search'),
-        'Hands': document.getElementById('hand-search'), // <-- FIX: 'Hands' attribute check is here
+        'Hands': document.getElementById('hand-search'),
         // Dropdowns (Filter)
         'Type': document.getElementById('type-filter'),
         'Faction': document.getElementById('faction-filter'),
@@ -208,80 +206,77 @@ const handleCombinedSearchAndFilter = (list) => {
     // Array of attributes that should be treated as NUMERIC for strict checking
     const numericAttributes = ['Ronum', 'Power', 'Off-guard Power', 'Endurance', 'Experience', 'Hands'];
 
-// Array of attributes that should be treated as NUMERIC for strict checking
-const numericAttributes = ['Ronum', 'Power', 'Off-guard Power', 'Endurance', 'Experience', 'Hands'];
+    // 4. Apply Custom Filtering
+    list.filter(function(item) {
+        let matchesAllCriteria = true;
+        const itemValues = item.values();
 
-// 4. Apply Custom Filtering
-list.filter(function(item) {
-    let matchesAllCriteria = true;
-    const itemValues = item.values();
+        // Check against every active criteria
+        for (const criteria of activeCriteria) {
+            const itemValue = itemValues[criteria.attribute];
+            // If card data is missing this field entirely, it fails the filter.
+            if (!itemValue) {
+                matchesAllCriteria = false;
+                break;
+            }
 
-    // Check against every active criteria
-    for (const criteria of activeCriteria) {
-        const itemValue = itemValues[criteria.attribute];
-        // If card data is missing this field entirely, it fails the filter.
-        if (!itemValue) {
-            matchesAllCriteria = false;
-            break;
-        }
+            // IMPORTANT: Always normalize the item value for consistency
+            const normalizedItemValue = String(itemValue).toLowerCase().trim();
+            let matches = false;
 
-        // IMPORTANT: Always normalize the item value for consistency
-        const normalizedItemValue = String(itemValue).toLowerCase().trim();
-        let matches = false;
+            // --- FILTER LOGIC BRANCHING ---
 
-        // --- FILTER LOGIC BRANCHING ---
+            if (criteria.type === 'input') {
+                // This is a text/numeric search field
 
-        if (criteria.type === 'input') {
-            // This is a text/numeric search field
+                // 1. Check for N/A in NUMERIC FIELDS
+                if (numericAttributes.includes(criteria.attribute)) {
+                    
+                    // If the card's value is N/A, it MUST fail the filter if the user is searching for a number.
+                    // This is CRITICAL to filter out non-numeric entries when searching for a number.
+                    if (normalizedItemValue === 'n/a' || normalizedItemValue === '') {
+                        matchesAllCriteria = false;
+                        break;
+                    }
+                    
+                    // If it's not N/A, use the standard text-based includes check.
+                    // This allows '0' to be found by '0', and '10' by '1' or '10'.
+                    matches = normalizedItemValue.includes(criteria.query);
+                    
+                } else {
+                    // 2. Standard Text Search (e.g., Card Name, Effect)
+                    matches = normalizedItemValue.includes(criteria.query);
+                }
 
-            // 1. Check for N/A in NUMERIC FIELDS
-            if (numericAttributes.includes(criteria.attribute)) {
+            } else if (criteria.type === 'select') {
+                // This is a dropdown filter (Type, Faction, Action Speed)
                 
-                // If the card's value is N/A, it MUST fail the filter if the user is searching for a number.
+                // 1. Check for N/A in DROPDOWNS (must fail)
                 if (normalizedItemValue === 'n/a' || normalizedItemValue === '') {
                     matchesAllCriteria = false;
                     break;
                 }
                 
-                // If it's not N/A, use the standard text-based includes check.
-                // This correctly handles:
-                // - Card value '0' matching query '0'
-                // - Card value '10' matching query '1' or '10'
-                matches = normalizedItemValue.includes(criteria.query);
-                
-            } else {
-                // 2. Standard Text Search (e.g., Card Name, Effect)
-                matches = normalizedItemValue.includes(criteria.query);
+                // 2. Standard Dropdown Match
+                if (criteria.attribute === 'Action Speed') {
+                    // Use .includes() for action speed to catch 'Normal, Lingering'
+                    matches = normalizedItemValue.includes(criteria.query);
+                } else {
+                    // Exact match for Type/Faction
+                    matches = normalizedItemValue === criteria.query;
+                }
             }
 
-        } else if (criteria.type === 'select') {
-            // This is a dropdown filter (Type, Faction, Action Speed)
-            
-            // 1. Check for N/A in DROPDOWNS (must fail, as previously fixed)
-            if (normalizedItemValue === 'n/a' || normalizedItemValue === '') {
+            // If this card fails to match the current criteria, stop and fail all
+            if (!matches) {
                 matchesAllCriteria = false;
                 break;
             }
-            
-            // 2. Standard Dropdown Match
-            if (criteria.attribute === 'Action Speed') {
-                // Use .includes() for action speed to catch 'Normal, Lingering'
-                matches = normalizedItemValue.includes(criteria.query);
-            } else {
-                // Exact match for Type/Faction
-                matches = normalizedItemValue === criteria.query;
-            }
         }
 
-        // If this card fails to match the current criteria, stop and fail all
-        if (!matches) {
-            matchesAllCriteria = false;
-            break;
-        }
-    }
-
-    return matchesAllCriteria;
-});
+        return matchesAllCriteria;
+    });
+};
         // 5. Attach Event Listeners to ALL controls
         // Note: The 'controls' object is now inside handleCombinedSearchAndFilter, so we
         // must reference the IDs directly here.
