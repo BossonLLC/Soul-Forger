@@ -348,7 +348,14 @@ list.filter(function(item) {
         if (downloadButton) { 
             downloadButton.addEventListener('click', generateDeckPDF);
         }
-
+// --- 7. CLEAR ALL FILTERS BUTTON LISTENER ---
+const clearFiltersButton = document.getElementById('clear-filters-btn');
+if (clearFiltersButton) {
+    clearFiltersButton.addEventListener('click', () => {
+        clearAllFilters(cardList);
+        handleCombinedSearchAndFilter(cardList); // Apply the reset state
+    });
+}
 // --- 7. DECK BUILDER LOGIC (Event Delegation) ---
 const deckListContainer = document.getElementById('deck-list-container');
 const cardsGallery = document.getElementById('cards-gallery');
