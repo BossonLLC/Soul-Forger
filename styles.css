@@ -595,7 +595,7 @@ p {
     justify-content: space-between; /* Pushes the button to the far right */
     align-items: center; /* Vertically centers the button with the checkboxes */
     margin-bottom: 15px; /* Adds space below the filter area */
-    padding-top: 10px; /* Pushes this section down from the elements above it */
+    padding-top: 5px; /* Pushes this section down from the elements above it */
 }
 
 /* 2. FIX CHECKBOX LABEL COLOR */
