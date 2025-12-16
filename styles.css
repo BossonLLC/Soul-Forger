@@ -28,10 +28,10 @@ p {color: #FFFFFF; }
     text-decoration: none;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: #FFFFFF;
+    color: #41414A;
   }
   #header a:hover {
-    color: #222;
+    color: #41414A;
   }
 #header-title {
   display: block;
