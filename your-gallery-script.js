@@ -295,7 +295,7 @@ const handleCombinedSearchAndFilter = (list) => {
             'name-search', 'effect-search', 'ronum-search', 'subtype-search',
             'on-guard-power-search', 'off-guard-power-search', 'endurance-search',
             'experience-search', 'hand-search', 'type-filter', 'faction-filter',
-            'speed-filter'
+            'speed-filter',
             'starting-gear-filter',
             'tokens-filter'
         ];
