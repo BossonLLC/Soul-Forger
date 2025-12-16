@@ -12,7 +12,7 @@ p {color: #FFFFFF; }
 .w3-content{position:relative;margin-top:0em;}
 
 #header {
-    background-color: #AFAFAF;
+    background-color: #41414A;
     height: 50px;
     line-height: 50px;
     
@@ -595,7 +595,7 @@ p {
     justify-content: space-between; /* Pushes the button to the far right */
     align-items: center; /* Vertically centers the button with the checkboxes */
     margin-bottom: 15px; /* Adds space below the filter area */
-    padding-top: 5px; /* Pushes this section down from the elements above it */
+    padding-top: 1px; /* Pushes this section down from the elements above it */
 }
 
 /* 2. FIX CHECKBOX LABEL COLOR */
