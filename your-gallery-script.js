@@ -296,15 +296,18 @@ const handleCombinedSearchAndFilter = (list) => {
             'on-guard-power-search', 'off-guard-power-search', 'endurance-search',
             'experience-search', 'hand-search', 'type-filter', 'faction-filter',
             'speed-filter'
+            'starting-gear-filter',
+            'tokens-filter'
         ];
 
-        controlIds.forEach(id => {
-            const element = document.getElementById(id);
-            if (element) {
-                const eventType = element.tagName.toLowerCase() === 'input' ? 'keyup' : 'change';
-                element.addEventListener(eventType, () => handleCombinedSearchAndFilter(cardList));
-            }
-        });
+controlIds.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                // Check if it's a checkbox or a select (uses 'change'), otherwise use 'keyup' (for text input)
+                const eventType = (element.type === 'checkbox' || element.tagName.toLowerCase() === 'select') ? 'change' : 'keyup';
+                element.addEventListener(eventType, () => handleCombinedSearchAndFilter(cardList));
+            }
+        });
 
 
         // --- 6. DOWNLOAD BUTTON LISTENER ---
