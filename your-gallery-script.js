@@ -169,62 +169,22 @@ const handleCombinedSearchAndFilter = (list) => {
         // Dropdowns (Filter)
         'Type': document.getElementById('type-filter'),
         'Faction': document.getElementById('faction-filter'),
-        'Action Speed': document.getElementById('speed-filter') 
+        'Action Speed': document.getElementById('speed-filter')
     };
 
     // 1. Reset List.js filter/search state
     list.search();
     list.filter();
-// 2. Collect all active criteria
+
+    // 2. Collect all active criteria (Text Inputs & Dropdowns)
     const activeCriteria = [];
     let isAnyControlActive = false;
 
     for (const key in controls) {
-        // ... (existing loop logic that populates activeCriteria) ...
         const element = controls[key];
         if (element) {
             const value = element.value.toLowerCase().trim();
-            const type = element.tagName.toLowerCase(); 
-
-            if (value && value !== "" && !value.includes("all")) {
-                isAnyControlActive = true;
-                activeCriteria.push({
-                    attribute: key,
-                    query: value,
-                    type: type
-                });
-            }
-        }
-    }
-
-    // --- CHECKBOX STATE INTEGRATION ---
-    const startingGearActive = document.getElementById('starting-gear-filter').checked;
-    const tokensActive = document.getElementById('tokens-filter').checked;
-
-    // If either checkbox is checked, the filtering is considered active
-    if (startingGearActive || tokensActive) {
-        isAnyControlActive = true;
-    }
-
-    // 3. If NO control (input, select, or checkbox) is active, stop here
-    if (!isAnyControlActive) {
-        return;
-    }
-    // --- END CHECKBOX STATE INTEGRATION ---
-    
-    // Array of attributes that should be treated as NUMERIC for strict checking
-    const numericAttributes = ['Ronum', 'Power', 'Off-guard Power', 'Endurance', 'Experience', 'Hands'];
-    
-// 2. Collect all active criteria
-    const activeCriteria = [];
-    let isAnyControlActive = false;
-
-    // --- Collect Text/Dropdown Criteria ---
-    for (const key in controls) {
-        const element = controls[key];
-        if (element) {
-            const value = element.value.toLowerCase().trim();
-            const type = element.tagName.toLowerCase(); 
+            const type = element.tagName.toLowerCase();
 
             if (value && value !== "" && !value.includes("all")) {
                 isAnyControlActive = true;
@@ -250,128 +210,82 @@ const handleCombinedSearchAndFilter = (list) => {
     if (!isAnyControlActive) {
         return;
     }
-    // --- END CHECKBOX STATE INTEGRATION ---
-    
+
     // Array of attributes that should be treated as NUMERIC for strict checking
     const numericAttributes = ['Ronum', 'Power', 'Off-guard Power', 'Endurance', 'Experience', 'Hands'];
-    
-// 4. Apply Custom Filtering
-list.filter(function(item) {
-    let matchesAllCriteria = true;
-    const itemValues = item.values();
 
-    // =========================================================
-    // 1. CHECKBOX FILTER LOGIC (NEW: Only run if a checkbox is checked)
-    // =========================================================
-    if (startingGearActive || tokensActive) {
-        const itemCost = String(itemValues['Cost']).toLowerCase().trim();
-        let passesCheckbox = false;
+    // 4. Apply Custom Filtering
+    list.filter(function(item) {
+        let matchesAllCriteria = true;
+        const itemValues = item.values();
 
-        // Condition 1: Check if it matches Starting Gear
-        if (startingGearActive && itemCost.includes('starting gear')) {
-            passesCheckbox = true;
-        }
+        // =========================================================
+        // 1. CHECKBOX FILTER LOGIC (MUST PASS THIS OR NOT RUN)
+        // =========================================================
+        if (startingGearActive || tokensActive) {
+            const itemCost = String(itemValues['Cost']).toLowerCase().trim();
+            let passesCheckbox = false;
 
-        // Condition 2: Check if it matches Tokens
-        if (tokensActive && itemCost.includes('token')) {
-            passesCheckbox = true;
-        }
-
-        // If a checkbox is active, but the card doesn't pass EITHER condition, fail it.
-        if (!passesCheckbox) {
-            return false; // Fail this card immediately
-        }
-    }
-    const itemValues = item.values();
-
-    // =========================================================
-    // 1. CHECKBOX FILTER LOGIC (MUST RUN FIRST)
-    // =========================================================
-
-    const itemType = String(itemValues['Type']).toLowerCase().trim();
-    const itemCost = String(itemValues['Cost']).toLowerCase().trim();
-
-    if (startingGearActive) {
-        // If 'Show Starting Gear Only' is checked, only cards with Cost: 'Starting Gear' pass.
-        if (!itemCost.includes('starting gear')) {
-            return false; // Fail this card immediately
-        }
-    }
-
-    if (tokensActive) {
-        // If 'Show Tokens Only' is checked, only cards with Cost: 'Token' pass.
-        if (!itemCost.includes('token')) {
-            return false; // Fail this card immediately
-        }
-    }
-    
-    // CRITICAL: If both are checked, the filter must allow items that match EITHER criteria.
-    // The current logic handles this: a card must pass BOTH (if both are checked).
-    // E.g., if SG is checked, Tokens fail. If Tokens is checked, SG fails.
-    // Assuming you want the filters to be mutually exclusive for simplicity.
-
-    // =========================================================
-    // 2. ACTIVE CRITERIA LOOP (EXISTING LOGIC)
-    // =========================================================
-
-    // Check against every active criteria (inputs and selects)
-    for (const criteria of activeCriteria) {
-        // ... (rest of your existing filter loop logic goes here) ...
-        // You should copy/paste your entire loop for activeCriteria here.
-        
-        const itemValue = itemValues[criteria.attribute];
-        
-        // --- CRITICAL FIX FOR ZERO (0) STATS ---
-        if (itemValue === null || itemValue === undefined || itemValue === '') {
-            matchesAllCriteria = false;
-            break;
-        }
-        
-        const normalizedItemValue = String(itemValue).toLowerCase().trim();
-        let matches = false;
-
-        // --- FILTER LOGIC BRANCHING ---
-
-        if (criteria.type === 'input') {
-            // This is a text/numeric search field
-            if (numericAttributes.includes(criteria.attribute)) {
-                
-                if (normalizedItemValue === 'n/a') {
-                    matchesAllCriteria = false;
-                    break;
-                }
-                
-                matches = normalizedItemValue.includes(criteria.query);
-                
-            } else {
-                // Standard Text Search (e.g., Card Name, Effect)
-                matches = normalizedItemValue.includes(criteria.query);
+            // Condition 1: Check if it matches Starting Gear
+            if (startingGearActive && itemCost.includes('starting gear')) {
+                passesCheckbox = true;
             }
 
-        } else if (criteria.type === 'select') {
-            // This is a dropdown filter (Type, Faction, Action Speed)
+            // Condition 2: Check if it matches Tokens
+            if (tokensActive && itemCost.includes('token')) {
+                passesCheckbox = true;
+            }
+
+            // If a checkbox is active, but the card doesn't pass EITHER condition, fail it.
+            if (!passesCheckbox) {
+                return false; // Card fails the filter
+            }
+        }
+
+        // =========================================================
+        // 2. ACTIVE CRITERIA LOOP (Checks Text Inputs and Dropdowns)
+        // =========================================================
+
+        // Check against every active criteria (inputs and selects)
+        for (const criteria of activeCriteria) {
+            const itemValue = itemValues[criteria.attribute];
             
-            if (normalizedItemValue === 'n/a') {
+            // Handle undefined/null/empty values early if a filter is set for that attribute
+            if (itemValue === null || itemValue === undefined || String(itemValue).trim() === '') {
+                 // We only fail if the user actively searched for something that should exist
+                 if (criteria.query !== "") {
+                     matchesAllCriteria = false;
+                     break;
+                 }
+            }
+            
+            const normalizedItemValue = String(itemValue).toLowerCase().trim();
+            let matches = false;
+
+            // --- FILTER LOGIC BRANCHING ---
+
+            if (criteria.type === 'input') {
+                // Standard Text/Numeric Search (checks if the item value INCLUDES the query)
+                matches = normalizedItemValue.includes(criteria.query);
+
+            } else if (criteria.type === 'select') {
+                // Dropdown Filter (must be an exact match, or use includes for 'Action Speed')
+                if (criteria.attribute === 'Action Speed') {
+                    matches = normalizedItemValue.includes(criteria.query);
+                } else {
+                    matches = normalizedItemValue === criteria.query;
+                }
+            }
+
+            // If this card fails to match the current criteria, stop and fail all
+            if (!matches) {
                 matchesAllCriteria = false;
                 break;
             }
-            
-            if (criteria.attribute === 'Action Speed') {
-                matches = normalizedItemValue.includes(criteria.query);
-            } else {
-                matches = normalizedItemValue === criteria.query;
-            }
         }
 
-        // If this card fails to match the current criteria, stop and fail all
-        if (!matches) {
-            matchesAllCriteria = false;
-            break;
-        }
-    }
-
-    return matchesAllCriteria;
-});
+        return matchesAllCriteria;
+    });
 };
         // 5. Attach Event Listeners to ALL controls
         // Note: The 'controls' object is now inside handleCombinedSearchAndFilter, so we
