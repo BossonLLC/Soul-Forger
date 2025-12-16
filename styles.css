@@ -602,6 +602,7 @@ p {
 .checkbox-group label {
     color: white; /* Changes the text color to white */
     margin-left: 5px; /* Adds a little space between the checkbox and the text */
+  margin-right: 20px; /* <--- CHANGE THIS VALUE! */
 }
 
 /* 3. VERTICAL ALIGNMENT FOR THE CHECKBOXES (if needed) */
@@ -615,7 +616,7 @@ p {
     padding: 8px 15px;
     border: none;
     border-radius: 5px;
-    background-color: #555; /* Darker background */
+    background-color: #41414A; /* Darker background */
     color: white;
     cursor: pointer;
     font-size: 1em;
