@@ -118,70 +118,57 @@
             <option value="Lingering">Lingering</option>
         </select>
     </div>
-<div class="filter-controls">
-    <div class="checkbox-line">
-        <div class="checkbox-group">
-            <input type="checkbox" id="starting-gear-filter"> 
-            <label for="starting-gear-filter">Show Starting Gear Only</label>
-            <br>
-            <input type="checkbox" id="tokens-filter"> 
-            <label for="tokens-filter">Show Tokens Only</label>
-        </div>
-        
-        <button id="clear-filters-btn" type="button">Clear All Filters</button>
-    </div>
-    
-    </div>
-
-    <ul class="list"> 
-    </ul>
-</div>
+<div id="header">...</div>
 			
+    <div class="main-content-wrapper">
 			
-<!--a <div class="card-list">
-      <h2>Card List</h2>
-            <div id="deck-list-container">
-        <h3 class="deck-category-header">Starting Gear (<span id="starting-gear-count">0</span>/3)</h3>
-        <ul id="starting-gear-list" class="deck-category-list"></ul>
+        <div id="cards-gallery-column">
         
-        <h3 class="deck-category-header">Main Deck (<span id="main-deck-count">0</span>/60-75)</h3>
-        <ul id="main-deck-list" class="deck-category-list"></ul>
+            <div class="filter-controls-wrapper">
 
-        <h3 class="deck-category-header">Forge Deck (<span id="forge-deck-count">0</span>/15)</h3>
-        <ul id="forge-deck-list" class="deck-category-list"></ul>
-        
-        <h3 class="deck-category-header">Tokens (<span id="token-deck-count">0</span>)</h3>
-        <ul id="token-deck-list" class="deck-category-list"></ul>
-      </div>
-            <button id="download-button">Download PDF</button>
-    </div>
+                <div class="control-group">...</div>
+                <div class="control-group">...</div>
+                <div class="filter-controls">
+                    <div class="checkbox-line">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="starting-gear-filter"> 
+                            <label for="starting-gear-filter">Show Starting Gear Only</label>
+                            <br>
+                            <input type="checkbox" id="tokens-filter"> 
+                            <label for="tokens-filter">Show Tokens Only</label>
+                        </div>
+                        <button id="clear-filters-btn" type="button">Clear All Filters</button>
+                    </div>
+                </div>
+            </div> <div id="cards-gallery">
+                <ul class="list"> 
+                    </ul>
+            </div>
+            
+        </div> <div class="card-list">
+            <div id="deck-list-container">
+                <h3 class="deck-category-header">
+                    Starting Gear <span id="starting-gear-count">0/3</span>
+                </h3>
+                <ul id="starting-gear-list" class="deck-category-list"></ul>
+                
+                <h3 class="deck-category-header">
+                    Main Deck <span id="main-deck-count">0/60-75</span>
+                </h3>
+                <ul id="main-deck-list" class="deck-category-list"></ul>
 
-</div>		</a--> 	
-
-	<div class="card-list">
-    <div id="deck-list-container">
-        <h3 class="deck-category-header">
-            Starting Gear <span id="starting-gear-count">0/3</span>
-        </h3>
-        <ul id="starting-gear-list" class="deck-category-list"></ul>
-        
-        <h3 class="deck-category-header">
-            Main Deck <span id="main-deck-count">0/60-75</span>
-        </h3>
-        <ul id="main-deck-list" class="deck-category-list"></ul>
-
-        <h3 class="deck-category-header">
-            Forge Deck <span id="forge-deck-count">0/15</span>
-        </h3>
-        <ul id="forge-deck-list" class="deck-category-list"></ul>
-        
-        <h3 class="deck-category-header">
-            Tokens <span id="token-deck-count">0</span>
-        </h3>
-        <ul id="token-deck-list" class="deck-category-list"></ul>
-    </div>
-    <button id="download-button">Download PDF</button>
-</div>
+                <h3 class="deck-category-header">
+                    Forge Deck <span id="forge-deck-count">0/15</span>
+                </h3>
+                <ul id="forge-deck-list" class="deck-category-list"></ul>
+                
+                <h3 class="deck-category-header">
+                    Tokens <span id="token-deck-count">0</span>
+                </h3>
+                <ul id="token-deck-list" class="deck-category-list"></ul>
+            </div>
+            <button id="download-button">Download PDF</button>
+        </div> </div> ```
 
 
 <div id="card-magnifier">
