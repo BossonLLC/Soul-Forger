@@ -315,6 +315,7 @@ controlIds.forEach(id => {
         if (downloadButton) { 
             downloadButton.addEventListener('click', generateDeckPDF);
         }
+         ;   
         function clearAllFilters(cardList) {
     // 1. Reset all Text Inputs and Dropdowns
     const controlsToClear = [
@@ -322,7 +323,7 @@ controlIds.forEach(id => {
         'on-guard-power-search', 'off-guard-power-search', 'endurance-search',
         'experience-search', 'hand-search'
     ];
-    
+
     // Reset Text Inputs
     controlsToClear.forEach(id => {
         const element = document.getElementById(id);
