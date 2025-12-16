@@ -215,23 +215,73 @@ const handleCombinedSearchAndFilter = (list) => {
     // Array of attributes that should be treated as NUMERIC for strict checking
     const numericAttributes = ['Ronum', 'Power', 'Off-guard Power', 'Endurance', 'Experience', 'Hands'];
     
-// 3. Check Checkbox State
+// 2. Collect all active criteria
+    const activeCriteria = [];
+    let isAnyControlActive = false;
+
+    // --- Collect Text/Dropdown Criteria ---
+    for (const key in controls) {
+        const element = controls[key];
+        if (element) {
+            const value = element.value.toLowerCase().trim();
+            const type = element.tagName.toLowerCase(); 
+
+            if (value && value !== "" && !value.includes("all")) {
+                isAnyControlActive = true;
+                activeCriteria.push({
+                    attribute: key,
+                    query: value,
+                    type: type
+                });
+            }
+        }
+    }
+
+    // --- Collect Checkbox State ---
     const startingGearActive = document.getElementById('starting-gear-filter').checked;
     const tokensActive = document.getElementById('tokens-filter').checked;
 
-    // Checkboxes count as an active control if checked
+    // If either checkbox is checked, the filtering is considered active
     if (startingGearActive || tokensActive) {
         isAnyControlActive = true;
     }
 
-    // 4. If nothing is active, stop here (the list is already reset above)
+    // 3. If NO control (input, select, or checkbox) is active, stop here
     if (!isAnyControlActive) {
         return;
     }
+    // --- END CHECKBOX STATE INTEGRATION ---
     
-// 5. Apply Custom Filtering
+    // Array of attributes that should be treated as NUMERIC for strict checking
+    const numericAttributes = ['Ronum', 'Power', 'Off-guard Power', 'Endurance', 'Experience', 'Hands'];
+    
+// 4. Apply Custom Filtering
 list.filter(function(item) {
     let matchesAllCriteria = true;
+    const itemValues = item.values();
+
+    // =========================================================
+    // 1. CHECKBOX FILTER LOGIC (NEW: Only run if a checkbox is checked)
+    // =========================================================
+    if (startingGearActive || tokensActive) {
+        const itemCost = String(itemValues['Cost']).toLowerCase().trim();
+        let passesCheckbox = false;
+
+        // Condition 1: Check if it matches Starting Gear
+        if (startingGearActive && itemCost.includes('starting gear')) {
+            passesCheckbox = true;
+        }
+
+        // Condition 2: Check if it matches Tokens
+        if (tokensActive && itemCost.includes('token')) {
+            passesCheckbox = true;
+        }
+
+        // If a checkbox is active, but the card doesn't pass EITHER condition, fail it.
+        if (!passesCheckbox) {
+            return false; // Fail this card immediately
+        }
+    }
     const itemValues = item.values();
 
     // =========================================================
@@ -348,6 +398,50 @@ list.filter(function(item) {
         if (downloadButton) { 
             downloadButton.addEventListener('click', generateDeckPDF);
         }
+        function clearAllFilters(cardList) {
+    // 1. Reset all Text Inputs and Dropdowns
+    const controlsToClear = [
+        'name-search', 'effect-search', 'ronum-search', 'subtype-search',
+        'on-guard-power-search', 'off-guard-power-search', 'endurance-search',
+        'experience-search', 'hand-search'
+    ];
+    
+    // Reset Text Inputs
+    controlsToClear.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.value = ''; // Clear the input field
+        }
+    });
+
+    // Reset Dropdowns (Selects) to their default/first option (which should be 'All')
+    const selectControlsToClear = [
+        'type-filter', 'faction-filter', 'speed-filter'
+    ];
+    selectControlsToClear.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            // Set the value to the default 'All' or the first option
+            // Assuming the 'All' option has the value "" (empty string) or "All"
+            element.value = ""; 
+        }
+    });
+
+    // 2. Reset Checkboxes
+    const startingGearCheckbox = document.getElementById('starting-gear-filter');
+    const tokensCheckbox = document.getElementById('tokens-filter');
+
+    if (startingGearCheckbox) {
+        startingGearCheckbox.checked = false;
+    }
+    if (tokensCheckbox) {
+        tokensCheckbox.checked = false;
+    }
+
+    // 3. Clear List.js internal filter/search state
+    cardList.search();
+    cardList.filter();
+}
 // --- 7. CLEAR ALL FILTERS BUTTON LISTENER ---
 const clearFiltersButton = document.getElementById('clear-filters-btn');
 if (clearFiltersButton) {
