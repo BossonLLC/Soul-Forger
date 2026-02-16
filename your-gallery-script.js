@@ -324,6 +324,43 @@ if (ttsButton) {
     console.log("TTS Button listener attached.");
 }
 
+ // --- LUA DATABASE EXPORT LOGIC ---
+function exportLuaDatabase(cardList) {
+    // ⚠️ CHANGE THIS to your actual website URL where images are hosted!
+    // Tabletop Simulator needs a full web address to download the images.
+    const baseURL = "https://your-website-link.com/"; 
+
+    let luaString = "cardDatabase = {\n";
+
+    cardList.items.forEach(item => {
+        const val = item.values();
+        const name = val["Card Name"];
+        let path = val["Image"] || "";
+
+        // Clean the path (remove parentheses like we did for the gallery)
+        const cleanPath = path.trim().replace(/[()]/g, '');
+        
+        if (name && cleanPath) {
+            // Formats as: ["Card Name"] = "https://url.com/path/image.png",
+            luaString += `    ["${name}"] = "${baseURL}${cleanPath}",\n`;
+        }
+    });
+
+    luaString += "}\n";
+    luaString += `cardBack = "${baseURL}assets/cardback.png"`; // Adjust your back path
+
+    // Copy to clipboard
+    navigator.clipboard.writeText(luaString).then(() => {
+        alert("Lua Database copied! Paste this at the TOP of your TTS Script.");
+    }).catch(err => {
+        console.log(luaString);
+        alert("Check console for Lua code.");
+    });
+}
+
+// Connect it inside your initCardGallery function:
+// const luaBtn = document.getElementById('export-lua-db-btn');
+// if (luaBtn) { luaBtn.onclick = () => exportLuaDatabase(cardList); }       
         
          ;   
         function clearAllFilters(cardList) {
