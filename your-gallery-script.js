@@ -841,11 +841,3 @@ if (ttsButton) {
     ttsButton.addEventListener('click', copyDeckToTTS);
 }
 
-
-
-// Connect the TTS Button
-const ttsButton = document.getElementById('copy-tts-btn');
-if (ttsButton) {
-    ttsButton.onclick = copyDeckToTTS; // Connects the click to the function
-    console.log("TTS Button listener attached.");
-}
