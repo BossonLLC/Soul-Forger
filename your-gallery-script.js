@@ -845,9 +845,3 @@ async function copyDeckToTTS() {
     }
 }
 
-// Attach the listener (Put this inside your initCardGallery function near the others)
-const ttsButton = document.getElementById('copy-tts-btn');
-if (ttsButton) {
-    ttsButton.addEventListener('click', copyDeckToTTS);
-}
-
