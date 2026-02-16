@@ -796,3 +796,47 @@ const clearButton = document.getElementById('clear-filters-btn');
 if (clearButton) {
     clearButton.addEventListener('click', () => clearAllFilters(cardList));
 }
+
+
+
+// --- 11. TTS EXPORT LOGIC ---
+async function copyDeckToTTS() {
+    const categoryIds = ['starting-gear-list', 'main-deck-list', 'forge-deck-list'];
+    let deckString = "";
+
+    categoryIds.forEach(id => {
+        const listElement = document.getElementById(id);
+        if (listElement) {
+            const items = listElement.querySelectorAll('li');
+            items.forEach(item => {
+                const name = item.getAttribute('data-card-name');
+                const quantityInput = item.querySelector('.card-list-item-quantity');
+                const quantity = quantityInput ? quantityInput.value : 1;
+                
+                // Format: "4 Blazemaw Whelp"
+                deckString += `${quantity} ${name}\n`;
+            });
+        }
+    });
+
+    if (!deckString) {
+        alert("Your deck is empty!");
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(deckString);
+        alert("Decklist copied to clipboard! You can now paste this into a TTS Importer.");
+    } catch (err) {
+        console.error('Failed to copy: ', err);
+        // Fallback for older browsers
+        alert("Could not copy automatically. Check console.");
+        console.log(deckString);
+    }
+}
+
+// Attach the listener (Put this inside your initCardGallery function near the others)
+const ttsButton = document.getElementById('copy-tts-btn');
+if (ttsButton) {
+    ttsButton.addEventListener('click', copyDeckToTTS);
+}
