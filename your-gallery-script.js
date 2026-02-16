@@ -315,6 +315,16 @@ controlIds.forEach(id => {
         if (downloadButton) { 
             downloadButton.addEventListener('click', generateDeckPDF);
         }
+
+
+// Connect the TTS Button
+const ttsButton = document.getElementById('copy-tts-btn');
+if (ttsButton) {
+    ttsButton.onclick = copyDeckToTTS; // Connects the click to the function
+    console.log("TTS Button listener attached.");
+}
+
+        
          ;   
         function clearAllFilters(cardList) {
     // 1. Reset all Text Inputs and Dropdowns
