@@ -1,8 +1,7 @@
 // ==========================================
-// 1. GLOBAL HELPER FUNCTIONS (The "Brains")
+// 1. GLOBAL HELPER FUNCTIONS
 // ==========================================
 
-// Fixes image paths from (path/file.png) to path/file.png
 function setImageSources(cardList) {
     cardList.items.forEach(item => {
         const imgElement = item.elm.querySelector('.card-image');
@@ -16,63 +15,39 @@ function setImageSources(cardList) {
     });
 }
 
-// Generates the Lua Database for Tabletop Simulator
 function exportLuaDatabase(cardList) {
-    const baseURL = "https://soul-forger.com/"; // BASE URL only
+    const baseURL = "https://soul-forger.com/"; 
     let luaString = "cardDatabase = {\n";
-
     cardList.items.forEach(item => {
         const val = item.values();
         const name = val["Card Name"];
-        const rawPath = val["Image"] || "";
-        const cleanPath = String(rawPath).trim().replace(/[()]/g, '');
-        
+        const cleanPath = String(val["Image"] || "").trim().replace(/[()]/g, '');
         if (name && cleanPath) {
             luaString += `    ["${name}"] = "${baseURL}${cleanPath}",\n`;
         }
     });
-
-    luaString += "}\n";
-    luaString += `cardBack = "${baseURL}firecards/cardback.png"`;
-
-    navigator.clipboard.writeText(luaString).then(() => {
-        alert("Lua Database copied! Paste into TTS Script.");
-    }).catch(err => {
-        console.log(luaString);
-        alert("Check console (F12) for code.");
-    });
+    luaString += "}\ncardBack = \"${baseURL}firecards/cardback.png\"";
+    navigator.clipboard.writeText(luaString).then(() => alert("Lua Database copied!"));
 }
 
-// Copies the current decklist in "Quantity Name" format
 async function copyDeckToTTS() {
     const categoryIds = ['starting-gear-list', 'main-deck-list', 'forge-deck-list'];
     let deckString = "";
-
     categoryIds.forEach(id => {
         const listElement = document.getElementById(id);
         if (listElement) {
-            const items = listElement.querySelectorAll('li');
-            items.forEach(item => {
+            listElement.querySelectorAll('li').forEach(item => {
                 const name = item.getAttribute('data-card-name');
-                const quantityInput = item.querySelector('.card-list-item-quantity');
-                const quantity = quantityInput ? quantityInput.value : 1;
-                deckString += `${quantity} ${name}\n`;
+                const qty = item.querySelector('.card-list-item-quantity').value;
+                deckString += `${qty} ${name}\n`;
             });
         }
     });
-
-    if (!deckString) { alert("Your deck is empty!"); return; }
-
-    try {
-        await navigator.clipboard.writeText(deckString);
-        alert("Decklist copied for TTS!");
-    } catch (err) {
-        console.log(deckString);
-        alert("Copy failed. Check console.");
-    }
+    if (!deckString) return alert("Deck is empty!");
+    await navigator.clipboard.writeText(deckString);
+    alert("Decklist copied for TTS!");
 }
 
-// Updates the 0/60 deck counters
 function updateDeckCounts() {
     const categories = [
         { id: 'starting-gear-list', countId: 'starting-gear-count', limitMin: 0, limitMax: 3 }, 
@@ -80,24 +55,74 @@ function updateDeckCounts() {
         { id: 'forge-deck-list', countId: 'forge-deck-count', limitMin: 15, limitMax: 15 },
         { id: 'token-deck-list', countId: 'token-deck-count', limitMin: 0, limitMax: Infinity }
     ];
-
-    categories.forEach(category => {
-        const list = document.getElementById(category.id);
-        const countSpan = document.getElementById(category.countId);
-        if (list && countSpan) {
-            let totalCards = 0;
-            list.querySelectorAll('li').forEach(item => {
-                const quantityInput = item.querySelector('.card-list-item-quantity');
-                totalCards += quantityInput ? parseInt(quantityInput.value) : 0;
+    categories.forEach(cat => {
+        const list = document.getElementById(cat.id);
+        const span = document.getElementById(cat.countId);
+        if (list && span) {
+            let total = 0;
+            list.querySelectorAll('li').forEach(li => {
+                total += parseInt(li.querySelector('.card-list-item-quantity').value || 0);
             });
-            countSpan.textContent = (category.limitMax === Infinity) ? totalCards : `${totalCards}/${category.limitMax}`;
-            countSpan.style.color = (totalCards < category.limitMin || totalCards > category.limitMax) ? 'red' : 'green';
+            span.textContent = (cat.limitMax === Infinity) ? total : `${total}/${cat.limitMax}`;
+            span.style.color = (total < cat.limitMin || total > cat.limitMax) ? 'red' : 'green';
         }
     });
 }
 
 // ==========================================
-// 2. MAIN INITIALIZATION (The "Heart")
+// 2. MASTER SEARCH & FILTER LOGIC
+// ==========================================
+
+const handleCombinedSearchAndFilter = (list) => {
+    const controls = {
+        'Card Name': document.getElementById('name-search'),
+        'Effect': document.getElementById('effect-search'),
+        'Ronum': document.getElementById('ronum-search'),
+        'Sub Type': document.getElementById('subtype-search'),
+        'Power': document.getElementById('on-guard-power-search'),
+        'Off-guard Power': document.getElementById('off-guard-power-search'),
+        'Endurance': document.getElementById('endurance-search'),
+        'Experience': document.getElementById('experience-search'),
+        'Hands': document.getElementById('hand-search'),
+        'Type': document.getElementById('type-filter'),
+        'Faction': document.getElementById('faction-filter'),
+        'Action Speed': document.getElementById('speed-filter')
+    };
+
+    const startingGearActive = document.getElementById('starting-gear-filter').checked;
+    const tokensActive = document.getElementById('tokens-filter').checked;
+
+    list.filter(item => {
+        const val = item.values();
+        
+        // 1. Checkbox Filters
+        if (startingGearActive || tokensActive) {
+            const cost = String(val['Cost']).toLowerCase();
+            let passCheck = false;
+            if (startingGearActive && cost.includes('starting gear')) passCheck = true;
+            if (tokensActive && cost.includes('token')) passCheck = true;
+            if (!passCheck) return false;
+        }
+
+        // 2. Text and Dropdown Filters
+        for (const key in controls) {
+            const el = controls[key];
+            if (el && el.value && el.value !== "" && !el.value.includes("all")) {
+                const query = el.value.toLowerCase().trim();
+                const itemVal = String(val[key] || "").toLowerCase();
+                if (el.tagName === 'SELECT' && key !== 'Action Speed') {
+                    if (itemVal !== query) return false;
+                } else {
+                    if (!itemVal.includes(query)) return false;
+                }
+            }
+        }
+        return true;
+    });
+};
+
+// ==========================================
+// 3. MAIN INITIALIZATION
 // ==========================================
 
 async function initCardGallery() {
@@ -106,40 +131,38 @@ async function initCardGallery() {
         const cardData = await response.json();
 
         const options = {
-            valueNames: [
-                "Card Name", "Ronum", "Cost", "Type", "Action Type", "Sub Type",
-                "Power", "Off-guard Power", "Effect", "Image", "Endurance", 
-                "Experience", "Hands", "Faction", "Action Speed"
-            ],
-            item: `<li class="card-item">
-                <h4 class="Card Name">{Card Name}</h4>
-                <img class="card-image" loading="lazy" data-card-name="{Card Name}" alt="">
-                <span class="Image" style="display:none">{Image}</span>
-                <div class="card-details">
-                    <p>Cost: <span class="Cost">{Cost}</span> | Type: <span class="Type">{Type}</span></p>
-                    <p class="attack-line">A/OG: <span class="Power">{Power}</span> | <span class="Off-guard Power">{Off-guard Power}</span></p>
-                    <p>Effect: <span class="Effect">{Effect}</span></p>
-                </div>
-                <button class="add-to-deck-btn">Add to Deck</button>
-            </li>`
+            valueNames: ["Card Name", "Ronum", "Cost", "Type", "Action Type", "Sub Type", "Power", "Off-guard Power", "Effect", "Image", "Endurance", "Experience", "Hands", "Faction", "Action Speed"],
+            item: `<li class="card-item"><h4 class="Card Name">{Card Name}</h4><img class="card-image" loading="lazy" alt=""><span class="Image" style="display:none">{Image}</span><div class="card-details"><p>Cost: <span class="Cost">{Cost}</span> | Type: <span class="Type">{Type}</span></p><p>A/OG: <span class="Power">{Power}</span> | <span class="Off-guard Power">{Off-guard Power}</span></p><p>Effect: <span class="Effect">{Effect}</span></p></div><button class="add-to-deck-btn">Add to Deck</button></li>`
         };
 
         var cardList = new List('cards-gallery', options, cardData);
         setImageSources(cardList);
-
         cardList.on('updated', () => setImageSources(cardList));
 
-        // --- BUTTON CONNECTIONS ---
-        const luaBtn = document.getElementById('export-lua-db-btn');
-        if (luaBtn) luaBtn.onclick = () => exportLuaDatabase(cardList);
+        // Attach Search Listeners
+        const controlIds = ['name-search', 'effect-search', 'ronum-search', 'subtype-search', 'on-guard-power-search', 'off-guard-power-search', 'endurance-search', 'experience-search', 'hand-search', 'type-filter', 'faction-filter', 'speed-filter', 'starting-gear-filter', 'tokens-filter'];
+        controlIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                const ev = (el.type === 'checkbox' || el.tagName === 'SELECT') ? 'change' : 'keyup';
+                el.addEventListener(ev, () => handleCombinedSearchAndFilter(cardList));
+            }
+        });
 
-        const ttsBtn = document.getElementById('copy-tts-btn');
-        if (ttsBtn) ttsBtn.onclick = copyDeckToTTS;
+        // Button Connections
+        document.getElementById('export-lua-db-btn').onclick = () => exportLuaDatabase(cardList);
+        document.getElementById('copy-tts-btn').onclick = copyDeckToTTS;
+        document.getElementById('download-button').onclick = generateDeckPDF;
+        document.getElementById('clear-filters-btn').onclick = () => {
+            controlIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.type === 'checkbox' ? el.checked = false : el.value = (el.tagName === 'SELECT' ? 'all' : '');
+            });
+            cardList.filter();
+            cardList.search();
+        };
 
-        const downloadBtn = document.getElementById('download-button');
-        if (downloadBtn) downloadBtn.onclick = generateDeckPDF;
-
-        // --- DECK BUILDING LOGIC ---
+        // Deck Builder Logic with LIMITS
         document.getElementById('cards-gallery').addEventListener('click', (e) => {
             const btn = e.target.closest('.add-to-deck-btn');
             if (!btn) return;
@@ -150,43 +173,38 @@ async function initCardGallery() {
             const cost = cardItem.querySelector('.Cost').textContent.trim();
             const imgPath = cardItem.querySelector('.card-image').getAttribute('src');
 
-            // Logic to find which list to add to (Main, Forge, etc)
             let listId = 'main-deck-list';
-            if (cost.toLowerCase().includes('starting gear')) listId = 'starting-gear-list';
-            else if (cost.toLowerCase().includes('token')) listId = 'token-deck-list';
-            else if (type === 'Equipment') listId = 'forge-deck-list';
+            let maxCopies = 4;
+            if (cost.toLowerCase().includes('starting gear')) { listId = 'starting-gear-list'; maxCopies = 1; }
+            else if (cost.toLowerCase().includes('token')) { listId = 'token-deck-list'; maxCopies = Infinity; }
+            else if (type === 'Equipment') { listId = 'forge-deck-list'; maxCopies = 4; }
 
             const targetList = document.getElementById(listId);
             let existing = targetList.querySelector(`li[data-card-name="${name}"]`);
 
             if (existing) {
                 const input = existing.querySelector('.card-list-item-quantity');
-                input.value = parseInt(input.value) + 1;
+                if (parseInt(input.value) < maxCopies) {
+                    input.value = parseInt(input.value) + 1;
+                }
             } else {
                 const li = document.createElement('li');
                 li.setAttribute('data-card-name', name);
                 li.setAttribute('data-image-path', imgPath);
-                li.innerHTML = `<button class="remove-btn">X</button> <span>${name}</span> 
-                                <input type="number" class="card-list-item-quantity" value="1" min="1">`;
-                
+                li.innerHTML = `<button class="remove-btn">X</button> <span>${name}</span> <input type="number" class="card-list-item-quantity" value="1" min="1" max="${maxCopies}">`;
                 li.querySelector('.remove-btn').onclick = () => { li.remove(); updateDeckCounts(); };
-                li.querySelector('input').onchange = updateDeckCounts;
+                li.querySelector('input').onchange = (ev) => {
+                    if (ev.target.value > maxCopies) ev.target.value = maxCopies;
+                    updateDeckCounts();
+                };
                 targetList.appendChild(li);
             }
             updateDeckCounts();
         });
 
-    } catch (error) {
-        console.error('Initialization Failed:', error);
-    }
+    } catch (err) { console.error('Init Error:', err); }
 }
 
 window.onload = initCardGallery;
 
-// --- PDF & IMAGE HELPERS (Kept at bottom) ---
-async function generateDeckPDF() { 
-    /* ... (Your existing PDF code is fine here) ... */ 
-}
-function imageUrlToBase64(url) { 
-    /* ... (Your existing Base64 code is fine here) ... */ 
-}
+// PDF logic stays exactly as you had it below...
