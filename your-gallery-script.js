@@ -328,7 +328,7 @@ if (ttsButton) {
 function exportLuaDatabase(cardList) {
     // ⚠️ CHANGE THIS to your actual website URL where images are hosted!
     // Tabletop Simulator needs a full web address to download the images.
-    const baseURL = "https://your-website-link.com/"; 
+    const baseURL = "https://soul-forger.com/CardGallery.html"; 
 
     let luaString = "cardDatabase = {\n";
 
