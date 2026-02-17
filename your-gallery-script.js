@@ -162,47 +162,86 @@ async function initCardGallery() {
             cardList.search();
         };
 
-        // Deck Builder Logic with LIMITS
-        document.getElementById('cards-gallery').addEventListener('click', (e) => {
-            const btn = e.target.closest('.add-to-deck-btn');
-            if (!btn) return;
+// --- DECK BUILDER LOGIC (REPAIRED) ---
+        const galleryElement = document.getElementById('cards-gallery');
+        if (galleryElement) {
+            galleryElement.addEventListener('click', (e) => {
+                const btn = e.target.closest('.add-to-deck-btn');
+                if (!btn) return; // Exit if we didn't click a button
 
-            const cardItem = btn.closest('.card-item');
-            const name = cardItem.querySelector('h4').textContent.trim();
-            const type = cardItem.querySelector('.Type').textContent.trim();
-            const cost = cardItem.querySelector('.Cost').textContent.trim();
-            const imgPath = cardItem.querySelector('.card-image').getAttribute('src');
+                console.log("Add button clicked!");
 
-            let listId = 'main-deck-list';
-            let maxCopies = 4;
-            if (cost.toLowerCase().includes('starting gear')) { listId = 'starting-gear-list'; maxCopies = 1; }
-            else if (cost.toLowerCase().includes('token')) { listId = 'token-deck-list'; maxCopies = Infinity; }
-            else if (type === 'Equipment') { listId = 'forge-deck-list'; maxCopies = 4; }
+                const cardItem = btn.closest('.card-item');
+                const name = cardItem.querySelector('h4').textContent.trim();
+                const type = cardItem.querySelector('.Type').textContent.trim();
+                const costElement = cardItem.querySelector('.Cost');
+                const cost = costElement ? costElement.textContent.trim().toLowerCase() : "";
+                const imgElement = cardItem.querySelector('.card-image');
+                const imgPath = imgElement ? imgElement.getAttribute('src') : "";
 
-            const targetList = document.getElementById(listId);
-            let existing = targetList.querySelector(`li[data-card-name="${name}"]`);
+                // 1. Determine which list this card belongs in
+                let listId = 'main-deck-list';
+                let maxCopies = 4;
 
-            if (existing) {
-                const input = existing.querySelector('.card-list-item-quantity');
-                if (parseInt(input.value) < maxCopies) {
-                    input.value = parseInt(input.value) + 1;
+                if (cost.includes('starting gear')) {
+                    listId = 'starting-gear-list';
+                    maxCopies = 1;
+                } else if (cost.includes('token')) {
+                    listId = 'token-deck-list';
+                    maxCopies = Infinity;
+                } else if (type === 'Equipment') {
+                    listId = 'forge-deck-list';
+                    maxCopies = 15; // Set to 15 based on your previous forge limits
                 }
-            } else {
-                const li = document.createElement('li');
-                li.setAttribute('data-card-name', name);
-                li.setAttribute('data-image-path', imgPath);
-                li.innerHTML = `<button class="remove-btn">X</button> <span>${name}</span> <input type="number" class="card-list-item-quantity" value="1" min="1" max="${maxCopies}">`;
-                li.querySelector('.remove-btn').onclick = () => { li.remove(); updateDeckCounts(); };
-                li.querySelector('input').onchange = (ev) => {
-                    if (ev.target.value > maxCopies) ev.target.value = maxCopies;
-                    updateDeckCounts();
-                };
-                targetList.appendChild(li);
-            }
-            updateDeckCounts();
-        });
 
-    } catch (err) { console.error('Init Error:', err); }
+                console.log(`Trying to add ${name} to ${listId}`);
+
+                const targetList = document.getElementById(listId);
+                
+                // CRITICAL CHECK: Does the list actually exist in your HTML?
+                if (!targetList) {
+                    console.error(`ERROR: Could not find an HTML element with id="${listId}"`);
+                    alert(`Developer Error: The list "${listId}" is missing from your HTML.`);
+                    return;
+                }
+
+                // 2. Check for existing card in that specific list
+                let existing = targetList.querySelector(`li[data-card-name="${name}"]`);
+
+                if (existing) {
+                    const input = existing.querySelector('.card-list-item-quantity');
+                    let currentQty = parseInt(input.value);
+                    if (currentQty < maxCopies) {
+                        input.value = currentQty + 1;
+                    } else {
+                        console.warn("Max copies reached for this category.");
+                    }
+                } else {
+                    // 3. Create new list item
+                    const li = document.createElement('li');
+                    li.setAttribute('data-card-name', name);
+                    li.setAttribute('data-image-path', imgPath);
+                    li.className = 'deck-list-item'; // Added a class for styling
+                    
+                    li.innerHTML = `
+                        <button class="remove-btn" style="margin-right:8px; color:red; cursor:pointer;">X</button>
+                        <span class="card-name-span">${name}</span>
+                        <input type="number" class="card-list-item-quantity" value="1" min="1" max="${maxCopies}" style="width:40px; margin-left:10px;">
+                    `;
+                    
+                    // Attach logic to the new buttons
+                    li.querySelector('.remove-btn').onclick = () => { li.remove(); updateDeckCounts(); };
+                    li.querySelector('input').onchange = (ev) => {
+                        if (parseInt(ev.target.value) > maxCopies) ev.target.value = maxCopies;
+                        updateDeckCounts();
+                    };
+
+                    targetList.appendChild(li);
+                }
+                
+                updateDeckCounts();
+            });
+        } catch (err) { console.error('Init Error:', err); }
 }
 
 window.onload = initCardGallery;
