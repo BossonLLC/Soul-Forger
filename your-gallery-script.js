@@ -1,3 +1,32 @@
+// --- LUA DATABASE EXPORT ENGINE (Safe at the top!) ---
+function exportLuaDatabase(cardList) {
+    // ⚠️ UPDATE THIS to your actual website link later!
+    const baseURL = "https://your-website.com/"; 
+
+    let luaString = "cardDatabase = {\n";
+
+    cardList.items.forEach(item => {
+        const val = item.values();
+        const name = val["Card Name"];
+        const rawPath = val["Image"] || "";
+        const cleanPath = String(rawPath).trim().replace(/[()]/g, '');
+        
+        if (name && cleanPath) {
+            luaString += `    ["${name}"] = "${baseURL}${cleanPath}",\n`;
+        }
+    });
+
+    luaString += "}\n";
+    luaString += `cardBack = "${baseURL}firecards/cardback.png"`;
+
+    navigator.clipboard.writeText(luaString).then(() => {
+        alert("Lua Database copied!");
+    }).catch(err => {
+        console.log(luaString);
+        alert("Check console (F12) for the code.");
+    });
+}
+
 // your-gallery-script.js
 
 // --- 1. INITIALIZE LIST.JS AND MAIN GALLERY SETUP ---
@@ -644,6 +673,15 @@ if (gallery && magnifier && magnifiedImage) {
         // If the mouse leaves any part of the gallery, hide the magnifier
         hideMagnifier();
     });
+    // --- TTS LUA BUTTON CONNECTION ---
+        const luaBtn = document.getElementById('export-lua-db-btn');
+        if (luaBtn) {
+            luaBtn.onclick = () => exportLuaDatabase(cardList);
+        }
+
+    } catch (error) {
+        console.error('CRITICAL ERROR:', error);
+    }
 }
 
 // Run the main initialization function only after the entire page is loaded
@@ -894,33 +932,3 @@ async function copyDeckToTTS() {
     }
 }
 
-// --- LUA DATABASE EXPORT ENGINE ---
-function exportLuaDatabase(cardList) {
-    // ⚠️ UPDATE THIS to your actual website link later!
-    const baseURL = "https://your-website.com/"; 
-
-    let luaString = "cardDatabase = {\n";
-
-    cardList.items.forEach(item => {
-        const val = item.values();
-        const name = val["Card Name"];
-        // Using the same logic as your images to keep it consistent
-        const rawPath = val["Image"] || "";
-        const cleanPath = String(rawPath).trim().replace(/[()]/g, '');
-        
-        if (name && cleanPath) {
-            luaString += `    ["${name}"] = "${baseURL}${cleanPath}",\n`;
-        }
-    });
-
-    luaString += "}\n";
-    luaString += `cardBack = "${baseURL}firecards/cardback.png"`; // Change to your actual back
-
-    navigator.clipboard.writeText(luaString).then(() => {
-        alert("Lua Database copied! Paste into the top of your TTS script.");
-    }).catch(err => {
-        console.error("Copy failed", err);
-        alert("Copy failed. Check console (F12) for the code.");
-        console.log(luaString);
-    });
-}
