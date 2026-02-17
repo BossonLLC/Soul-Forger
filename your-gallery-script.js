@@ -356,6 +356,18 @@ function exportLuaDatabase(cardList) {
         console.log(luaString);
         alert("Check console for Lua code.");
     });
+    // --- CONNECTION FOR LUA DATABASE BUTTON ---
+        const luaBtn = document.getElementById('export-lua-db-btn');
+        if (luaBtn) {
+            luaBtn.onclick = function() {
+                console.log("Lua Export button clicked!"); 
+                exportLuaDatabase(cardList); // It can see cardList here!
+            };
+        }
+
+    } catch (error) { // <--- Look for this "catch" line to find the end
+        console.error('CRITICAL ERROR: Main Initialization Failed:', error);
+    }
 }
 
 // Connect it inside your initCardGallery function:
@@ -882,3 +894,33 @@ async function copyDeckToTTS() {
     }
 }
 
+// --- LUA DATABASE EXPORT ENGINE ---
+function exportLuaDatabase(cardList) {
+    // ⚠️ UPDATE THIS to your actual website link later!
+    const baseURL = "https://your-website.com/"; 
+
+    let luaString = "cardDatabase = {\n";
+
+    cardList.items.forEach(item => {
+        const val = item.values();
+        const name = val["Card Name"];
+        // Using the same logic as your images to keep it consistent
+        const rawPath = val["Image"] || "";
+        const cleanPath = String(rawPath).trim().replace(/[()]/g, '');
+        
+        if (name && cleanPath) {
+            luaString += `    ["${name}"] = "${baseURL}${cleanPath}",\n`;
+        }
+    });
+
+    luaString += "}\n";
+    luaString += `cardBack = "${baseURL}firecards/cardback.png"`; // Change to your actual back
+
+    navigator.clipboard.writeText(luaString).then(() => {
+        alert("Lua Database copied! Paste into the top of your TTS script.");
+    }).catch(err => {
+        console.error("Copy failed", err);
+        alert("Copy failed. Check console (F12) for the code.");
+        console.log(luaString);
+    });
+}
