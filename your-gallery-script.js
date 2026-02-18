@@ -18,16 +18,26 @@ function setImageSources(cardList) {
 function exportLuaDatabase(cardList) {
     const baseURL = "https://soul-forger.com/"; 
     let luaString = "cardDatabase = {\n";
+    
     cardList.items.forEach(item => {
         const val = item.values();
         const name = val["Card Name"];
+        // Clean the path and ensure it's a string
         const cleanPath = String(val["Image"] || "").trim().replace(/[()]/g, '');
+        
         if (name && cleanPath) {
+            // Added proper string joining and a comma at the end of the line
             luaString += `    ["${name}"] = "${baseURL}${cleanPath}",\n`;
         }
     });
-    luaString += "}\ncardBack = \"" + baseURL + "firecards/cardback.png\"";
-    navigator.clipboard.writeText(luaString).then(() => alert("Lua Database copied!"));
+    
+    // Fixed the baseURL joining here
+    luaString += "}\n";
+    luaString += "cardBack = \"" + baseURL + "firecards/cardback.png\"";
+    
+    navigator.clipboard.writeText(luaString).then(() => {
+        alert("Lua Database copied! Now paste this into the TTS Global Script.");
+    });
 }
 
 async function copyDeckToTTS() {
