@@ -163,63 +163,96 @@ async function initCardGallery() {
             document.getElementById('download-button').onclick = generateDeckPDF;
         }
 
-        // DECK BUILDER LOGIC
-        const galleryElement = document.getElementById('cards-gallery');
-        if (galleryElement) {
-            galleryElement.addEventListener('click', (e) => {
-                const btn = e.target.closest('.add-to-deck-btn');
-                if (!btn) return;
+// ==========================================
+// DECK BUILDER LOGIC (DIAGNOSTIC VERSION)
+// ==========================================
+const galleryElement = document.getElementById('cards-gallery');
 
-                const cardItem = btn.closest('.card-item');
-                const name = cardItem.querySelector('h4').textContent.trim();
-                const type = cardItem.querySelector('.Type').textContent.trim();
-                const cost = cardItem.querySelector('.Cost').textContent.trim().toLowerCase();
-                const imgPath = cardItem.querySelector('.card-image').getAttribute('src');
+if (galleryElement) {
+    console.log("SUCCESS: Gallery container found. Listening for clicks...");
+    
+    galleryElement.addEventListener('click', (e) => {
+        const btn = e.target.closest('.add-to-deck-btn');
+        
+        // If we didn't click the button, stop.
+        if (!btn) return; 
 
-                let listId = 'main-deck-list';
-                let maxCopies = 4;
+        console.log("1. CLICK DETECTED: 'Add to Deck' button pressed.");
 
-                if (cost.includes('starting gear')) {
-                    listId = 'starting-gear-list';
-                    maxCopies = 1;
-                } else if (cost.includes('token')) {
-                    listId = 'token-deck-list';
-                    maxCopies = Infinity;
-                } else if (type === 'Equipment') {
-                    listId = 'forge-deck-list';
-                    maxCopies = 4;
-                }
+        const cardItem = btn.closest('.card-item');
+        if (!cardItem) return console.error("ERROR: Could not find the card container (.card-item)");
 
-                const targetList = document.getElementById(listId);
-                if (!targetList) return;
+        // SCRAPING DATA
+        const name = cardItem.querySelector('h4').textContent.trim();
+        const typeEl = cardItem.querySelector('.Type');
+        const costEl = cardItem.querySelector('.Cost');
+        const imgEl = cardItem.querySelector('.card-image');
 
-                let existing = targetList.querySelector(`li[data-card-name="${name}"]`);
+        if (!typeEl || !costEl) {
+            return console.error("ERROR: Missing .Type or .Cost in the card HTML template!");
+        }
 
-                if (existing) {
-                    const input = existing.querySelector('.card-list-item-quantity');
-                    if (parseInt(input.value) < maxCopies) {
-                        input.value = parseInt(input.value) + 1;
-                    }
-                } else {
-                    const li = document.createElement('li');
-                    li.setAttribute('data-card-name', name);
-                    li.setAttribute('data-image-path', imgPath);
-                    li.innerHTML = `
-                        <button class="remove-btn" style="color:red; margin-right:5px;">X</button>
-                        <span>${name}</span>
-                        <input type="number" class="card-list-item-quantity" value="1" min="1" max="${maxCopies}" style="width:40px; float:right;">
-                    `;
-                    li.querySelector('.remove-btn').onclick = () => { li.remove(); updateDeckCounts(); };
-                    li.querySelector('input').onchange = (ev) => {
-                        if (parseInt(ev.target.value) > maxCopies) ev.target.value = maxCopies;
-                        updateDeckCounts();
-                    };
-                    targetList.appendChild(li);
-                }
-                updateDeckCounts();
-            });
-        } // Closed the galleryElement if-block correctly
+        const type = typeEl.textContent.trim();
+        const cost = costEl.textContent.trim().toLowerCase();
+        const imgPath = imgEl ? imgEl.getAttribute('src') : "";
 
+        console.log(`2. SCRAPED DATA: Name: ${name}, Type: ${type}, Cost: ${cost}`);
+
+        // SORTING LOGIC
+        let listId = 'main-deck-list';
+        let maxCopies = 4;
+
+        if (cost.includes('starting gear')) {
+            listId = 'starting-gear-list';
+            maxCopies = 1;
+        } else if (cost.includes('token')) {
+            listId = 'token-deck-list';
+            maxCopies = Infinity;
+        } else if (type === 'Equipment') {
+            listId = 'forge-deck-list';
+            maxCopies = 4;
+        }
+
+        console.log(`3. TARGETING: Sending card to #${listId}`);
+
+        const targetList = document.getElementById(listId);
+        if (!targetList) {
+            return console.error(`ERROR: Could not find the list in HTML with id="${listId}"`);
+        }
+
+        // ADDING TO LIST
+        let existing = targetList.querySelector(`li[data-card-name="${name}"]`);
+
+        if (existing) {
+            console.log("4. UPDATING: Card exists, increasing quantity.");
+            const input = existing.querySelector('.card-list-item-quantity');
+            if (parseInt(input.value) < maxCopies) {
+                input.value = parseInt(input.value) + 1;
+            }
+        } else {
+            console.log("4. ADDING: Creating new list item.");
+            const li = document.createElement('li');
+            li.setAttribute('data-card-name', name);
+            li.setAttribute('data-image-path', imgPath);
+            li.className = 'deck-list-item';
+            li.innerHTML = `
+                <button class="remove-btn" style="color:red; margin-right:8px;">X</button>
+                <span>${name}</span>
+                <input type="number" class="card-list-item-quantity" value="1" min="1" max="${maxCopies}" style="width:40px; float:right;">
+            `;
+            
+            li.querySelector('.remove-btn').onclick = () => { li.remove(); updateDeckCounts(); };
+            li.querySelector('input').onchange = () => updateDeckCounts();
+            
+            targetList.appendChild(li);
+        }
+        
+        updateDeckCounts();
+        console.log("5. FINISHED: List updated successfully.");
+    });
+} else {
+    console.error("CRITICAL ERROR: Could not find <div id='cards-gallery'> in your HTML!");
+}
     } catch (err) { 
         console.error('Init Error:', err); 
     } // Closed the try block correctly
