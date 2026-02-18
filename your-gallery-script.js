@@ -261,3 +261,6 @@ if (galleryElement) {
 window.onload = initCardGallery;
 
 // --- KEEP YOUR PDF GENERATION CODE BELOW THIS LINE ---
+function generateDeckPDF() {
+    alert("PDF function is currently empty, but I'm not crashing anymore!");
+}
