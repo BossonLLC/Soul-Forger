@@ -13,6 +13,26 @@ function setImageSources(cardList) {
             if (pathSpan) pathSpan.style.display = 'none';
         }
     });
+    // Re-initialize magnifier whenever images are refreshed
+    initMagnifier();
+}
+
+// --- ADD THIS MAGNIFIER FUNCTION ---
+function initMagnifier() {
+    const cards = document.querySelectorAll('.card-image');
+    const zoomResult = document.getElementById('zoom-result'); // Ensure you have this ID in your HTML
+
+    cards.forEach(card => {
+        card.onmouseover = function() {
+            if(zoomResult) {
+                zoomResult.style.backgroundImage = `url('${this.src}')`;
+                zoomResult.style.display = "block";
+            }
+        };
+        card.onmouseout = function() {
+            if(zoomResult) zoomResult.style.display = "none";
+        };
+    });
 }
 
 function exportLuaDatabase(cardList) {
@@ -22,21 +42,18 @@ function exportLuaDatabase(cardList) {
     cardList.items.forEach(item => {
         const val = item.values();
         const name = val["Card Name"];
-        // Clean the path and ensure it's a string
         const cleanPath = String(val["Image"] || "").trim().replace(/[()]/g, '');
         
         if (name && cleanPath) {
-            // Added proper string joining and a comma at the end of the line
             luaString += `    ["${name}"] = "${baseURL}${cleanPath}",\n`;
         }
     });
     
-    // Fixed the baseURL joining here
     luaString += "}\n";
     luaString += "cardBack = \"" + baseURL + "firecards/cardback.png\"";
     
     navigator.clipboard.writeText(luaString).then(() => {
-        alert("Lua Database copied! Now paste this into the TTS Global Script.");
+        alert("Lua Database copied!");
     });
 }
 
@@ -153,10 +170,15 @@ async function initCardGallery() {
         };
 
         var cardList = new List('cards-gallery', options, cardData);
+        
+        // Initial Image setup
         setImageSources(cardList);
-        cardList.on('updated', () => setImageSources(cardList));
+        
+        // Setup listeners
+        cardList.on('updated', () => {
+            setImageSources(cardList);
+        });
 
-        // Listeners for Search
         const controlIds = ['name-search', 'effect-search', 'ronum-search', 'subtype-search', 'on-guard-power-search', 'off-guard-power-search', 'endurance-search', 'experience-search', 'hand-search', 'type-filter', 'faction-filter', 'speed-filter', 'starting-gear-filter', 'tokens-filter'];
         controlIds.forEach(id => {
             const el = document.getElementById(id);
@@ -166,111 +188,63 @@ async function initCardGallery() {
             }
         });
 
-        // Buttons
         document.getElementById('export-lua-db-btn').onclick = () => exportLuaDatabase(cardList);
         document.getElementById('copy-tts-btn').onclick = copyDeckToTTS;
-        if(document.getElementById('download-button')) {
-            document.getElementById('download-button').onclick = generateDeckPDF;
+
+        // Deck Builder Event Delegation
+        const galleryElement = document.getElementById('cards-gallery');
+        if (galleryElement) {
+            galleryElement.addEventListener('click', (e) => {
+                const btn = e.target.closest('.add-to-deck-btn');
+                if (!btn) return; 
+
+                const cardItem = btn.closest('.card-item');
+                const name = cardItem.querySelector('h4').textContent.trim();
+                const type = cardItem.querySelector('.Type').textContent.trim();
+                const cost = cardItem.querySelector('.Cost').textContent.trim().toLowerCase();
+                const imgPath = cardItem.querySelector('.card-image').src;
+
+                let listId = 'main-deck-list';
+                let maxCopies = 4;
+
+                if (cost.includes('starting gear')) {
+                    listId = 'starting-gear-list';
+                    maxCopies = 1;
+                } else if (cost.includes('token')) {
+                    listId = 'token-deck-list';
+                    maxCopies = Infinity;
+                } else if (type === 'Equipment') {
+                    listId = 'forge-deck-list';
+                    maxCopies = 4;
+                }
+
+                const targetList = document.getElementById(listId);
+                let existing = targetList.querySelector(`li[data-card-name="${name}"]`);
+
+                if (existing) {
+                    const input = existing.querySelector('.card-list-item-quantity');
+                    if (parseInt(input.value) < maxCopies) {
+                        input.value = parseInt(input.value) + 1;
+                    }
+                } else {
+                    const li = document.createElement('li');
+                    li.setAttribute('data-card-name', name);
+                    li.className = 'deck-list-item';
+                    li.innerHTML = `
+                        <button class="remove-btn" style="color:red; margin-right:8px;">X</button>
+                        <span>${name}</span>
+                        <input type="number" class="card-list-item-quantity" value="1" min="1" max="${maxCopies}" style="width:40px; float:right;">
+                    `;
+                    li.querySelector('.remove-btn').onclick = () => { li.remove(); updateDeckCounts(); };
+                    li.querySelector('input').onchange = () => updateDeckCounts();
+                    targetList.appendChild(li);
+                }
+                updateDeckCounts();
+            });
         }
-
-// ==========================================
-// DECK BUILDER LOGIC (DIAGNOSTIC VERSION)
-// ==========================================
-const galleryElement = document.getElementById('cards-gallery');
-
-if (galleryElement) {
-    console.log("SUCCESS: Gallery container found. Listening for clicks...");
-    
-    galleryElement.addEventListener('click', (e) => {
-        const btn = e.target.closest('.add-to-deck-btn');
-        
-        // If we didn't click the button, stop.
-        if (!btn) return; 
-
-        console.log("1. CLICK DETECTED: 'Add to Deck' button pressed.");
-
-        const cardItem = btn.closest('.card-item');
-        if (!cardItem) return console.error("ERROR: Could not find the card container (.card-item)");
-
-        // SCRAPING DATA
-        const name = cardItem.querySelector('h4').textContent.trim();
-        const typeEl = cardItem.querySelector('.Type');
-        const costEl = cardItem.querySelector('.Cost');
-        const imgEl = cardItem.querySelector('.card-image');
-
-        if (!typeEl || !costEl) {
-            return console.error("ERROR: Missing .Type or .Cost in the card HTML template!");
-        }
-
-        const type = typeEl.textContent.trim();
-        const cost = costEl.textContent.trim().toLowerCase();
-        const imgPath = imgEl ? imgEl.getAttribute('src') : "";
-
-        console.log(`2. SCRAPED DATA: Name: ${name}, Type: ${type}, Cost: ${cost}`);
-
-        // SORTING LOGIC
-        let listId = 'main-deck-list';
-        let maxCopies = 4;
-
-        if (cost.includes('starting gear')) {
-            listId = 'starting-gear-list';
-            maxCopies = 1;
-        } else if (cost.includes('token')) {
-            listId = 'token-deck-list';
-            maxCopies = Infinity;
-        } else if (type === 'Equipment') {
-            listId = 'forge-deck-list';
-            maxCopies = 4;
-        }
-
-        console.log(`3. TARGETING: Sending card to #${listId}`);
-
-        const targetList = document.getElementById(listId);
-        if (!targetList) {
-            return console.error(`ERROR: Could not find the list in HTML with id="${listId}"`);
-        }
-
-        // ADDING TO LIST
-        let existing = targetList.querySelector(`li[data-card-name="${name}"]`);
-
-        if (existing) {
-            console.log("4. UPDATING: Card exists, increasing quantity.");
-            const input = existing.querySelector('.card-list-item-quantity');
-            if (parseInt(input.value) < maxCopies) {
-                input.value = parseInt(input.value) + 1;
-            }
-        } else {
-            console.log("4. ADDING: Creating new list item.");
-            const li = document.createElement('li');
-            li.setAttribute('data-card-name', name);
-            li.setAttribute('data-image-path', imgPath);
-            li.className = 'deck-list-item';
-            li.innerHTML = `
-                <button class="remove-btn" style="color:red; margin-right:8px;">X</button>
-                <span>${name}</span>
-                <input type="number" class="card-list-item-quantity" value="1" min="1" max="${maxCopies}" style="width:40px; float:right;">
-            `;
-            
-            li.querySelector('.remove-btn').onclick = () => { li.remove(); updateDeckCounts(); };
-            li.querySelector('input').onchange = () => updateDeckCounts();
-            
-            targetList.appendChild(li);
-        }
-        
-        updateDeckCounts();
-        console.log("5. FINISHED: List updated successfully.");
-    });
-} else {
-    console.error("CRITICAL ERROR: Could not find <div id='cards-gallery'> in your HTML!");
-}
     } catch (err) { 
         console.error('Init Error:', err); 
-    } // Closed the try block correctly
-} // Closed the function correctly
+    }
+}
 
 window.onload = initCardGallery;
-
-// --- KEEP YOUR PDF GENERATION CODE BELOW THIS LINE ---
-function generateDeckPDF() {
-    alert("PDF function is currently empty, but I'm not crashing anymore!");
-}
