@@ -13,24 +13,27 @@ function setImageSources(cardList) {
             if (pathSpan) pathSpan.style.display = 'none';
         }
     });
-    // Re-initialize magnifier whenever images are refreshed
+    // This is the "Hook" that connects the new images to the magnifier
     initMagnifier();
 }
 
-// --- ADD THIS MAGNIFIER FUNCTION ---
 function initMagnifier() {
-    const cards = document.querySelectorAll('.card-image');
-    const zoomResult = document.getElementById('zoom-result'); // Ensure you have this ID in your HTML
+    const magnifierDiv = document.getElementById('card-magnifier');
+    const magnifiedImg = document.getElementById('magnified-image');
+    const cardImages = document.querySelectorAll('.card-image');
 
-    cards.forEach(card => {
-        card.onmouseover = function() {
-            if(zoomResult) {
-                zoomResult.style.backgroundImage = `url('${this.src}')`;
-                zoomResult.style.display = "block";
+    cardImages.forEach(img => {
+        img.onmouseenter = function() {
+            if (magnifierDiv && magnifiedImg) {
+                magnifiedImg.src = this.src; // Set the big image to the one you're hovering over
+                magnifierDiv.style.display = "block"; // Show the box
             }
         };
-        card.onmouseout = function() {
-            if(zoomResult) zoomResult.style.display = "none";
+
+        img.onmouseleave = function() {
+            if (magnifierDiv) {
+                magnifierDiv.style.display = "none"; // Hide the box
+            }
         };
     });
 }
