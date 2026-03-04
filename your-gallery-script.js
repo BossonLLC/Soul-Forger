@@ -81,9 +81,9 @@ async function copyDeckToTTS() {
 
 function updateDeckCounts() {
     const categories = [
-        { id: 'starting-gear-list', countId: 'starting-gear-count', limitMin: 0, limitMax: 3 }, 
+        { id: 'starting-gear-list', countId: 'starting-gear-count', limitMin: 0, limitMax: 4 }, 
         { id: 'main-deck-list', countId: 'main-deck-count', limitMin: 60, limitMax: 75 }, 
-        { id: 'forge-deck-list', countId: 'forge-deck-count', limitMin: 15, limitMax: 15 },
+        { id: 'forge-deck-list', countId: 'forge-deck-count', limitMin: 10, limitMax: 10 },
         { id: 'token-deck-list', countId: 'token-deck-count', limitMin: 0, limitMax: Infinity }
     ];
     categories.forEach(cat => {
