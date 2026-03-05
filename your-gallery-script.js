@@ -219,6 +219,7 @@ async function initCardGallery() {
                 } else {
                     const li = document.createElement('li');
                     li.setAttribute('data-card-name', name);
+                    li.setAttribute('data-image-path', imgPath);
                     li.className = 'deck-list-item';
                     li.innerHTML = `
                         <button class="remove-btn" style="color:red; margin-right:8px;">X</button>
