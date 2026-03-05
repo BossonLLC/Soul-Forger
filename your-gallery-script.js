@@ -242,46 +242,57 @@ async function initCardGallery() {
 // ==========================================
 
 function generateDeckPDF() {
-    const categories = [
-        { id: 'starting-gear-list', name: 'Starting Gear' },
-        { id: 'main-deck-list', name: 'Main Deck' },
-        { id: 'forge-deck-list', name: 'Forge Deck' },
-        { id: 'token-deck-list', name: 'Tokens' }
-    ];
-
+    const categories = ['starting-gear-list', 'main-deck-list', 'forge-deck-list', 'token-deck-list'];
     let hasCards = false;
     let printWindow = window.open('', '_blank');
     
-    printWindow.document.write('<html><head><title>Soul Forger Decklist</title>');
-    printWindow.document.write('<style>body{font-family:sans-serif; padding:40px;} h1{border-bottom:2px solid #333;} .cat{margin-top:20px; border-bottom:1px solid #ccc;} .item{display:flex; justify-content:space-between; padding:5px 0;}</style>');
-    printWindow.document.write('</head><body><h1>Soul Forger Decklist</h1>');
+    printWindow.document.write('<html><head><title>Soul Forger Print & Play</title>');
+    printWindow.document.write(`
+        <style>
+            body { font-family: sans-serif; display: flex; flex-wrap: wrap; }
+            .card-preview { 
+                width: 2.5in; 
+                height: 3.5in; 
+                border: 1px solid #ccc; 
+                margin: 5px; 
+                display: inline-block; 
+                page-break-inside: avoid;
+            }
+            @media print {
+                body { margin: 0; }
+            }
+        </style>
+    `);
+    printWindow.document.write('</head><body>');
 
-    categories.forEach(cat => {
-        const list = document.getElementById(cat.id);
-        if (list && list.querySelectorAll('li').length > 0) {
-            hasCards = true;
-            printWindow.document.write(`<div class="cat"><h3>${cat.name}</h3>`);
+    categories.forEach(id => {
+        const list = document.getElementById(id);
+        if (list) {
             list.querySelectorAll('li').forEach(li => {
-                const name = li.getAttribute('data-card-name');
-                const qty = li.querySelector('.card-list-item-quantity').value;
-                printWindow.document.write(`<div class="item"><span>${name}</span><span>x${qty}</span></div>`);
+                const imgPath = li.getAttribute('data-image-src');
+                const qty = parseInt(li.querySelector('.card-list-item-quantity').value);
+                
+                if (imgPath) {
+                    hasCards = true;
+                    // Add the image for every copy in the deck
+                    for (let i = 0; i < qty; i++) {
+                        printWindow.document.write(`<img src="${imgPath}" class="card-preview">`);
+                    }
+                }
             });
-            printWindow.document.write('</div>');
         }
     });
 
     if (!hasCards) {
         printWindow.close();
-        return alert("Your deck is empty! Add some cards before downloading.");
+        return alert("No images found in your deck to print!");
     }
 
     printWindow.document.write('</body></html>');
     printWindow.document.close();
     
-    // Give images/styles a tiny moment to load before triggering print
-    setTimeout(() => {
-        printWindow.print();
-    }, 500);
+    // Allow a moment for images to load before printing
+    setTimeout(() => { printWindow.print(); }, 1000);
 }
 
 window.onload = initCardGallery;
