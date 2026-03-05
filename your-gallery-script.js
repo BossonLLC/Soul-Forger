@@ -243,58 +243,48 @@ async function initCardGallery() {
 // ==========================================
 
 function generateDeckPDF() {
-    const categories = [
-        { id: 'starting-gear-list', name: 'Starting Gear' },
-        { id: 'main-deck-list', name: 'Main Deck' },
-        { id: 'forge-deck-list', name: 'Forge Deck' },
-        { id: 'token-deck-list', name: 'Tokens' }
-    ];
-
+    const categories = ['starting-gear-list', 'main-deck-list', 'forge-deck-list', 'token-deck-list'];
     let printWindow = window.open('', '_blank');
     
-    printWindow.document.write('<html><head><title>Soul Forger Print & Play</title>');
+    printWindow.document.write('<html><head><title>Soul Forger PnP</title>');
     printWindow.document.write(`
         <style>
-            body { font-family: sans-serif; margin: 0; padding: 20px; background: #fff; }
-            h1 { text-align: center; font-size: 18px; margin-bottom: 20px; }
+            /* 1. Remove all page margins for maximum space */
+            @page { margin: 0.25in; }
+            body { margin: 0; padding: 0; background: #fff; }
             
-            /* The Grid Container */
+            /* 2. Grid container with NO extra text */
             .print-grid { 
                 display: flex; 
                 flex-wrap: wrap; 
-                gap: 5px; 
+                gap: 0; /* No gap between cards for tightest fit */
                 justify-content: flex-start;
             }
 
-            /* Standard TCG Size: 2.5in x 3.5in */
+            /* 3. TCG Size: 2.5in x 3.5in */
             .print-card {
                 width: 2.5in;
                 height: 3.5in;
-                border: 1px solid #eee;
-                object-fit: contain;
+                border: 0.1mm solid #ccc; /* Thin line for cutting */
+                box-sizing: border-box;
+                display: block;
                 page-break-inside: avoid;
             }
 
-            @media print {
-                .no-print { display: none; }
-                body { padding: 0; }
-                @page { margin: 0.5in; }
-            }
+            /* Hide everything but the images */
+            h1, h3, p { display: none !important; }
         </style>
     `);
     printWindow.document.write('</head><body>');
-    printWindow.document.write('<h1>Soul Forger - Print & Play Sheet</h1>');
     printWindow.document.write('<div class="print-grid">');
 
     let totalCards = 0;
-
-    categories.forEach(cat => {
-        const list = document.getElementById(cat.id);
+    categories.forEach(id => {
+        const list = document.getElementById(id);
         if (list) {
             list.querySelectorAll('li').forEach(li => {
                 const imgPath = li.getAttribute('data-image-path');
                 const qty = parseInt(li.querySelector('.card-list-item-quantity').value);
-                
                 if (imgPath) {
                     for (let i = 0; i < qty; i++) {
                         printWindow.document.write(`<img src="${imgPath}" class="print-card">`);
@@ -305,21 +295,11 @@ function generateDeckPDF() {
         }
     });
 
-    printWindow.document.write('</div>');
-
-    if (totalCards === 0) {
-        printWindow.close();
-        return alert("Your deck is empty! Add cards with images to print.");
-    }
-
-    printWindow.document.write('</body></html>');
+    printWindow.document.write('</div></body></html>');
     printWindow.document.close();
 
-    // Wait for images to load before printing
     printWindow.onload = function() {
-        setTimeout(() => {
-            printWindow.print();
-        }, 1000);
+        setTimeout(() => { printWindow.print(); }, 800);
     };
 }
 
