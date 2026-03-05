@@ -242,57 +242,84 @@ async function initCardGallery() {
 // ==========================================
 
 function generateDeckPDF() {
-    const categories = ['starting-gear-list', 'main-deck-list', 'forge-deck-list', 'token-deck-list'];
-    let hasCards = false;
+    const categories = [
+        { id: 'starting-gear-list', name: 'Starting Gear' },
+        { id: 'main-deck-list', name: 'Main Deck' },
+        { id: 'forge-deck-list', name: 'Forge Deck' },
+        { id: 'token-deck-list', name: 'Tokens' }
+    ];
+
     let printWindow = window.open('', '_blank');
     
     printWindow.document.write('<html><head><title>Soul Forger Print & Play</title>');
     printWindow.document.write(`
         <style>
-            body { font-family: sans-serif; display: flex; flex-wrap: wrap; }
-            .card-preview { 
-                width: 2.5in; 
-                height: 3.5in; 
-                border: 1px solid #ccc; 
-                margin: 5px; 
-                display: inline-block; 
+            body { font-family: sans-serif; margin: 0; padding: 20px; background: #fff; }
+            h1 { text-align: center; font-size: 18px; margin-bottom: 20px; }
+            
+            /* The Grid Container */
+            .print-grid { 
+                display: flex; 
+                flex-wrap: wrap; 
+                gap: 5px; 
+                justify-content: flex-start;
+            }
+
+            /* Standard TCG Size: 2.5in x 3.5in */
+            .print-card {
+                width: 2.5in;
+                height: 3.5in;
+                border: 1px solid #eee;
+                object-fit: contain;
                 page-break-inside: avoid;
             }
+
             @media print {
-                body { margin: 0; }
+                .no-print { display: none; }
+                body { padding: 0; }
+                @page { margin: 0.5in; }
             }
         </style>
     `);
     printWindow.document.write('</head><body>');
+    printWindow.document.write('<h1>Soul Forger - Print & Play Sheet</h1>');
+    printWindow.document.write('<div class="print-grid">');
 
-    categories.forEach(id => {
-        const list = document.getElementById(id);
+    let totalCards = 0;
+
+    categories.forEach(cat => {
+        const list = document.getElementById(cat.id);
         if (list) {
             list.querySelectorAll('li').forEach(li => {
-                const imgPath = li.getAttribute('data-image-src');
+                const imgPath = li.getAttribute('data-image-path');
                 const qty = parseInt(li.querySelector('.card-list-item-quantity').value);
                 
                 if (imgPath) {
-                    hasCards = true;
-                    // Add the image for every copy in the deck
                     for (let i = 0; i < qty; i++) {
-                        printWindow.document.write(`<img src="${imgPath}" class="card-preview">`);
+                        printWindow.document.write(`<img src="${imgPath}" class="print-card">`);
+                        totalCards++;
                     }
                 }
             });
         }
     });
 
-    if (!hasCards) {
+    printWindow.document.write('</div>');
+
+    if (totalCards === 0) {
         printWindow.close();
-        return alert("No images found in your deck to print!");
+        return alert("Your deck is empty! Add cards with images to print.");
     }
 
     printWindow.document.write('</body></html>');
     printWindow.document.close();
-    
-    // Allow a moment for images to load before printing
-    setTimeout(() => { printWindow.print(); }, 1000);
+
+    // Wait for images to load before printing
+    printWindow.onload = function() {
+        setTimeout(() => {
+            printWindow.print();
+        }, 1000);
+    };
 }
 
 window.onload = initCardGallery;
