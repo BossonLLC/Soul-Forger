@@ -13,7 +13,6 @@ function setImageSources(cardList) {
             if (pathSpan) pathSpan.style.display = 'none';
         }
     });
-    // This is the "Hook" that connects the new images to the magnifier
     initMagnifier();
 }
 
@@ -25,15 +24,12 @@ function initMagnifier() {
     cardImages.forEach(img => {
         img.onmouseenter = function() {
             if (magnifierDiv && magnifiedImg) {
-                magnifiedImg.src = this.src; // Set the big image to the one you're hovering over
-                magnifierDiv.style.display = "block"; // Show the box
+                magnifiedImg.src = this.src;
+                magnifierDiv.style.display = "block";
             }
         };
-
         img.onmouseleave = function() {
-            if (magnifierDiv) {
-                magnifierDiv.style.display = "none"; // Hide the box
-            }
+            if (magnifierDiv) magnifierDiv.style.display = "none";
         };
     });
 }
@@ -41,23 +37,17 @@ function initMagnifier() {
 function exportLuaDatabase(cardList) {
     const baseURL = "https://soul-forger.com/"; 
     let luaString = "cardDatabase = {\n";
-    
     cardList.items.forEach(item => {
         const val = item.values();
         const name = val["Card Name"];
         const cleanPath = String(val["Image"] || "").trim().replace(/[()]/g, '');
-        
         if (name && cleanPath) {
             luaString += `    ["${name}"] = "${baseURL}${cleanPath}",\n`;
         }
     });
-    
     luaString += "}\n";
     luaString += "cardBack = \"" + baseURL + "firecards/cardback.png\"";
-    
-    navigator.clipboard.writeText(luaString).then(() => {
-        alert("Lua Database copied!");
-    });
+    navigator.clipboard.writeText(luaString).then(() => alert("Lua Database copied!"));
 }
 
 async function copyDeckToTTS() {
@@ -95,7 +85,6 @@ function updateDeckCounts() {
                 const qtyInput = li.querySelector('.card-list-item-quantity');
                 total += parseInt(qtyInput ? qtyInput.value : 0);
             });
-            
             if (cat.id === 'main-deck-list') {
                 span.textContent = `${total}/60-75`;
             } else if (cat.id === 'token-deck-list') {
@@ -133,7 +122,6 @@ const handleCombinedSearchAndFilter = (list) => {
 
     list.filter(item => {
         const val = item.values();
-        
         if (startingGearActive || tokensActive) {
             const cost = String(val['Cost'] || "").toLowerCase();
             let passCheck = false;
@@ -173,14 +161,8 @@ async function initCardGallery() {
         };
 
         var cardList = new List('cards-gallery', options, cardData);
-        
-        // Initial Image setup
         setImageSources(cardList);
-        
-        // Setup listeners
-        cardList.on('updated', () => {
-            setImageSources(cardList);
-        });
+        cardList.on('updated', () => setImageSources(cardList));
 
         const controlIds = ['name-search', 'effect-search', 'ronum-search', 'subtype-search', 'on-guard-power-search', 'off-guard-power-search', 'endurance-search', 'experience-search', 'hand-search', 'type-filter', 'faction-filter', 'speed-filter', 'starting-gear-filter', 'tokens-filter'];
         controlIds.forEach(id => {
@@ -193,8 +175,13 @@ async function initCardGallery() {
 
         document.getElementById('export-lua-db-btn').onclick = () => exportLuaDatabase(cardList);
         document.getElementById('copy-tts-btn').onclick = copyDeckToTTS;
+        
+        // --- RELINKING THE PDF BUTTON ---
+        const pdfBtn = document.getElementById('download-button');
+        if (pdfBtn) {
+            pdfBtn.onclick = generateDeckPDF;
+        }
 
-        // Deck Builder Event Delegation
         const galleryElement = document.getElementById('cards-gallery');
         if (galleryElement) {
             galleryElement.addEventListener('click', (e) => {
@@ -248,6 +235,53 @@ async function initCardGallery() {
     } catch (err) { 
         console.error('Init Error:', err); 
     }
+}
+
+// ==========================================
+// 4. PDF GENERATION LOGIC
+// ==========================================
+
+function generateDeckPDF() {
+    const categories = [
+        { id: 'starting-gear-list', name: 'Starting Gear' },
+        { id: 'main-deck-list', name: 'Main Deck' },
+        { id: 'forge-deck-list', name: 'Forge Deck' },
+        { id: 'token-deck-list', name: 'Tokens' }
+    ];
+
+    let hasCards = false;
+    let printWindow = window.open('', '_blank');
+    
+    printWindow.document.write('<html><head><title>Soul Forger Decklist</title>');
+    printWindow.document.write('<style>body{font-family:sans-serif; padding:40px;} h1{border-bottom:2px solid #333;} .cat{margin-top:20px; border-bottom:1px solid #ccc;} .item{display:flex; justify-content:space-between; padding:5px 0;}</style>');
+    printWindow.document.write('</head><body><h1>Soul Forger Decklist</h1>');
+
+    categories.forEach(cat => {
+        const list = document.getElementById(cat.id);
+        if (list && list.querySelectorAll('li').length > 0) {
+            hasCards = true;
+            printWindow.document.write(`<div class="cat"><h3>${cat.name}</h3>`);
+            list.querySelectorAll('li').forEach(li => {
+                const name = li.getAttribute('data-card-name');
+                const qty = li.querySelector('.card-list-item-quantity').value;
+                printWindow.document.write(`<div class="item"><span>${name}</span><span>x${qty}</span></div>`);
+            });
+            printWindow.document.write('</div>');
+        }
+    });
+
+    if (!hasCards) {
+        printWindow.close();
+        return alert("Your deck is empty! Add some cards before downloading.");
+    }
+
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    
+    // Give images/styles a tiny moment to load before triggering print
+    setTimeout(() => {
+        printWindow.print();
+    }, 500);
 }
 
 window.onload = initCardGallery;
