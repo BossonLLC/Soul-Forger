@@ -34,7 +34,6 @@ function initMagnifier() {
     });
 }
 
-// Function to clear all lists
 function clearDeck() {
     if (!confirm("Are you sure you want to clear your entire deck?")) return;
     const categoryIds = ['starting-gear-list', 'main-deck-list', 'forge-deck-list', 'token-deck-list'];
@@ -127,16 +126,21 @@ async function initCardGallery() {
         setImageSources(cardList);
         cardList.on('updated', () => setImageSources(cardList));
 
-        // Connect Clear Button
+        // --- BUTTON CONNECTIONS ---
         const clearBtn = document.getElementById('clear-deck-btn');
         if (clearBtn) clearBtn.onclick = clearDeck;
 
-        // Connect other buttons
         if (document.getElementById('export-lua-db-btn')) document.getElementById('export-lua-db-btn').onclick = () => exportLuaDatabase(cardList);
         if (document.getElementById('copy-tts-btn')) document.getElementById('copy-tts-btn').onclick = copyDeckToTTS;
         if (document.getElementById('download-button')) document.getElementById('download-button').onclick = generateDeckPDF;
 
-        // Deck Builder Logic with Hover Preview
+        // Scroll to top button
+        const scrollBtn = document.getElementById("scroll-to-top");
+        if (scrollBtn) {
+            scrollBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- DECK BUILDER LOGIC ---
         const galleryElement = document.getElementById('cards-gallery');
         if (galleryElement) {
             galleryElement.addEventListener('click', (e) => {
@@ -197,6 +201,10 @@ async function initCardGallery() {
     } catch (err) { console.error('Init Error:', err); }
 }
 
+// ==========================================
+// 4. PRINT & SCROLL UTILITIES
+// ==========================================
+
 function generateDeckPDF() {
     const categories = ['starting-gear-list', 'main-deck-list', 'forge-deck-list', 'token-deck-list'];
     let printWindow = window.open('', '_blank');
@@ -215,5 +223,17 @@ function generateDeckPDF() {
     printWindow.document.close();
     printWindow.onload = () => setTimeout(() => printWindow.print(), 800);
 }
+
+// Global scroll listener for the button visibility
+window.onscroll = function() {
+    const scrollBtn = document.getElementById("scroll-to-top");
+    if (scrollBtn) {
+        if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
+            scrollBtn.style.display = "block";
+        } else {
+            scrollBtn.style.display = "none";
+        }
+    }
+};
 
 window.onload = initCardGallery;
