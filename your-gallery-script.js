@@ -113,6 +113,9 @@ function updateDeckCounts() {
 // 3. MAIN INITIALIZATION
 // ==========================================
 
+// Move this outside so the Search Bar can find it!
+var cardList; 
+
 async function initCardGallery() {
     try {
         const response = await fetch('SFD.json');
@@ -122,7 +125,9 @@ async function initCardGallery() {
             item: `<li class="card-item"><h4 class="Card Name">{Card Name}</h4><img class="card-image" loading="lazy" alt=""><span class="Image" style="display:none">{Image}</span><div class="card-details"><p>Cost: <span class="Cost">{Cost}</span> | Type: <span class="Type">{Type}</span></p><p>A/OG: <span class="Power">{Power}</span> | <span class="Off-guard Power">{Off-guard Power}</span></p><p>Effect: <span class="Effect">{Effect}</span></p></div><button class="add-to-deck-btn">Add to Deck</button></li>`
         };
 
-        var cardList = new List('cards-gallery', options, cardData);
+        // Initialize the global cardList
+        cardList = new List('cards-gallery', options, cardData);
+        
         setImageSources(cardList);
         cardList.on('updated', () => setImageSources(cardList));
 
@@ -134,7 +139,6 @@ async function initCardGallery() {
         if (document.getElementById('copy-tts-btn')) document.getElementById('copy-tts-btn').onclick = copyDeckToTTS;
         if (document.getElementById('download-button')) document.getElementById('download-button').onclick = generateDeckPDF;
 
-        // Scroll to top button
         const scrollBtn = document.getElementById("scroll-to-top");
         if (scrollBtn) {
             scrollBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -178,7 +182,6 @@ async function initCardGallery() {
                         <input type="number" class="card-list-item-quantity" value="1" min="1" max="${maxCopies === Infinity ? '' : maxCopies}" style="width:40px; float:right;">
                     `;
 
-                    // Hover logic for the list item
                     const nameSpan = li.querySelector('.deck-card-hover');
                     const magnifierDiv = document.getElementById('card-magnifier');
                     const magnifiedImg = document.getElementById('magnified-image');
