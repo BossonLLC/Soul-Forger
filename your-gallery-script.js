@@ -70,22 +70,31 @@ function exportLuaDatabase(cardList) {
 }
 
 async function copyDeckToTTS() {
-    const categoryIds = ['starting-gear-list', 'main-deck-list', 'forge-deck-list'];
+    // Included all 4 categories to ensure nothing is missed
+    const categoryIds = ['starting-gear-list', 'main-deck-list', 'forge-deck-list', 'token-deck-list'];
     let deckString = "";
+
     categoryIds.forEach(id => {
         const listElement = document.getElementById(id);
         if (listElement) {
             listElement.querySelectorAll('li').forEach(item => {
                 const name = item.getAttribute('data-card-name');
                 const qtyInput = item.querySelector('.card-list-item-quantity');
-                const qty = qtyInput ? qtyInput.value : 1;
-                deckString += `${qty} ${name}\n`;
+                const qty = qtyInput ? parseInt(qtyInput.value) : 1;
+
+                // Loop for the quantity: Adds the name on a new line for every copy
+                for (let i = 0; i < qty; i++) {
+                    deckString += `${name}\n`;
+                }
             });
         }
     });
+
     if (!deckString) return alert("Deck is empty!");
-    await navigator.clipboard.writeText(deckString);
-    alert("Decklist copied for TTS!");
+
+    // Trim the extra newline at the very end
+    await navigator.clipboard.writeText(deckString.trim());
+    alert("Decklist copied for TTS (Names only, repeated)! Use Ctrl+V in your TTS object.");
 }
 
 function updateDeckCounts() {
