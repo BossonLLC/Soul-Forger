@@ -113,23 +113,36 @@ function updateDeckCounts() {
 // 3. MAIN INITIALIZATION
 // ==========================================
 
-// Move this outside so the Search Bar can find it!
 var cardList; 
 
 async function initCardGallery() {
     try {
         const response = await fetch('SFD.json');
         const cardData = await response.json();
+        
         const options = {
             valueNames: ["Card Name", "Ronum", "Cost", "Type", "Action Type", "Sub Type", "Power", "Off-guard Power", "Effect", "Image", "Endurance", "Experience", "Hands", "Faction", "Action Speed"],
             item: `<li class="card-item"><h4 class="Card Name">{Card Name}</h4><img class="card-image" loading="lazy" alt=""><span class="Image" style="display:none">{Image}</span><div class="card-details"><p>Cost: <span class="Cost">{Cost}</span> | Type: <span class="Type">{Type}</span></p><p>A/OG: <span class="Power">{Power}</span> | <span class="Off-guard Power">{Off-guard Power}</span></p><p>Effect: <span class="Effect">{Effect}</span></p></div><button class="add-to-deck-btn">Add to Deck</button></li>`
         };
 
-        // Initialize the global cardList
+        // 1. Initialize List.js
         cardList = new List('cards-gallery', options, cardData);
+
+        // 2. MANUAL SEARCH FIX: 
+        // Replace 'search-input-id' with the actual ID of your search box if it has one.
+        // If your search box just has the class "search", List.js usually finds it.
+        // This line forces a refresh of the search if auto-detection failed.
+        const searchBox = document.querySelector('.search'); 
+        if (searchBox) {
+            searchBox.addEventListener('keyup', function() {
+                cardList.search(searchBox.value);
+            });
+        }
         
         setImageSources(cardList);
         cardList.on('updated', () => setImageSources(cardList));
+
+        // ... (rest of your button connections and deck logic)
 
         // --- BUTTON CONNECTIONS ---
         const clearBtn = document.getElementById('clear-deck-btn');
