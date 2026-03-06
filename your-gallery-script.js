@@ -36,18 +36,37 @@ function initMagnifier() {
 
 function exportLuaDatabase(cardList) {
     const baseURL = "https://soul-forger.com/"; 
+    // This is the universal back you specified
+    const universalBack = "https://soul-forger.com/back%20%26%20mat/back.png";
+    
     let luaString = "cardDatabase = {\n";
+    
     cardList.items.forEach(item => {
         const val = item.values();
         const name = val["Card Name"];
-        const cleanPath = String(val["Image"] || "").trim().replace(/[()]/g, '');
+        
+        // Clean the image path
+        const rawPath = val["Image"] || "";
+        const cleanPath = String(rawPath).trim().replace(/[()]/g, '');
+        
         if (name && cleanPath) {
-            luaString += `    ["${name}"] = "${baseURL}${cleanPath}",\n`;
+            // Construct the entry in the specific style you requested
+            luaString += `    ["${name}"] = {\n`;
+            luaString += `        f = "${baseURL}${cleanPath}",\n`;
+            luaString += `        b = "${universalBack}"\n`;
+            luaString += `    },\n`;
         }
     });
+    
     luaString += "}\n";
-    luaString += "cardBack = \"" + baseURL + "firecards/cardback.png\"";
-    navigator.clipboard.writeText(luaString).then(() => alert("Lua Database copied!"));
+    
+    // Copy to clipboard
+    navigator.clipboard.writeText(luaString).then(() => {
+        alert("Lua Database copied in the new format! You can now paste it into TTS.");
+    }).catch(err => {
+        console.error('Clipboard error:', err);
+        alert("Failed to copy. Check console.");
+    });
 }
 
 async function copyDeckToTTS() {
