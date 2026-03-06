@@ -6,7 +6,7 @@ function setImageSources(cardList) {
     cardList.items.forEach(item => {
         const imgElement = item.elm.querySelector('.card-image');
         const imagePath = item.values().Image || '';
-        if (imagePath && imagePath !== 'SPAN NOT FOUND') {
+        if (imgElement && imagePath && imagePath !== 'SPAN NOT FOUND') {
             const cleanPath = String(imagePath).trim().replace(/[()]/g, ''); 
             imgElement.setAttribute('src', cleanPath);
             const pathSpan = item.elm.querySelector('.Image');
@@ -20,60 +20,41 @@ function initMagnifier() {
     const magnifierDiv = document.getElementById('card-magnifier');
     const magnifiedImg = document.getElementById('magnified-image');
     const cardImages = document.querySelectorAll('.card-image');
+    
+    if (!magnifierDiv || !magnifiedImg) return; // Guard: stop if HTML isn't ready
 
     cardImages.forEach(img => {
         img.onmouseenter = function() {
-            if (magnifierDiv && magnifiedImg) {
-                magnifiedImg.src = this.src;
-                magnifierDiv.style.display = "block";
-            }
+            magnifiedImg.src = this.src;
+            magnifierDiv.style.display = "block";
         };
         img.onmouseleave = function() {
-            if (magnifierDiv) magnifierDiv.style.display = "none";
+            magnifierDiv.style.display = "none";
         };
     });
 }
 
 function exportLuaDatabase(cardList) {
     const baseURL = "https://soul-forger.com/"; 
-    // This is the universal back you specified
     const universalBack = "https://soul-forger.com/back%20%26%20mat/back.png";
-    
     let luaString = "cardDatabase = {\n";
     
     cardList.items.forEach(item => {
         const val = item.values();
         const name = val["Card Name"];
-        
-        // Clean the image path
-        const rawPath = val["Image"] || "";
-        const cleanPath = String(rawPath).trim().replace(/[()]/g, '');
-        
+        const cleanPath = String(val["Image"] || "").trim().replace(/[()]/g, '');
         if (name && cleanPath) {
-            // Construct the entry in the specific style you requested
-            luaString += `    ["${name}"] = {\n`;
-            luaString += `        f = "${baseURL}${cleanPath}",\n`;
-            luaString += `        b = "${universalBack}"\n`;
-            luaString += `    },\n`;
+            luaString += `    ["${name}"] = { f = "${baseURL}${cleanPath}", b = "${universalBack}" },\n`;
         }
     });
     
     luaString += "}\n";
-    
-    // Copy to clipboard
-    navigator.clipboard.writeText(luaString).then(() => {
-        alert("Lua Database copied in the new format! You can now paste it into TTS.");
-    }).catch(err => {
-        console.error('Clipboard error:', err);
-        alert("Failed to copy. Check console.");
-    });
+    navigator.clipboard.writeText(luaString).then(() => alert("Lua Database copied!"));
 }
 
 async function copyDeckToTTS() {
-    // Included all 4 categories to ensure nothing is missed
     const categoryIds = ['starting-gear-list', 'main-deck-list', 'forge-deck-list', 'token-deck-list'];
     let deckString = "";
-
     categoryIds.forEach(id => {
         const listElement = document.getElementById(id);
         if (listElement) {
@@ -81,20 +62,15 @@ async function copyDeckToTTS() {
                 const name = item.getAttribute('data-card-name');
                 const qtyInput = item.querySelector('.card-list-item-quantity');
                 const qty = qtyInput ? parseInt(qtyInput.value) : 1;
-
-                // Loop for the quantity: Adds the name on a new line for every copy
                 for (let i = 0; i < qty; i++) {
                     deckString += `${name}\n`;
                 }
             });
         }
     });
-
     if (!deckString) return alert("Deck is empty!");
-
-    // Trim the extra newline at the very end
     await navigator.clipboard.writeText(deckString.trim());
-    alert("Decklist copied for TTS (Names only, repeated)! Use Ctrl+V in your TTS object.");
+    alert("Decklist copied for TTS!");
 }
 
 function updateDeckCounts() {
@@ -115,10 +91,8 @@ function updateDeckCounts() {
             });
             if (cat.id === 'main-deck-list') {
                 span.textContent = `${total}/60-75`;
-            } else if (cat.id === 'token-deck-list') {
-                span.textContent = total;
             } else {
-                span.textContent = `${total}/${cat.limitMax}`;
+                span.textContent = (cat.limitMax === Infinity) ? total : `${total}/${cat.limitMax}`;
             }
             span.style.color = (total < cat.limitMin || (cat.limitMax !== Infinity && total > cat.limitMax)) ? 'red' : 'green';
         }
@@ -145,8 +119,8 @@ const handleCombinedSearchAndFilter = (list) => {
         'Action Speed': document.getElementById('speed-filter')
     };
 
-    const startingGearActive = document.getElementById('starting-gear-filter').checked;
-    const tokensActive = document.getElementById('tokens-filter').checked;
+    const startingGearActive = document.getElementById('starting-gear-filter')?.checked;
+    const tokensActive = document.getElementById('tokens-filter')?.checked;
 
     list.filter(item => {
         const val = item.values();
@@ -192,6 +166,7 @@ async function initCardGallery() {
         setImageSources(cardList);
         cardList.on('updated', () => setImageSources(cardList));
 
+        // Connect Filters
         const controlIds = ['name-search', 'effect-search', 'ronum-search', 'subtype-search', 'on-guard-power-search', 'off-guard-power-search', 'endurance-search', 'experience-search', 'hand-search', 'type-filter', 'faction-filter', 'speed-filter', 'starting-gear-filter', 'tokens-filter'];
         controlIds.forEach(id => {
             const el = document.getElementById(id);
@@ -201,15 +176,17 @@ async function initCardGallery() {
             }
         });
 
-        document.getElementById('export-lua-db-btn').onclick = () => exportLuaDatabase(cardList);
-        document.getElementById('copy-tts-btn').onclick = copyDeckToTTS;
-        
-        // --- RELINKING THE PDF BUTTON ---
-        const pdfBtn = document.getElementById('download-button');
-        if (pdfBtn) {
-            pdfBtn.onclick = generateDeckPDF;
-        }
+        // Connect Buttons safely
+        const luaBtn = document.getElementById('export-lua-db-btn');
+        if (luaBtn) luaBtn.onclick = () => exportLuaDatabase(cardList);
 
+        const ttsBtn = document.getElementById('copy-tts-btn');
+        if (ttsBtn) ttsBtn.onclick = copyDeckToTTS;
+
+        const downloadBtn = document.getElementById('download-button');
+        if (downloadBtn) downloadBtn.onclick = generateDeckPDF;
+
+        // Deck Builder Logic
         const galleryElement = document.getElementById('cards-gallery');
         if (galleryElement) {
             galleryElement.addEventListener('click', (e) => {
@@ -237,11 +214,13 @@ async function initCardGallery() {
                 }
 
                 const targetList = document.getElementById(listId);
+                if (!targetList) return;
+
                 let existing = targetList.querySelector(`li[data-card-name="${name}"]`);
 
                 if (existing) {
                     const input = existing.querySelector('.card-list-item-quantity');
-                    if (parseInt(input.value) < maxCopies) {
+                    if (input && (maxCopies === Infinity || parseInt(input.value) < maxCopies)) {
                         input.value = parseInt(input.value) + 1;
                     }
                 } else {
@@ -252,7 +231,7 @@ async function initCardGallery() {
                     li.innerHTML = `
                         <button class="remove-btn" style="color:red; margin-right:8px;">X</button>
                         <span>${name}</span>
-                        <input type="number" class="card-list-item-quantity" value="1" min="1" max="${maxCopies}" style="width:40px; float:right;">
+                        <input type="number" class="card-list-item-quantity" value="1" min="1" max="${maxCopies === Infinity ? '' : maxCopies}" style="width:40px; float:right;">
                     `;
                     li.querySelector('.remove-btn').onclick = () => { li.remove(); updateDeckCounts(); };
                     li.querySelector('input').onchange = () => updateDeckCounts();
@@ -273,50 +252,21 @@ async function initCardGallery() {
 function generateDeckPDF() {
     const categories = ['starting-gear-list', 'main-deck-list', 'forge-deck-list', 'token-deck-list'];
     let printWindow = window.open('', '_blank');
-    
+    if (!printWindow) return alert("Please allow popups to download the PDF.");
+
     printWindow.document.write('<html><head><title>Soul Forger PnP</title>');
-    printWindow.document.write(`
-        <style>
-            /* 1. Remove all page margins for maximum space */
-            @page { margin: 0.25in; }
-            body { margin: 0; padding: 0; background: #fff; }
-            
-            /* 2. Grid container with NO extra text */
-            .print-grid { 
-                display: flex; 
-                flex-wrap: wrap; 
-                gap: 0; /* No gap between cards for tightest fit */
-                justify-content: flex-start;
-            }
+    printWindow.document.write('<style>@page { margin: 0.25in; } body { margin: 0; padding: 0; background: #fff; } .print-grid { display: flex; flex-wrap: wrap; gap: 0; justify-content: flex-start; } .print-card { width: 2.5in; height: 3.5in; border: 0.1mm solid #ccc; box-sizing: border-box; display: block; page-break-inside: avoid; }</style></head><body><div class="print-grid">');
 
-            /* 3. TCG Size: 2.5in x 3.5in */
-            .print-card {
-                width: 2.5in;
-                height: 3.5in;
-                border: 0.1mm solid #ccc; /* Thin line for cutting */
-                box-sizing: border-box;
-                display: block;
-                page-break-inside: avoid;
-            }
-
-            /* Hide everything but the images */
-            h1, h3, p { display: none !important; }
-        </style>
-    `);
-    printWindow.document.write('</head><body>');
-    printWindow.document.write('<div class="print-grid">');
-
-    let totalCards = 0;
     categories.forEach(id => {
         const list = document.getElementById(id);
         if (list) {
             list.querySelectorAll('li').forEach(li => {
                 const imgPath = li.getAttribute('data-image-path');
-                const qty = parseInt(li.querySelector('.card-list-item-quantity').value);
+                const qtyInput = li.querySelector('.card-list-item-quantity');
+                const qty = qtyInput ? parseInt(qtyInput.value) : 1;
                 if (imgPath) {
                     for (let i = 0; i < qty; i++) {
                         printWindow.document.write(`<img src="${imgPath}" class="print-card">`);
-                        totalCards++;
                     }
                 }
             });
@@ -325,10 +275,7 @@ function generateDeckPDF() {
 
     printWindow.document.write('</div></body></html>');
     printWindow.document.close();
-
-    printWindow.onload = function() {
-        setTimeout(() => { printWindow.print(); }, 800);
-    };
+    printWindow.onload = () => setTimeout(() => { printWindow.print(); }, 800);
 }
 
 window.onload = initCardGallery;
