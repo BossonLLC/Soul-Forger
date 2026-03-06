@@ -21,7 +21,7 @@ function initMagnifier() {
     const magnifiedImg = document.getElementById('magnified-image');
     const cardImages = document.querySelectorAll('.card-image');
     
-    if (!magnifierDiv || !magnifiedImg) return; // Guard: stop if HTML isn't ready
+    if (!magnifierDiv || !magnifiedImg) return;
 
     cardImages.forEach(img => {
         img.onmouseenter = function() {
@@ -34,11 +34,25 @@ function initMagnifier() {
     });
 }
 
+// Function to clear all lists
+function clearDeck() {
+    if (!confirm("Are you sure you want to clear your entire deck?")) return;
+    const categoryIds = ['starting-gear-list', 'main-deck-list', 'forge-deck-list', 'token-deck-list'];
+    categoryIds.forEach(id => {
+        const list = document.getElementById(id);
+        if (list) list.innerHTML = '';
+    });
+    updateDeckCounts();
+}
+
+// ==========================================
+// 2. EXPORT & COUNT LOGIC
+// ==========================================
+
 function exportLuaDatabase(cardList) {
     const baseURL = "https://soul-forger.com/"; 
     const universalBack = "https://soul-forger.com/back%20%26%20mat/back.png";
     let luaString = "cardDatabase = {\n";
-    
     cardList.items.forEach(item => {
         const val = item.values();
         const name = val["Card Name"];
@@ -47,7 +61,6 @@ function exportLuaDatabase(cardList) {
             luaString += `    ["${name}"] = { f = "${baseURL}${cleanPath}", b = "${universalBack}" },\n`;
         }
     });
-    
     luaString += "}\n";
     navigator.clipboard.writeText(luaString).then(() => alert("Lua Database copied!"));
 }
@@ -62,9 +75,7 @@ async function copyDeckToTTS() {
                 const name = item.getAttribute('data-card-name');
                 const qtyInput = item.querySelector('.card-list-item-quantity');
                 const qty = qtyInput ? parseInt(qtyInput.value) : 1;
-                for (let i = 0; i < qty; i++) {
-                    deckString += `${name}\n`;
-                }
+                for (let i = 0; i < qty; i++) { deckString += `${name}\n`; }
             });
         }
     });
@@ -100,55 +111,6 @@ function updateDeckCounts() {
 }
 
 // ==========================================
-// 2. MASTER SEARCH & FILTER LOGIC
-// ==========================================
-
-const handleCombinedSearchAndFilter = (list) => {
-    const controls = {
-        'Card Name': document.getElementById('name-search'),
-        'Effect': document.getElementById('effect-search'),
-        'Ronum': document.getElementById('ronum-search'),
-        'Sub Type': document.getElementById('subtype-search'),
-        'Power': document.getElementById('on-guard-power-search'),
-        'Off-guard Power': document.getElementById('off-guard-power-search'),
-        'Endurance': document.getElementById('endurance-search'),
-        'Experience': document.getElementById('experience-search'),
-        'Hands': document.getElementById('hand-search'),
-        'Type': document.getElementById('type-filter'),
-        'Faction': document.getElementById('faction-filter'),
-        'Action Speed': document.getElementById('speed-filter')
-    };
-
-    const startingGearActive = document.getElementById('starting-gear-filter')?.checked;
-    const tokensActive = document.getElementById('tokens-filter')?.checked;
-
-    list.filter(item => {
-        const val = item.values();
-        if (startingGearActive || tokensActive) {
-            const cost = String(val['Cost'] || "").toLowerCase();
-            let passCheck = false;
-            if (startingGearActive && cost.includes('starting gear')) passCheck = true;
-            if (tokensActive && cost.includes('token')) passCheck = true;
-            if (!passCheck) return false;
-        }
-
-        for (const key in controls) {
-            const el = controls[key];
-            if (el && el.value && el.value !== "" && el.value !== "all") {
-                const query = el.value.toLowerCase().trim();
-                const itemVal = String(val[key] || "").toLowerCase();
-                if (el.tagName === 'SELECT' && key !== 'Action Speed') {
-                    if (itemVal !== query) return false;
-                } else {
-                    if (!itemVal.includes(query)) return false;
-                }
-            }
-        }
-        return true;
-    });
-};
-
-// ==========================================
 // 3. MAIN INITIALIZATION
 // ==========================================
 
@@ -156,7 +118,6 @@ async function initCardGallery() {
     try {
         const response = await fetch('SFD.json');
         const cardData = await response.json();
-
         const options = {
             valueNames: ["Card Name", "Ronum", "Cost", "Type", "Action Type", "Sub Type", "Power", "Off-guard Power", "Effect", "Image", "Endurance", "Experience", "Hands", "Faction", "Action Speed"],
             item: `<li class="card-item"><h4 class="Card Name">{Card Name}</h4><img class="card-image" loading="lazy" alt=""><span class="Image" style="display:none">{Image}</span><div class="card-details"><p>Cost: <span class="Cost">{Cost}</span> | Type: <span class="Type">{Type}</span></p><p>A/OG: <span class="Power">{Power}</span> | <span class="Off-guard Power">{Off-guard Power}</span></p><p>Effect: <span class="Effect">{Effect}</span></p></div><button class="add-to-deck-btn">Add to Deck</button></li>`
@@ -166,27 +127,16 @@ async function initCardGallery() {
         setImageSources(cardList);
         cardList.on('updated', () => setImageSources(cardList));
 
-        // Connect Filters
-        const controlIds = ['name-search', 'effect-search', 'ronum-search', 'subtype-search', 'on-guard-power-search', 'off-guard-power-search', 'endurance-search', 'experience-search', 'hand-search', 'type-filter', 'faction-filter', 'speed-filter', 'starting-gear-filter', 'tokens-filter'];
-        controlIds.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                const ev = (el.type === 'checkbox' || el.tagName === 'SELECT') ? 'change' : 'keyup';
-                el.addEventListener(ev, () => handleCombinedSearchAndFilter(cardList));
-            }
-        });
+        // Connect Clear Button
+        const clearBtn = document.getElementById('clear-deck-btn');
+        if (clearBtn) clearBtn.onclick = clearDeck;
 
-        // Connect Buttons safely
-        const luaBtn = document.getElementById('export-lua-db-btn');
-        if (luaBtn) luaBtn.onclick = () => exportLuaDatabase(cardList);
+        // Connect other buttons
+        if (document.getElementById('export-lua-db-btn')) document.getElementById('export-lua-db-btn').onclick = () => exportLuaDatabase(cardList);
+        if (document.getElementById('copy-tts-btn')) document.getElementById('copy-tts-btn').onclick = copyDeckToTTS;
+        if (document.getElementById('download-button')) document.getElementById('download-button').onclick = generateDeckPDF;
 
-        const ttsBtn = document.getElementById('copy-tts-btn');
-        if (ttsBtn) ttsBtn.onclick = copyDeckToTTS;
-
-        const downloadBtn = document.getElementById('download-button');
-        if (downloadBtn) downloadBtn.onclick = generateDeckPDF;
-
-        // Deck Builder Logic
+        // Deck Builder Logic with Hover Preview
         const galleryElement = document.getElementById('cards-gallery');
         if (galleryElement) {
             galleryElement.addEventListener('click', (e) => {
@@ -201,21 +151,11 @@ async function initCardGallery() {
 
                 let listId = 'main-deck-list';
                 let maxCopies = 4;
-
-                if (cost.includes('starting gear')) {
-                    listId = 'starting-gear-list';
-                    maxCopies = 1;
-                } else if (cost.includes('token')) {
-                    listId = 'token-deck-list';
-                    maxCopies = Infinity;
-                } else if (type === 'Equipment') {
-                    listId = 'forge-deck-list';
-                    maxCopies = 4;
-                }
+                if (cost.includes('starting gear')) { listId = 'starting-gear-list'; maxCopies = 1; }
+                else if (cost.includes('token')) { listId = 'token-deck-list'; maxCopies = Infinity; }
+                else if (type === 'Equipment') { listId = 'forge-deck-list'; maxCopies = 4; }
 
                 const targetList = document.getElementById(listId);
-                if (!targetList) return;
-
                 let existing = targetList.querySelector(`li[data-card-name="${name}"]`);
 
                 if (existing) {
@@ -230,52 +170,50 @@ async function initCardGallery() {
                     li.className = 'deck-list-item';
                     li.innerHTML = `
                         <button class="remove-btn" style="color:red; margin-right:8px;">X</button>
-                        <span>${name}</span>
+                        <span class="deck-card-hover">${name}</span>
                         <input type="number" class="card-list-item-quantity" value="1" min="1" max="${maxCopies === Infinity ? '' : maxCopies}" style="width:40px; float:right;">
                     `;
-                    li.querySelector('.remove-btn').onclick = () => { li.remove(); updateDeckCounts(); };
+
+                    // Hover logic for the list item
+                    const nameSpan = li.querySelector('.deck-card-hover');
+                    const magnifierDiv = document.getElementById('card-magnifier');
+                    const magnifiedImg = document.getElementById('magnified-image');
+
+                    nameSpan.onmouseenter = () => {
+                        if (magnifierDiv && magnifiedImg) {
+                            magnifiedImg.src = imgPath;
+                            magnifierDiv.style.display = "block";
+                        }
+                    };
+                    nameSpan.onmouseleave = () => { if (magnifierDiv) magnifierDiv.style.display = "none"; };
+
+                    li.querySelector('.remove-btn').onclick = () => { li.remove(); updateDeckCounts(); if (magnifierDiv) magnifierDiv.style.display="none"; };
                     li.querySelector('input').onchange = () => updateDeckCounts();
                     targetList.appendChild(li);
                 }
                 updateDeckCounts();
             });
         }
-    } catch (err) { 
-        console.error('Init Error:', err); 
-    }
+    } catch (err) { console.error('Init Error:', err); }
 }
-
-// ==========================================
-// 4. PDF GENERATION LOGIC
-// ==========================================
 
 function generateDeckPDF() {
     const categories = ['starting-gear-list', 'main-deck-list', 'forge-deck-list', 'token-deck-list'];
     let printWindow = window.open('', '_blank');
-    if (!printWindow) return alert("Please allow popups to download the PDF.");
-
-    printWindow.document.write('<html><head><title>Soul Forger PnP</title>');
-    printWindow.document.write('<style>@page { margin: 0.25in; } body { margin: 0; padding: 0; background: #fff; } .print-grid { display: flex; flex-wrap: wrap; gap: 0; justify-content: flex-start; } .print-card { width: 2.5in; height: 3.5in; border: 0.1mm solid #ccc; box-sizing: border-box; display: block; page-break-inside: avoid; }</style></head><body><div class="print-grid">');
-
+    printWindow.document.write('<html><head><title>Soul Forger PnP</title><style>@page { margin: 0.25in; } body { margin: 0; padding: 0; background: #fff; } .print-grid { display: flex; flex-wrap: wrap; gap: 0; justify-content: flex-start; } .print-card { width: 2.5in; height: 3.5in; border: 0.1mm solid #ccc; box-sizing: border-box; display: block; page-break-inside: avoid; }</style></head><body><div class="print-grid">');
     categories.forEach(id => {
         const list = document.getElementById(id);
         if (list) {
             list.querySelectorAll('li').forEach(li => {
                 const imgPath = li.getAttribute('data-image-path');
-                const qtyInput = li.querySelector('.card-list-item-quantity');
-                const qty = qtyInput ? parseInt(qtyInput.value) : 1;
-                if (imgPath) {
-                    for (let i = 0; i < qty; i++) {
-                        printWindow.document.write(`<img src="${imgPath}" class="print-card">`);
-                    }
-                }
+                const qty = parseInt(li.querySelector('.card-list-item-quantity').value);
+                if (imgPath) { for (let i = 0; i < qty; i++) { printWindow.document.write(`<img src="${imgPath}" class="print-card">`); } }
             });
         }
     });
-
     printWindow.document.write('</div></body></html>');
     printWindow.document.close();
-    printWindow.onload = () => setTimeout(() => { printWindow.print(); }, 800);
+    printWindow.onload = () => setTimeout(() => printWindow.print(), 800);
 }
 
 window.onload = initCardGallery;
