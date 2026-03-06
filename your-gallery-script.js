@@ -125,39 +125,73 @@ async function initCardGallery() {
             item: `<li class="card-item"><h4 class="Card Name">{Card Name}</h4><img class="card-image" loading="lazy" alt=""><span class="Image" style="display:none">{Image}</span><div class="card-details"><p>Cost: <span class="Cost">{Cost}</span> | Type: <span class="Type">{Type}</span></p><p>A/OG: <span class="Power">{Power}</span> | <span class="Off-guard Power">{Off-guard Power}</span></p><p>Effect: <span class="Effect">{Effect}</span></p></div><button class="add-to-deck-btn">Add to Deck</button></li>`
         };
 
-        // 1. Initialize List.js
-        cardList = new List('cards-gallery', options, cardData);
-
-        // 2. MANUAL SEARCH FIX: 
-        // Replace 'search-input-id' with the actual ID of your search box if it has one.
-        // If your search box just has the class "search", List.js usually finds it.
-        // This line forces a refresh of the search if auto-detection failed.
-        const searchBox = document.querySelector('.search'); 
-        if (searchBox) {
-            searchBox.addEventListener('keyup', function() {
-                cardList.search(searchBox.value);
-            });
-        }
+        cardList = new List('cards-gallery-column', options, cardData);
         
+        // --- MULTI-FILTER LOGIC ---
+        const filterCards = () => {
+            const nameVal = document.getElementById('name-search').value.toLowerCase();
+            const effectVal = document.getElementById('effect-search').value.toLowerCase();
+            const ronumVal = document.getElementById('ronum-search').value.toLowerCase();
+            const subtypeVal = document.getElementById('subtype-search').value.toLowerCase();
+            const powerVal = document.getElementById('on-guard-power-search').value.toLowerCase();
+            const offPowerVal = document.getElementById('off-guard-power-search').value.toLowerCase();
+            const enduranceVal = document.getElementById('endurance-search').value.toLowerCase();
+            const expVal = document.getElementById('experience-search').value.toLowerCase();
+            
+            const typeFilter = document.getElementById('type-filter').value;
+            const factionFilter = document.getElementById('faction-filter').value;
+            const speedFilter = document.getElementById('speed-filter').value;
+            const startingOnly = document.getElementById('starting-gear-filter').checked;
+            const tokensOnly = document.getElementById('tokens-filter').checked;
+
+            cardList.filter((item) => {
+                const v = item.values();
+                const cost = String(v.Cost || "").toLowerCase();
+
+                return (
+                    (v["Card Name"].toLowerCase().includes(nameVal)) &&
+                    (v["Effect"].toLowerCase().includes(effectVal)) &&
+                    (String(v["Ronum"]).toLowerCase().includes(ronumVal)) &&
+                    (v["Sub Type"].toLowerCase().includes(subtypeVal)) &&
+                    (String(v["Power"]).toLowerCase().includes(powerVal)) &&
+                    (String(v["Off-guard Power"]).toLowerCase().includes(offPowerVal)) &&
+                    (String(v["Endurance"]).toLowerCase().includes(enduranceVal)) &&
+                    (String(v["Experience"]).toLowerCase().includes(expVal)) &&
+                    (!typeFilter || v["Type"] === typeFilter) &&
+                    (!factionFilter || v["Faction"] === factionFilter) &&
+                    (!speedFilter || v["Action Speed"] === speedFilter) &&
+                    (!startingOnly || cost.includes("starting gear")) &&
+                    (!tokensOnly || cost.includes("token"))
+                );
+            });
+        };
+
+        // Attach listeners to all inputs and selects
+        document.querySelectorAll('.search, .filter, input[type="checkbox"]').forEach(el => {
+            el.addEventListener('keyup', filterCards);
+            el.addEventListener('change', filterCards);
+        });
+
+        // Clear Filters Button
+        document.getElementById('clear-filters-btn').onclick = () => {
+            document.querySelectorAll('.search, .filter').forEach(el => el.value = '');
+            document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
+            cardList.filter();
+        };
+
         setImageSources(cardList);
         cardList.on('updated', () => setImageSources(cardList));
 
-        // ... (rest of your button connections and deck logic)
-
         // --- BUTTON CONNECTIONS ---
-        const clearBtn = document.getElementById('clear-deck-btn');
-        if (clearBtn) clearBtn.onclick = clearDeck;
-
+        if (document.getElementById('clear-deck-btn')) document.getElementById('clear-deck-btn').onclick = clearDeck;
         if (document.getElementById('export-lua-db-btn')) document.getElementById('export-lua-db-btn').onclick = () => exportLuaDatabase(cardList);
         if (document.getElementById('copy-tts-btn')) document.getElementById('copy-tts-btn').onclick = copyDeckToTTS;
         if (document.getElementById('download-button')) document.getElementById('download-button').onclick = generateDeckPDF;
 
         const scrollBtn = document.getElementById("scroll-to-top");
-        if (scrollBtn) {
-            scrollBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        if (scrollBtn) scrollBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-        // --- DECK BUILDER LOGIC ---
+        // --- DECK BUILDER CLICK LISTENER ---
         const galleryElement = document.getElementById('cards-gallery');
         if (galleryElement) {
             galleryElement.addEventListener('click', (e) => {
