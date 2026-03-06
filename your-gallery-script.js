@@ -208,7 +208,7 @@ async function initCardGallery() {
                 let maxCopies = 4;
                 if (cost.includes('starting gear')) { listId = 'starting-gear-list'; maxCopies = 1; }
                 else if (cost.includes('token')) { listId = 'token-deck-list'; maxCopies = Infinity; }
-                else if (type === 'Equipment') { listId = 'forge-deck-list'; maxCopies = 4; }
+                else if (type === 'Equipment') { listId = 'forge-deck-list'; maxCopies = 1; }
 
                 const targetList = document.getElementById(listId);
                 let existing = targetList.querySelector(`li[data-card-name="${name}"]`);
